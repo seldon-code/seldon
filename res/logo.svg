@@ -2,13 +2,13 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="167.20418mm"
+   width="486.9397mm"
    height="166.55771mm"
-   viewBox="0 0 167.20418 166.55771"
+   viewBox="0 0 486.93971 166.55771"
    version="1.1"
    id="svg1"
    inkscape:version="1.3 (1:1.3+202307231459+0e150ed6c4)"
-   sodipodi:docname="logo.svg"
+   sodipodi:docname="logo_text.svg"
    xml:space="preserve"
    inkscape:export-filename="logo.png"
    inkscape:export-xdpi="300"
@@ -26,15 +26,15 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="1.2378347"
-     inkscape:cx="232.66434"
-     inkscape:cy="345.76507"
+     inkscape:zoom="0.5182338"
+     inkscape:cx="642.56712"
+     inkscape:cy="453.46328"
      inkscape:window-width="1916"
      inkscape:window-height="1156"
      inkscape:window-x="0"
      inkscape:window-y="20"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g4"
+     inkscape:current-layer="layer1"
      inkscape:export-bgcolor="#ffffff00" /><defs
      id="defs1"><linearGradient
        id="swatch3"
@@ -42,11 +42,28 @@
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
          id="stop3" /></linearGradient></defs><g
-     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Text"><text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:FoundationTitlesHand;-inkscape-font-specification:'FoundationTitlesHand, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#e9e9e9;fill-opacity:1;stroke:#490071;stroke-width:6;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       x="205.80246"
+       y="154.32103"
+       id="text7"
+       transform="translate(-41.919845,-38.983266)"><tspan
+         sodipodi:role="line"
+         id="tspan7"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:88.1944px;font-family:FoundationTitlesHand;-inkscape-font-specification:'FoundationTitlesHand, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#e9e9e9;fill-opacity:1;stroke:#490071;stroke-width:6;stroke-dasharray:none;stroke-opacity:1"
+         x="205.80246"
+         y="154.32103">Seldon</tspan></text></g><g
+     inkscape:label="Background_atom"
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(-41.919846,-38.983266)"
-     style="display:inline"><path
+     style="display:inline"
+     inkscape:export-filename="logo.png"
+     inkscape:export-xdpi="300"
+     inkscape:export-ydpi="300"><path
        id="path1"
        style="display:none;fill:#ffffff;fill-opacity:1;stroke:#dddddd;stroke-width:5.82256;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
        d="m 105.6324,61.108698 a 21.166941,42.04353 0 0 0 -14.021365,10.666309 43.766864,20.333484 41.628406 0 0 -18.051353,1.648035 43.766864,20.333484 41.628406 0 0 -1.777633,16.732374 45.357731,19.620312 0 0 0 -11.507425,12.996844 45.357731,19.620312 0 0 0 11.507425,12.99685 20.333484,43.766864 48.371594 0 0 1.777633,16.73238 20.333484,43.766864 48.371594 0 0 18.051353,1.64774 21.166941,42.04353 0 0 0 14.021365,10.6666 21.166941,42.04353 0 0 0 14.02136,-10.6666 43.766864,20.333484 41.628406 0 0 18.05135,-1.64774 43.766864,20.333484 41.628406 0 0 1.82639,-16.75613 45.357731,19.620312 0 0 0 11.45867,-12.9731 A 45.357731,19.620312 0 0 0 139.54744,90.130503 20.333484,43.766864 48.371594 0 0 137.70511,73.423042 20.333484,43.766864 48.371594 0 0 119.70627,71.760233 21.166941,42.04353 0 0 0 105.6324,61.108698 Z"
@@ -64,7 +81,7 @@
      id="g4"
      transform="translate(-41.919846,-38.983266)"
      style="display:inline"><ellipse
-       style="fill:none;stroke:#490071;stroke-width:1.74677;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#000000;fill-opacity:0;stroke:#490071;stroke-width:1.74677;stroke-dasharray:none;stroke-opacity:1"
        id="ellipse1"
        cx="105.63243"
        cy="103.15221"
