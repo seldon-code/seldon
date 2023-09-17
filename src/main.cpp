@@ -1,7 +1,13 @@
 #include <iostream>
 #include <fmt/core.h>
 
+#include "state.hpp"
+
+#include "models/DeGroot.hpp"
+
 int main()
 {
-    fmt::print("Hello, world!\n");
+    auto state = Seldon::State("conf.toml");
+    auto model = Seldon::DeGrootModel(state);
+    model.run();
 }

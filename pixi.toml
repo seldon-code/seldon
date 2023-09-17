@@ -1,7 +1,7 @@
 [project]
 name = "seldon"
 version = "0.1.0"
-description = "Add a short description here"
+description = "A code for opinion dynamics simulations."
 authors = ["Moritz Sallermann <m.sallermann@fz-juelich.de>"]
 channels = ["conda-forge"]
 platforms = ["linux-64"]
