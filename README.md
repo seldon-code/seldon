@@ -10,15 +10,15 @@ Seldon is a performant code for performing various types of opinion dynamics sim
 
 We use [`pixi`](https://github.com/prefix-dev/pixi) as the package manager. 
 
-``
+```bash
 pixi shell # to activate the env
-``
+```
 
 ### Compilation
 
 We use `meson` to compile and build Seldon. 
 
-``
+```bash
 meson setup build
 meson compile -C build
-``
+```
