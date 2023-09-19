@@ -29,7 +29,8 @@ int main( int argc, char * argv[] )
     auto config_file_path = program.get<std::string>( "config_file" );
     fmt::print( "Using input file: {}\n", config_file_path );
 
-    // auto state = Seldon::State("conf.toml");
+    auto state = Seldon::State( config_file_path );
+
     // auto model = Seldon::DeGrootModel(state);
     // model.run();
 

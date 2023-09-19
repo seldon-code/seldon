@@ -1,0 +1,5 @@
+model = "DeGroot"
+
+[DeGroot]
+number_of_agents = 300
+connections_per_agent = 10
