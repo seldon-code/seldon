@@ -13,7 +13,7 @@ protected:
 
 public:
     Model(State & state);
-    virtual void run();
+    virtual void run() = 0;
 };
 
 }

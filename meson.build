@@ -4,9 +4,16 @@ project('seldon', 'cpp',
 
 incdir = include_directories('include')
 
-exe = executable('seldon', 'src/main.cpp',
+sources = [
+  'src/state.cpp',
+  'src/main.cpp',
+  'src/network.cpp',
+  'src/model.cpp',
+  'src/models/DeGroot.cpp'
+]
+
+exe = executable('seldon', sources,
   install : true,
   dependencies : [dependency('fmt')],
   include_directories : incdir
   )
-

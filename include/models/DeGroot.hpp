@@ -3,7 +3,7 @@
 
 namespace Seldon {
 
-class DeGrootModel : Model
+class DeGrootModel : public Model
 {
     private:
     std::vector<Agent> agent_current_copy;
