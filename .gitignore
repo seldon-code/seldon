@@ -1,6 +1,8 @@
 build/
 
+# pixi 
 .pixi/
+pixi.lock
 
 # Prerequisites
 *.d
