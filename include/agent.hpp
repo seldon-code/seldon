@@ -1,10 +1,11 @@
 #pragma once
 
-namespace Seldon {
+namespace Seldon
+{
 
 struct Agent
 {
     double opinion;
 };
 
-}
+} // namespace Seldon

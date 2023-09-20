@@ -12,8 +12,8 @@ protected:
     State & state;
 
 public:
-    Model(State & state);
+    Model( State & state );
     virtual void run() = 0;
 };
 
-}
+} // namespace Seldon

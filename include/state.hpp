@@ -1,20 +1,25 @@
 #pragma once
 
-#include <vector>
-#include <string>
 #include "agent.hpp"
+#include "model.hpp"
 #include "network.hpp"
+#include <string>
+#include <vector>
 
-namespace Seldon {
+namespace Seldon
+{
 
 class State
 {
-    public:
-    State(std::string toml_file);
+public:
+    int n_agents;
+    Model * model;
 
-    // Holds all the information needed in the simulation run, e.g a reference to a model object, time, the vector of agent opiniond
-    std::vector<Agent> agents;
+    State( std::string toml_file );
+
+    // Holds all the information needed in the simulation run, e.g a reference to
+    // a model object, time, the vector of agent opiniond
     Network network;
 };
 
-}
+} // namespace Seldon
