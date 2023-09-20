@@ -29,10 +29,8 @@ int main( int argc, char * argv[] )
     auto config_file_path = program.get<std::string>( "config_file" );
     fmt::print( "Using input file: {}\n", config_file_path );
 
-    auto state = Seldon::Simulation( config_file_path );
-
-    // auto model = Seldon::DeGrootModel(state);
-    // model.run();
+    auto simulation = Seldon::Simulation( config_file_path );
+    // simulation.model->run();
 
     return 0;
 }

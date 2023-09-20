@@ -40,7 +40,7 @@ Seldon::Simulation::Simulation( std::string config_file )
     if( model_string == "DeGroot" )
     {
         int n_agents = tbl["DeGroot"]["number_of_agents"].value_or( 0 );
-        this->model = std::make_unique<DeGrootModel>( n_agents, network );
-        model_type  = ModelType::DeGroot;
+        this->model  = std::make_unique<DeGrootModel>( n_agents, network );
+        model_type   = ModelType::DeGroot;
     }
 }

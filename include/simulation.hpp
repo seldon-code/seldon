@@ -18,9 +18,6 @@ public:
 
     Network network;
     Simulation( std::string toml_file );
-
-    // Holds all the information needed in the simulation run, e.g a reference to
-    // a model object, time, the vector of agent opiniond
 };
 
 } // namespace Seldon

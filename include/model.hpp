@@ -8,7 +8,7 @@ class Model
 {
 
 public:
-    Model() { };
+    Model(){};
     virtual void run() = 0;
 };
 
