@@ -1,10 +1,17 @@
 #include "simulation.hpp"
+#include "models/DeGroot.hpp"
+
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <toml++/toml.h>
 #include <iostream>
 #include <optional>
 #include <set>
+
+enum class ModelType : unsigned int
+{
+    DeGroot
+};
 
 Seldon::Simulation::Simulation( std::string config_file )
 {
@@ -19,11 +26,21 @@ Seldon::Simulation::Simulation( std::string config_file )
         throw std::runtime_error( fmt::format( "Configuration file needs to include 'model'!" ) );
 
     // Check if 'model' is one of the allowed values
-    auto model = model_opt.value();
-    if( !allowed_models.count( model ) )
+    auto model_string = model_opt.value();
+    if( !allowed_models.count( model_string ) )
     {
-        throw std::runtime_error( fmt::format( "Unknown model type: '{}'!", model ) );
+        throw std::runtime_error( fmt::format( "Unknown model type: '{}'!", model_string ) );
     }
 
-    // TODO: construct model object from conf
+    // Construct the network
+    network = Network();
+
+    // Construct the model object
+    ModelType model_type;
+    if( model_string == "DeGroot" )
+    {
+        int n_agents = tbl["DeGroot"]["number_of_agents"].value_or( 0 );
+        this->model = std::make_unique<DeGrootModel>( n_agents, network );
+        model_type  = ModelType::DeGroot;
+    }
 }
