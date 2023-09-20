@@ -10,14 +10,14 @@
 namespace Seldon
 {
 
-class State
+class Simulation
 {
 public:
     int n_agents;
     std::unique_ptr<Model> model;
 
     Network network;
-    State( std::string toml_file );
+    Simulation( std::string toml_file );
 
     // Holds all the information needed in the simulation run, e.g a reference to
     // a model object, time, the vector of agent opiniond

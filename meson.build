@@ -5,7 +5,7 @@ project('seldon', 'cpp',
 incdir = include_directories('include')
 
 sources = [
-  'src/state.cpp',
+  'src/simulation.cpp',
   'src/main.cpp',
   'src/network.cpp',
   'src/model.cpp',

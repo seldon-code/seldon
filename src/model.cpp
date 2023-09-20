@@ -1,4 +1,4 @@
 #include "model.hpp"
-#include "state.hpp"
+#include "simulation.hpp"
 
-// Seldon::Model::Model( Seldon::State & _state ) : state( _state ) {}
+// Seldon::Model::Model( Seldon::Simulation & _state ) : state( _state ) {}

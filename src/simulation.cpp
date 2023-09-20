@@ -1,4 +1,4 @@
-#include "state.hpp"
+#include "simulation.hpp"
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <toml++/toml.h>
@@ -6,7 +6,7 @@
 #include <optional>
 #include <set>
 
-Seldon::State::State( std::string config_file )
+Seldon::Simulation::Simulation( std::string config_file )
 {
     std::set<std::string> allowed_models = { "DeGroot" };
 
