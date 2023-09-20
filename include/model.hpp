@@ -1,5 +1,4 @@
 #pragma once
-#include "state.hpp"
 #include <cstddef>
 
 namespace Seldon
@@ -8,11 +7,8 @@ namespace Seldon
 class Model
 {
 
-protected:
-    State & state;
-
 public:
-    Model( State & state );
+    Model() { };
     virtual void run() = 0;
 };
 

@@ -1,10 +1,10 @@
 #include "models/DeGroot.hpp"
 #include <iterator>
 
-Seldon::DeGrootModel::DeGrootModel( State & state ) : Model( state )
+Seldon::DeGrootModel::DeGrootModel( int n_agents, Network & network ) : network( network )
 {
-    agents             = std::vector<AgentT>( state.n_agents );
-    agent_current_copy = std::vector<AgentT>( state.n_agents );
+    agents             = std::vector<AgentT>( n_agents );
+    agent_current_copy = std::vector<AgentT>( n_agents );
 }
 
 void Seldon::DeGrootModel::run()
@@ -13,7 +13,7 @@ void Seldon::DeGrootModel::run()
 
     for( std::size_t i = 0; i < agents.size(); i++ )
     {
-        state.network.get_edges( i, edge_buffer );
+        network.get_edges( i, edge_buffer );
 
         agent_current_copy[i].opinion = 0.0;
 
