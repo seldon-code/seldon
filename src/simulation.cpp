@@ -1,6 +1,5 @@
 #include "simulation.hpp"
 #include "models/DeGroot.hpp"
-
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <toml++/toml.h>

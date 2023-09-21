@@ -1,12 +1,9 @@
-#include <fmt/core.h>
-#include <iostream>
-
+#include "models/DeGroot.hpp"
 #include "simulation.hpp"
-
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <argparse/argparse.hpp>
 #include <string>
-
-#include "models/DeGroot.hpp"
 
 int main( int argc, char * argv[] )
 {
@@ -21,8 +18,7 @@ int main( int argc, char * argv[] )
     }
     catch( const std::runtime_error & err )
     {
-        std::cerr << err.what() << std::endl;
-        std::cerr << program;
+        fmt::print( stderr, "{}\n{}", err.what(), fmt::streamed( program ) );
         return 1;
     }
 
