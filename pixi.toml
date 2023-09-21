@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "A code for opinion dynamics simulations."
 authors = ["Moritz Sallermann <m.sallermann@fz-juelich.de>"]
 channels = ["conda-forge"]
-platforms = ["linux-64"]
+platforms = ["linux-64", "osx-arm64", "osx-64"]
 
 [tasks]
 

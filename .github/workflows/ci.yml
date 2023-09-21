@@ -1,0 +1,32 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+
+  test:
+    runs-on: ${{ matrix.os }}
+    name: test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        build-type: [Release]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup pixi
+      uses: prefix-dev/setup-pixi@v0.2.1
+      with:
+        pixi-version: v0.3.0
+
+    - name: Setup pixi environment
+      run: |
+        pixi install
+
+    - name: Compile with meson
+      shell: pixi run bash {0}
+      run: |
+        meson setup build
+        meson compile -C build
