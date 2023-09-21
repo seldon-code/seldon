@@ -1,4 +1,8 @@
 #include "network.hpp"
+#include <cstddef>
+#include <iterator>
+#include <random>
+#include <set>
 
 Seldon::Network::Network( int n_agents, int n_connections )
 {
@@ -47,7 +51,7 @@ Seldon::Network::Network( int n_agents, int n_connections )
                 {
                     agent_found = true;
                     break; // Break out of the loop
-                }          // not found
+                }          // not foundiopok
                 else
                 {
                     continue;
