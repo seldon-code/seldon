@@ -1,8 +1,8 @@
 #include "simulation.hpp"
 #include "models/DeGroot.hpp"
+#include "util/tomlplusplus.hpp"
 #include <fmt/format.h>
 #include <fmt/ostream.h>
-#include <toml++/toml.h>
 #include <iostream>
 #include <optional>
 #include <set>

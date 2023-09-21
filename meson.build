@@ -9,7 +9,8 @@ sources = [
   'src/main.cpp',
   'src/network.cpp',
   'src/model.cpp',
-  'src/models/DeGroot.cpp'
+  'src/models/DeGroot.cpp',
+  'src/util/tomlplusplus.cpp'
 ]
 
 exe = executable('seldon', sources,
