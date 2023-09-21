@@ -15,6 +15,6 @@ sources = [
 
 exe = executable('seldon', sources,
   install : true,
-  dependencies : [dependency('fmt')],
+  dependencies : [dependency('fmt'), dependency('tomlplusplus')],
   include_directories : incdir
   )
