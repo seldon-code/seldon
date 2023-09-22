@@ -9,7 +9,7 @@ Seldon::DeGrootModel::DeGrootModel( int n_agents, Network & network ) : network(
 
 void Seldon::DeGrootModel::run()
 {
-    std::vector<std::tuple<std::size_t, double>> edge_buffer( 1 );
+    auto edge_buffer = Network::connectionVectorT();
 
     for( std::size_t i = 0; i < agents.size(); i++ )
     {

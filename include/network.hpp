@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <tuple>
 #include <vector>
 
@@ -7,14 +8,20 @@ namespace Seldon
 
 class Network
 {
-
-    using connectionVectorT = std::vector<std::tuple<int, double>>;
-
 public:
-    Network() = default;
-    Network( int n_agents, int n_connections );
+    using edgeT             = std::tuple<size_t, double>;
+    using connectionVectorT = std::vector<edgeT>;
 
-    void get_edges( std::size_t agent_idx, std::vector<std::tuple<std::size_t, double>> & buffer );
+    Network() = default;
+    Network( std::size_t n_agents, std::size_t n_connections );
+
+    std::size_t n_agents() const
+    {
+        return adjacency_list.size();
+    }
+
+    void get_adjacencies( std::size_t agent_idx, std::vector<size_t> & buffer ) const;
+    void get_edges( std::size_t agent_idx, connectionVectorT & buffer ) const;
 
 private:
     std::vector<connectionVectorT> adjacency_list; // Adjacency list for the connections

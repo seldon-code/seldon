@@ -4,7 +4,7 @@
 #include <random>
 #include <set>
 
-Seldon::Network::Network( int n_agents, int n_connections )
+Seldon::Network::Network( size_t n_agents, size_t n_connections )
 {
     // Loop through all the agents
     for( size_t i_agent = 0; i_agent < n_agents; ++i_agent )
@@ -18,7 +18,7 @@ Seldon::Network::Network( int n_agents, int n_connections )
         std::mt19937 gen( rd() );                                   // mersenne_twister_engine seeded with rd()
         std::uniform_int_distribution<> distrib( 0, n_agents - 1 ); // for the j agent index
         std::uniform_real_distribution<> dis( 1.0, 2.0 );           // Values don't matter, will be normalized
-        int max_iter     = 10000; // Maximum loop iterations to search for a unique connection
+        size_t max_iter  = 10000; // Maximum loop iterations to search for a unique connection
         bool agent_found = false;
         int j_agent_idx;
         double norm_weight = 0.0; // Do something else later? Sum of all weights per row
@@ -91,7 +91,24 @@ Seldon::Network::Network( int n_agents, int n_connections )
     } // end of loop through n_agents
 }
 
-void Seldon::Network::get_edges( std::size_t agent_idx, std::vector<std::tuple<std::size_t, double>> & buffer )
+void Seldon::Network::get_adjacencies( std::size_t agent_idx, std::vector<size_t> & buffer ) const
 {
-    // return ;
+    // TODO: rewrite this using std::span
+    const size_t n_edges = adjacency_list[agent_idx].size();
+    buffer.resize( n_edges );
+    for( size_t i_edge = 0; i_edge < n_edges; i_edge++ )
+    {
+        buffer[i_edge] = std::get<0>( adjacency_list[agent_idx][i_edge] );
+    }
+}
+
+void Seldon::Network::get_edges( std::size_t agent_idx, Seldon::Network::connectionVectorT & buffer ) const
+{
+    // TODO: rewrite this using std::span
+    const size_t n_edges = adjacency_list[agent_idx].size();
+    buffer.resize( n_edges );
+    for( size_t i_edge = 0; i_edge < n_edges; i_edge++ )
+    {
+        buffer[i_edge] = adjacency_list[agent_idx][i_edge];
+    }
 }

@@ -4,6 +4,7 @@
 #include <fmt/ostream.h>
 #include <argparse/argparse.hpp>
 #include <string>
+#include <util/io.hpp>
 
 int main( int argc, char * argv[] )
 {
@@ -27,6 +28,8 @@ int main( int argc, char * argv[] )
 
     auto simulation = Seldon::Simulation( config_file_path );
     // simulation.model->run();
+
+    Seldon::IO::Network_to_DOT_file( simulation.network, "network.dot" );
 
     return 0;
 }
