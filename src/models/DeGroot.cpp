@@ -5,6 +5,11 @@ Seldon::DeGrootModel::DeGrootModel( int n_agents, Network & network ) : network(
 {
     agents             = std::vector<AgentT>( n_agents );
     agent_current_copy = std::vector<AgentT>( n_agents );
+
+    for( size_t i = 0; i < agents.size(); i++ )
+    {
+        agents[i].opinion = double( i ) / double( agents.size() );
+    }
 }
 
 void Seldon::DeGrootModel::run()
