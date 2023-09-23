@@ -29,7 +29,7 @@ int main( int argc, char * argv[] )
     auto simulation = Seldon::Simulation( config_file_path );
     // simulation.model->run();
 
-    Seldon::IO::Network_to_DOT_file( simulation.network, "network.dot" );
+    Seldon::IO::network_to_dot_file( simulation.network, "network.dot" );
 
     return 0;
 }
