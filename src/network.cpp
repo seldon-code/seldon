@@ -1,12 +1,13 @@
 #include "network.hpp"
 #include <cstddef>
 #include <iterator>
+#include <optional>
 #include <set>
 
-Seldon::Network::Network( size_t n_agents, size_t n_connections ) // : gen( 0 )
+Seldon::Network::Network( size_t n_agents, size_t n_connections, std::optional<int> seed )
 {
-    std::random_device rd;    // a seed source for the random number engine
-    std::mt19937 gen( rd() ); // mersenne_twister_engine seeded with rd()
+    initialize_rng( seed );
+
     // Distributions to draw from                              // mersenne_twister_engine seeded with rd()
     std::uniform_real_distribution<> dis( 1.0, 2.0 ); // Values don't matter, will be normalized
     auto j_idx_buffer = std::vector<size_t>();        // for the j_agents indices connected to i_agent (adjacencies)
@@ -53,10 +54,9 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections ) // : gen( 0 )
 // Function for drawing k agents (indices), from n, without repitition
 // Includes agent_idx of the i^th agent
 void Seldon::Network::draw_unique_k_from_n(
-    std::size_t agent_idx, std::size_t k, std::size_t n, std::vector<std::size_t> & buffer ) const
+    std::size_t agent_idx, std::size_t k, std::size_t n, std::vector<std::size_t> & buffer )
 {
-    std::random_device rd;    // a seed source for the random number engine
-    std::mt19937 gen( rd() ); // mersenne_twister_engine seeded with rd()
+
     // Distributions to draw from
     std::uniform_int_distribution<> distrib( 0, n - 1 ); // for the j agent index
     std::set<std::size_t> j_agents;                      // Set of agents connected to i (agent_idx)
