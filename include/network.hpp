@@ -1,9 +1,9 @@
 #pragma once
 #include <cstddef>
+#include <optional>
+#include <random>
 #include <tuple>
 #include <vector>
-#include <random>
-#include <optional>
 
 namespace Seldon
 {
@@ -34,15 +34,15 @@ public:
     //     // // else{
     //     //     if ( seed.has_value() )
     //     //     {
-    //     //         gen = seed( seed.value() ); 
-    //     //     } // initialize with seed value 
+    //     //         gen = seed( seed.value() );
+    //     //     } // initialize with seed value
     //     //     else{
     //     //         std::random_device rd;
     //     //         std::mt19937 gen( rd() );
-    //     //     } // no seed provided 
-        
+    //     //     } // no seed provided
+
     //     // // }
-    // } 
+    // }
 
     void get_adjacencies( std::size_t agent_idx, std::vector<size_t> & buffer ) const;
     void get_edges( std::size_t agent_idx, connectionVectorT & buffer ) const;
@@ -54,9 +54,8 @@ private:
     // Function for getting a vector of k agents (corresponding to connections)
     // drawing from n agents (without duplication)
     // also includes agent_idx, the agent itself
-    void draw_unique_k_from_n( std::size_t agent_idx, std::size_t k, 
-        std::size_t n, std::vector<std::size_t> & buffer ) const;
-
+    void draw_unique_k_from_n(
+        std::size_t agent_idx, std::size_t k, std::size_t n, std::vector<std::size_t> & buffer ) const;
 };
 
 } // namespace Seldon
