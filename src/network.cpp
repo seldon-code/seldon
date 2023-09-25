@@ -1,77 +1,35 @@
 #include "network.hpp"
 #include <cstddef>
 #include <iterator>
-#include <random>
 #include <set>
 
-Seldon::Network::Network( size_t n_agents, size_t n_connections )
-{
+Seldon::Network::Network( size_t n_agents, size_t n_connections ) 
+{   
+    RNG();
+    // Distributions to draw from                              // mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<> dis( 1.0, 2.0 );           // Values don't matter, will be normalized
+    auto j_idx_buffer     = std::vector<size_t>(); // for the j_agents indices connected to i_agent (adjacencies) 
+
     // Loop through all the agents
     for( size_t i_agent = 0; i_agent < n_agents; ++i_agent )
     {
         connectionVectorT vec_i_agent;       // vector of tuples of (agent_idx,weight)
-        std::set<int> j_agents;              // Set of agents connected to i
         std::vector<double> j_agent_weights; // Vector of weights
         double weight;                       // Weight of a particular j_agent
-        // Distributions to draw from
-        std::random_device rd;                                      // a seed source for the random number engine
-        std::mt19937 gen( rd() );                                   // mersenne_twister_engine seeded with rd()
-        std::uniform_int_distribution<> distrib( 0, n_agents - 1 ); // for the j agent index
-        std::uniform_real_distribution<> dis( 1.0, 2.0 );           // Values don't matter, will be normalized
-        size_t max_iter  = 10000; // Maximum loop iterations to search for a unique connection
-        bool agent_found = false;
-        int j_agent_idx;
         double norm_weight = 0.0; // Do something else later? Sum of all weights per row
 
-        // Add i_agent to j_agents
-        j_agents.insert( i_agent ); //
-        // Draw weight, for now vector is not sorted according to agent idx
-        weight = dis( gen );
-        j_agent_weights.push_back( weight );
-        norm_weight += weight;
+        // Get the vector of sorted adjacencies, including i 
+        // TODO: option for making the n_conections variable
+        this->draw_unique_k_from_n(i_agent, n_connections,n_agents, j_idx_buffer);
 
-        // Maybe also make n_connections variable for each agent?
-
-        // ---------
-        // Draw the agent index, for n_connections-1
-        // The agent itself is counted in n_connections
-        // Here we will also draw the weights (I guess the order doesn't matter)
-        // Loop through all connections
-        agent_found = false;
-        for( size_t j = 0; j < n_connections; ++j )
-        {
-            // Draw a new agent index
-            for( size_t k = 0; k < max_iter; ++k )
-            {
-                j_agent_idx = distrib( gen ); // Draw an agent index
-                // Check and see if it is inside the set
-                auto it = j_agents.find( j_agent_idx );
-                // Agent not found, break out
-                if( it == j_agents.end() )
-                {
-                    agent_found = true;
-                    break; // Break out of the loop
-                }          // not foundiopok
-                else
-                {
-                    continue;
-                } // agent found, try again
-            }
-
-            // If a unique agent idx has not been found, skip this connection
-            if( !agent_found )
-            {
-                continue;
-            }
-
-            // Now that a unique agent has been found, add to the set
-            j_agents.insert( j_agent_idx );
-            // Draw the weight for the agent
-            weight = dis( gen );
-            j_agent_weights.push_back( weight );
-            norm_weight += weight;
-
-        } // end of loop through all connections
+        // Draw the weights, and calculate the normalizing factor 
+        j_agent_weights.resize( j_idx_buffer.size() );
+        for (size_t j = 0; j < j_idx_buffer; ++j)
+        {   
+            weight = dis( gen ); // Draw the weight 
+            j_agent_weights[j] = weight; // Update the weight vector  
+            norm_weight += weight; 
+        }
 
         // ---------
         // Normalize the weights so that the row sums to 1
@@ -80,7 +38,7 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections )
         for( size_t j = 0; j < j_agents.size(); ++j )
         {
             weight    = j_agent_weights[j] / norm_weight;
-            int j_idx = *std::next( j_agents.begin(), j );             // Accesses the j^th agent in set
+            size_t j_idx = j_idx_buffer[j];             // Accesses the j^th agent index
             vec_i_agent.push_back( std::make_tuple( j_idx, weight ) ); // Update the vector
         }
         // ---------
@@ -89,6 +47,60 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections )
         adjacency_list.push_back( vec_i_agent );
 
     } // end of loop through n_agents
+}
+
+// Function for drawing k agents (indices), from n, without repitition
+// Includes agent_idx of the i^th agent 
+void Seldon::Network::draw_unique_k_from_n( std::size_t agent_idx, std::size_t k, 
+        std::size_t n, std::vector<std::size_t> & buffer  ) const
+{
+    // Distributions to draw from                             
+    std::uniform_int_distribution<> distrib( 0, n-1 );        // for the j agent index
+    std::set<std::size_t> j_agents;              // Set of agents connected to i (agent_idx)
+    size_t max_iter  = 10000; // Maximum loop iterations to search for a unique connection
+    bool agent_found = false; // Checks whether a j_agent has been found, which is not a duplicate
+    int number_drawn = 0; // Number of agents drawn, should be k or less
+
+    // Add the agent itself 
+    j_agents.insert( agent_idx ); //
+
+    agent_found = false;
+    // Loop through all n
+    for( size_t j = 0; j < k; ++j ){
+        // Draw a new agent index
+        for( size_t itr = 0; itr < max_iter; ++itr )
+            {
+                j_agent_idx = distrib( gen ); // Draw an agent index
+                // Check and see if the agent drawn is inside the set
+                if(j_agents.insert(j_agent_idx).second == false)
+                {
+                    continue; // try drawing j_agent_idx again 
+                } // duplicate agent found
+                else{
+                    agent_found = true;
+                    break;
+                } // duplicate agent not found, break out of loop 
+            } // end of agent draw 
+
+            // If a unique agent idx has not been found in max_itr, skip this connection
+            if( !agent_found )
+            {
+                continue;
+            }
+    } // end of n draws 
+
+    // Update the number of connections drawn 
+    number_drawn = j_agents.size(); 
+
+    buffer.resize( number_drawn ); // Resize the output buffer 
+
+    // Update the vector with the sorted values in the set: 
+    for( size_t j = 0; j < number_drawn; ++j )
+        {
+            int j_idx = *std::next( j_agents.begin(), j );             // Accesses the j^th agent in set
+            buffer[j] = j_idx;
+        } 
+
 }
 
 void Seldon::Network::get_adjacencies( std::size_t agent_idx, std::vector<size_t> & buffer ) const
