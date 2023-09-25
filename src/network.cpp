@@ -3,9 +3,10 @@
 #include <iterator>
 #include <set>
 
-Seldon::Network::Network( size_t n_agents, size_t n_connections ) 
+Seldon::Network::Network( size_t n_agents, size_t n_connections ) // : gen( 0 )
 {   
-    RNG();
+    std::random_device rd;                                      // a seed source for the random number engine
+    std::mt19937 gen( rd() );                                   // mersenne_twister_engine seeded with rd()
     // Distributions to draw from                              // mersenne_twister_engine seeded with rd()
     std::uniform_real_distribution<> dis( 1.0, 2.0 );           // Values don't matter, will be normalized
     auto j_idx_buffer     = std::vector<size_t>(); // for the j_agents indices connected to i_agent (adjacencies) 
@@ -24,7 +25,7 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections )
 
         // Draw the weights, and calculate the normalizing factor 
         j_agent_weights.resize( j_idx_buffer.size() );
-        for (size_t j = 0; j < j_idx_buffer; ++j)
+        for (size_t j = 0; j < j_idx_buffer.size(); ++j)
         {   
             weight = dis( gen ); // Draw the weight 
             j_agent_weights[j] = weight; // Update the weight vector  
@@ -35,7 +36,7 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections )
         // Normalize the weights so that the row sums to 1
         // Might be specific to the DeGroot model?
         // Also update the vector of tuples
-        for( size_t j = 0; j < j_agents.size(); ++j )
+        for( size_t j = 0; j < j_idx_buffer.size(); ++j )
         {
             weight    = j_agent_weights[j] / norm_weight;
             size_t j_idx = j_idx_buffer[j];             // Accesses the j^th agent index
@@ -53,13 +54,16 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections )
 // Includes agent_idx of the i^th agent 
 void Seldon::Network::draw_unique_k_from_n( std::size_t agent_idx, std::size_t k, 
         std::size_t n, std::vector<std::size_t> & buffer  ) const
-{
+{   
+    std::random_device rd;                                      // a seed source for the random number engine
+    std::mt19937 gen( rd() );                                   // mersenne_twister_engine seeded with rd()
     // Distributions to draw from                             
     std::uniform_int_distribution<> distrib( 0, n-1 );        // for the j agent index
     std::set<std::size_t> j_agents;              // Set of agents connected to i (agent_idx)
     size_t max_iter  = 10000; // Maximum loop iterations to search for a unique connection
     bool agent_found = false; // Checks whether a j_agent has been found, which is not a duplicate
-    int number_drawn = 0; // Number of agents drawn, should be k or less
+    std::size_t number_drawn = 0; // Number of agents drawn, should be k or less
+    std::size_t j_agent_idx; // Agent index drawn 
 
     // Add the agent itself 
     j_agents.insert( agent_idx ); //
