@@ -1,4 +1,5 @@
 #include "network.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <iterator>
 #include <optional>
@@ -56,56 +57,34 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections, std::optional<i
 void Seldon::Network::draw_unique_k_from_n(
     std::size_t agent_idx, std::size_t k, std::size_t n, std::vector<std::size_t> & buffer )
 {
-
-    // Distributions to draw from
-    std::uniform_int_distribution<> distrib( 0, n - 1 ); // for the j agent index
-    std::set<std::size_t> j_agents;                      // Set of agents connected to i (agent_idx)
-    size_t max_iter          = 10000;                    // Maximum loop iterations to search for a unique connection
-    bool agent_found         = false; // Checks whether a j_agent has been found, which is not a duplicate
-    std::size_t number_drawn = 0;     // Number of agents drawn, should be k or less
-    std::size_t j_agent_idx;          // Agent index drawn
-
-    // Add the agent itself
-    j_agents.insert( agent_idx ); //
-
-    agent_found = false;
-    // Loop through all n
-    for( size_t j = 0; j < k; ++j )
+    struct SequenceGenerator
     {
-        // Draw a new agent index
-        for( size_t itr = 0; itr < max_iter; ++itr )
-        {
-            j_agent_idx = distrib( gen ); // Draw an agent index
-            // Check and see if the agent drawn is inside the set
-            if( j_agents.insert( j_agent_idx ).second == false )
-            {
-                continue; // try drawing j_agent_idx again
-            }             // duplicate agent found
-            else
-            {
-                agent_found = true;
-                break;
-            } // duplicate agent not found, break out of loop
-        }     // end of agent draw
+        /* An iterator that generates a sequence of integers 2, 3, 4 ...*/
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type   = std::ptrdiff_t;
+        using value_type        = size_t;
+        using pointer           = size_t *; // or also value_type*
+        using reference         = size_t &;
 
-        // If a unique agent idx has not been found in max_itr, skip this connection
-        if( !agent_found )
+        SequenceGenerator( size_t i ) : i( i ) {}
+        size_t i;
+        size_t & operator*()
         {
-            continue;
+            return i;
+        };
+        bool operator==( const SequenceGenerator & it1 )
+        {
+            return i == it1.i;
+        };
+        SequenceGenerator & operator++()
+        {
+            i++;
+            return *this;
         }
-    } // end of n draws
+    };
 
-    // Update the number of connections drawn
-    number_drawn = j_agents.size();
-
-    buffer.resize( number_drawn ); // Resize the output buffer
-
-    // Update the vector with the sorted values in the set:
-    for( size_t j = 0; j < number_drawn; ++j )
-    {
-        int j_idx = *std::next( j_agents.begin(), j ); // Accesses the j^th agent in set
-        buffer[j] = j_idx;
-    }
+    buffer.resize( k );
+    std::sample( SequenceGenerator( 0 ), SequenceGenerator( n ), buffer.begin(), k, gen );
 }
 
 void Seldon::Network::get_adjacencies( std::size_t agent_idx, std::vector<size_t> & buffer ) const
