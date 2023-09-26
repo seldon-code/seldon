@@ -22,3 +22,13 @@ We use `meson` to compile and build Seldon.
 meson setup build
 meson compile -C build
 ```
+
+### Quick Start 
+
+Run the executable, and provide the input configuration TOML file (as the first
+positional argument), and an optional output directory parent location. If the output location is not specified, it is set to the parent directory in which the config file is present
+
+```bash
+cd build
+./seldon /path/to/config -o /path/to/parent/output/dir
+``` 
