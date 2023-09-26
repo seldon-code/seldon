@@ -1,86 +1,47 @@
 #include "network.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <iterator>
-#include <random>
+#include <optional>
 #include <set>
 
-Seldon::Network::Network( size_t n_agents, size_t n_connections )
+Seldon::Network::Network( size_t n_agents, size_t n_connections, std::optional<int> seed )
 {
+    initialize_rng( seed );
+
+    // Distributions to draw from                              // mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<> dis( 1.0, 2.0 ); // Values don't matter, will be normalized
+    auto j_idx_buffer = std::vector<size_t>();        // for the j_agents indices connected to i_agent (adjacencies)
+
     // Loop through all the agents
     for( size_t i_agent = 0; i_agent < n_agents; ++i_agent )
     {
         connectionVectorT vec_i_agent;       // vector of tuples of (agent_idx,weight)
-        std::set<int> j_agents;              // Set of agents connected to i
         std::vector<double> j_agent_weights; // Vector of weights
         double weight;                       // Weight of a particular j_agent
-        // Distributions to draw from
-        std::random_device rd;                                      // a seed source for the random number engine
-        std::mt19937 gen( rd() );                                   // mersenne_twister_engine seeded with rd()
-        std::uniform_int_distribution<> distrib( 0, n_agents - 1 ); // for the j agent index
-        std::uniform_real_distribution<> dis( 1.0, 2.0 );           // Values don't matter, will be normalized
-        size_t max_iter  = 10000; // Maximum loop iterations to search for a unique connection
-        bool agent_found = false;
-        int j_agent_idx;
-        double norm_weight = 0.0; // Do something else later? Sum of all weights per row
+        double norm_weight = 0.0;            // Do something else later? Sum of all weights per row
 
-        // Add i_agent to j_agents
-        j_agents.insert( i_agent ); //
-        // Draw weight, for now vector is not sorted according to agent idx
-        weight = dis( gen );
-        j_agent_weights.push_back( weight );
-        norm_weight += weight;
+        // Get the vector of sorted adjacencies, including i
+        // TODO: option for making the n_conections variable
+        this->draw_unique_k_from_n( i_agent, n_connections, n_agents, j_idx_buffer );
 
-        // Maybe also make n_connections variable for each agent?
-
-        // ---------
-        // Draw the agent index, for n_connections-1
-        // The agent itself is counted in n_connections
-        // Here we will also draw the weights (I guess the order doesn't matter)
-        // Loop through all connections
-        agent_found = false;
-        for( size_t j = 0; j < n_connections; ++j )
+        // Draw the weights, and calculate the normalizing factor
+        j_agent_weights.resize( j_idx_buffer.size() );
+        for( size_t j = 0; j < j_idx_buffer.size(); ++j )
         {
-            // Draw a new agent index
-            for( size_t k = 0; k < max_iter; ++k )
-            {
-                j_agent_idx = distrib( gen ); // Draw an agent index
-                // Check and see if it is inside the set
-                auto it = j_agents.find( j_agent_idx );
-                // Agent not found, break out
-                if( it == j_agents.end() )
-                {
-                    agent_found = true;
-                    break; // Break out of the loop
-                }          // not foundiopok
-                else
-                {
-                    continue;
-                } // agent found, try again
-            }
-
-            // If a unique agent idx has not been found, skip this connection
-            if( !agent_found )
-            {
-                continue;
-            }
-
-            // Now that a unique agent has been found, add to the set
-            j_agents.insert( j_agent_idx );
-            // Draw the weight for the agent
-            weight = dis( gen );
-            j_agent_weights.push_back( weight );
+            weight             = dis( gen ); // Draw the weight
+            j_agent_weights[j] = weight;     // Update the weight vector
             norm_weight += weight;
-
-        } // end of loop through all connections
+        }
 
         // ---------
         // Normalize the weights so that the row sums to 1
         // Might be specific to the DeGroot model?
         // Also update the vector of tuples
-        for( size_t j = 0; j < j_agents.size(); ++j )
+        for( size_t j = 0; j < j_idx_buffer.size(); ++j )
         {
-            weight    = j_agent_weights[j] / norm_weight;
-            int j_idx = *std::next( j_agents.begin(), j );             // Accesses the j^th agent in set
+            weight       = j_agent_weights[j] / norm_weight;
+            size_t j_idx = j_idx_buffer[j];                            // Accesses the j^th agent index
             vec_i_agent.push_back( std::make_tuple( j_idx, weight ) ); // Update the vector
         }
         // ---------
@@ -89,6 +50,41 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections )
         adjacency_list.push_back( vec_i_agent );
 
     } // end of loop through n_agents
+}
+
+// Function for drawing k agents (indices), from n, without repitition
+// Includes agent_idx of the i^th agent
+void Seldon::Network::draw_unique_k_from_n(
+    std::size_t agent_idx, std::size_t k, std::size_t n, std::vector<std::size_t> & buffer )
+{
+    struct SequenceGenerator
+    {
+        /* An iterator that generates a sequence of integers 2, 3, 4 ...*/
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type   = std::ptrdiff_t;
+        using value_type        = size_t;
+        using pointer           = size_t *; // or also value_type*
+        using reference         = size_t &;
+
+        SequenceGenerator( size_t i ) : i( i ) {}
+        size_t i;
+        size_t & operator*()
+        {
+            return i;
+        };
+        bool operator==( const SequenceGenerator & it1 )
+        {
+            return i == it1.i;
+        };
+        SequenceGenerator & operator++()
+        {
+            i++;
+            return *this;
+        }
+    };
+
+    buffer.resize( k );
+    std::sample( SequenceGenerator( 0 ), SequenceGenerator( n ), buffer.begin(), k, gen );
 }
 
 void Seldon::Network::get_adjacencies( std::size_t agent_idx, std::vector<size_t> & buffer ) const
