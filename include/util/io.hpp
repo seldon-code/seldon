@@ -45,14 +45,14 @@ void simulation_state_to_file( Simulation & simulation, std::string file_path )
     fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );
 
     auto & network  = simulation.network;
-    auto & model    = *simulation.model;
+    auto & model    = simulation.model;
     size_t n_agents = network.n_agents();
 
     auto buffer = Network::connectionVectorT();
 
     for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
     {
-        std::string row = fmt::format( "{} {}\n", idx_agent, model.agents[idx_agent].opinion );
+        std::string row = fmt::format( "{} {}\n", idx_agent, model->get_agent( idx_agent )->to_string() );
         fs << row;
     }
     fs.close();
