@@ -32,7 +32,7 @@ Seldon::Simulation::Simulation( std::string config_file )
     }
 
     // Construct the network
-    int n_agents      = tbl["network"]["number_of_agents"].value_or( 0 );
+    n_agents          = tbl["network"]["number_of_agents"].value_or( 0 );
     int n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
     network           = Network( n_agents, n_connections );
 
