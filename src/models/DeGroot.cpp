@@ -12,18 +12,21 @@ Seldon::DeGrootModel::DeGrootModel( int n_agents, Network & network )
 
 void Seldon::DeGrootModel::run()
 {
-    auto edge_buffer = Network::connectionVectorT();
+    auto neighbour_buffer = std::vector<size_t>();
+    auto weight_buffer    = std::vector<double>();
+    size_t j_index;
+    double weight;
 
-    for( std::size_t i = 0; i < agents.size(); i++ )
+    for( size_t i = 0; i < agents.size(); i++ )
     {
-        network.get_edges( i, edge_buffer );
+        network.get_neighbours( i, neighbour_buffer );
+        network.get_weights( i, weight_buffer );
         agents_current_copy[i].opinion = 0.0;
-        for( auto & edge : edge_buffer )
+        for( size_t j = 0; j < neighbour_buffer.size(); j++ )
         {
-            int j;
-            double weight;
-            std::tie( j, weight ) = edge;
-            agents_current_copy[i].opinion += weight * agents[j].opinion;
+            j_index = neighbour_buffer[j];
+            weight  = weight_buffer[j];
+            agents_current_copy[i].opinion += weight * agents[j_index].opinion;
         }
     }
 

@@ -14,6 +14,14 @@ We use [`pixi`](https://github.com/prefix-dev/pixi) as the package manager.
 pixi shell # to activate the env
 ```
 
+If you want to use [`micromamba`](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html) as the package manager, create and activate 
+the environment.
+
+```bash
+micromamba create -f environment.yml
+micromamba activate seldonenv
+```
+
 ### Compilation
 
 We use `meson` to compile and build Seldon. 
@@ -26,9 +34,9 @@ meson compile -C build
 ### Quick Start 
 
 Run the executable, and provide the input configuration TOML file (as the first
-positional argument), and an optional output directory parent location. If the output location is not specified, it is set to the parent directory in which the config file is present
+positional argument), and an optional output directory location. If the output location is not specified, it is set to the parent directory in which the config file is present
 
 ```bash
 cd build
-./seldon /path/to/config -o /path/to/parent/output/dir
+./seldon /path/to/config -o /path/to/output/dir
 ``` 
