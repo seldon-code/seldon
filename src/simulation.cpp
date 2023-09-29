@@ -48,14 +48,14 @@ Seldon::Simulation::Simulation( std::string config_file )
     // Construct the network
     n_agents          = tbl["network"]["number_of_agents"].value_or( 0 );
     int n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
-    network           = Network( n_agents, n_connections, gen );
+    network           = std::make_unique<Network>( n_agents, n_connections, gen );
 
     // Construct the model object
     ModelType model_type;
     if( model_string == "DeGroot" )
     {
         // int n_agents = tbl["DeGroot"]["number_of_agents"].value_or( 0 );
-        this->model = std::make_unique<DeGrootModel>( n_agents, network );
+        this->model = std::make_unique<DeGrootModel>( n_agents, *network );
         model_type  = ModelType::DeGroot;
     }
 }

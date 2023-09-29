@@ -10,7 +10,6 @@ namespace Seldon
 class Network
 {
 public:
-    Network() = default;
     Network( std::size_t n_agents, std::size_t n_connections, std::mt19937 & gen );
 
     std::size_t n_agents() const
@@ -22,7 +21,7 @@ public:
     void get_weights( std::size_t agent_idx, std::vector<double> & buffer ) const;
 
 private:
-    std::mt19937 * gen = nullptr;
+    std::mt19937 * const gen = nullptr;
     std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
     std::vector<std::vector<double>> weight_list;    // List for the interaction weights of each connection
 

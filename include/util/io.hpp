@@ -46,7 +46,7 @@ inline void simulation_state_to_file( Simulation & simulation, std::string file_
 
     auto & network  = simulation.network;
     auto & model    = simulation.model;
-    size_t n_agents = network.n_agents();
+    size_t n_agents = network->n_agents();
 
     for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
     {

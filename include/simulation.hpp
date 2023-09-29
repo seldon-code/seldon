@@ -17,8 +17,7 @@ private:
 public:
     int n_agents;
     std::unique_ptr<ModelBase> model;
-
-    Network network;
+    std::unique_ptr<Network> network;
     Simulation( std::string toml_file );
 };
 
