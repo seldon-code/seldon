@@ -19,6 +19,20 @@ Seldon::Simulation::Simulation( std::string config_file )
     toml::table tbl;
     tbl = toml::parse_file( config_file );
 
+    // Initialize the rng
+    std::optional<int> rng_seed = tbl["rng_seed"].value<int>();
+    if( rng_seed.has_value() )
+    {
+        fmt::print( "WARNING: Seeding random number generator with seed {}!\n", rng_seed.value() );
+    }
+    else
+    {
+        rng_seed = std::random_device()();
+        fmt::print( "INFO: Seeding with seed {}!\n", rng_seed.value() );
+    }
+
+    gen = std::mt19937( rng_seed.value() );
+
     // Check if the 'model' keyword exists
     std::optional<std::string> model_opt = tbl["model"].value<std::string>();
     if( !model_opt.has_value() )
@@ -34,7 +48,7 @@ Seldon::Simulation::Simulation( std::string config_file )
     // Construct the network
     n_agents          = tbl["network"]["number_of_agents"].value_or( 0 );
     int n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
-    network           = Network( n_agents, n_connections );
+    network           = Network( n_agents, n_connections, gen );
 
     // Construct the model object
     ModelType model_type;
