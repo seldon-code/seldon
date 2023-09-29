@@ -28,7 +28,7 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections, std::mt19937 & 
 
         // Get the vector of sorted adjacencies, excluding i (include i later)
         // TODO: option for making the n_conections variable
-        this->draw_unique_k_from_n( i_agent, n_connections, n_agents, j_idx_buffer );
+        this->draw_unique_k_from_n( n_connections, n_agents, j_idx_buffer );
 
         // Draw the weights, and calculate the normalizing factor
         j_agent_weights.resize( j_idx_buffer.size() );
@@ -74,9 +74,7 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections, std::mt19937 & 
 }
 
 // Function for drawing k agents (indices), from n, without repitition
-// Includes agent_idx of the i^th agent
-void Seldon::Network::draw_unique_k_from_n(
-    std::size_t agent_idx, std::size_t k, std::size_t n, std::vector<std::size_t> & buffer )
+void Seldon::Network::draw_unique_k_from_n( std::size_t k, std::size_t n, std::vector<std::size_t> & buffer )
 {
     struct SequenceGenerator
     {
