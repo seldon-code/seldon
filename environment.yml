@@ -1,0 +1,20 @@
+# $ micromamba create -f environment.yml
+# $ micromamba activate seldonenv
+#
+
+name: seldonenv
+channels:
+  - conda-forge
+# requirements:
+#   build:
+#     - {{ compiler('c') }}
+#     - {{ compiler('c++') }}
+dependencies:
+  - meson
+  - fmt
+  - pkg-config
+  - cmake
+  - ninja 
+  - cpp-argparse
+  - clang-format
+  - tomlplusplus
