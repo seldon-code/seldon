@@ -10,16 +10,18 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections, std::optional<i
     initialize_rng( seed );
 
     // Distributions to draw from                              // mersenne_twister_engine seeded with rd()
-    std::uniform_real_distribution<> dis( 1.0, 2.0 ); // Values don't matter, will be normalized
+    std::uniform_real_distribution<> dis( 0.0, 1.0 ); // Values don't matter, will be normalized
     auto j_idx_buffer = std::vector<size_t>();        // for the j_agents indices connected to i_agent (adjacencies)
+    connectionVectorT vec_i_agent;                    // vector of tuples of (agent_idx, weight)
+    std::vector<double> j_agent_weights;              // Vector of weights
 
     // Loop through all the agents
     for( size_t i_agent = 0; i_agent < n_agents; ++i_agent )
     {
-        connectionVectorT vec_i_agent;       // vector of tuples of (agent_idx,weight)
-        std::vector<double> j_agent_weights; // Vector of weights
-        double weight;                       // Weight of a particular j_agent
-        double norm_weight = 0.0;            // Do something else later? Sum of all weights per row
+        vec_i_agent.clear();
+        j_agent_weights.clear();
+
+        double norm_weight = 0.0; // Do something else later? Sum of all weights per row
 
         // Get the vector of sorted adjacencies, including i
         // TODO: option for making the n_conections variable
@@ -29,10 +31,15 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections, std::optional<i
         j_agent_weights.resize( j_idx_buffer.size() );
         for( size_t j = 0; j < j_idx_buffer.size(); ++j )
         {
-            weight             = dis( gen ); // Draw the weight
-            j_agent_weights[j] = weight;     // Update the weight vector
-            norm_weight += weight;
+            j_agent_weights[j] = dis( gen ); // Draw the weight
+            norm_weight += j_agent_weights[j];
         }
+
+        // Put the self-interaction as the first entry
+        auto self_interaction_weight = dis( gen );
+        norm_weight += self_interaction_weight;
+        self_interaction_weight /= norm_weight;
+        vec_i_agent.push_back( std::make_tuple( i_agent, self_interaction_weight ) );
 
         // ---------
         // Normalize the weights so that the row sums to 1
@@ -40,9 +47,8 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections, std::optional<i
         // Also update the vector of tuples
         for( size_t j = 0; j < j_idx_buffer.size(); ++j )
         {
-            weight       = j_agent_weights[j] / norm_weight;
-            size_t j_idx = j_idx_buffer[j];                            // Accesses the j^th agent index
-            vec_i_agent.push_back( std::make_tuple( j_idx, weight ) ); // Update the vector
+            const size_t j_idx = j_idx_buffer[j]; // Accesses the j^th agent index
+            vec_i_agent.push_back( std::make_tuple( j_idx, j_agent_weights[j] / norm_weight ) ); // Update the vector
         }
         // ---------
 
