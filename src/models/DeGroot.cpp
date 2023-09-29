@@ -19,7 +19,7 @@ void Seldon::DeGrootModel::run()
 
     for( size_t i = 0; i < agents.size(); i++ )
     {
-        network.get_adjacencies( i, neighbour_buffer );
+        network.get_neighbours( i, neighbour_buffer );
         network.get_weights( i, weight_buffer );
         agents_current_copy[i].opinion = 0.0;
         for( size_t j = 0; j < neighbour_buffer.size(); j++ )

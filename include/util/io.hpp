@@ -24,7 +24,7 @@ void network_to_dot_file( const Network & network, std::string file_path )
 
     for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
     {
-        network.get_adjacencies( idx_agent, buffer );
+        network.get_neighbours( idx_agent, buffer );
 
         std::string row = fmt::format( "{} -> {{", idx_agent );
         for( size_t i = 0; i < buffer.size() - 1; i++ )

@@ -108,7 +108,7 @@ void Seldon::Network::draw_unique_k_from_n(
     std::sample( SequenceGenerator( 0 ), SequenceGenerator( n ), buffer.begin(), k, gen );
 }
 
-void Seldon::Network::get_adjacencies( std::size_t agent_idx, std::vector<size_t> & buffer ) const
+void Seldon::Network::get_neighbours( std::size_t agent_idx, std::vector<size_t> & buffer ) const
 {
     // TODO: rewrite this using std::span
     const size_t n_edges = neighbour_list[agent_idx].size();

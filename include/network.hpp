@@ -25,7 +25,7 @@ public:
         gen = std::mt19937( seed.value_or( std::random_device()() ) );
     }
 
-    void get_adjacencies( std::size_t agent_idx, std::vector<size_t> & buffer ) const;
+    void get_neighbours( std::size_t agent_idx, std::vector<size_t> & buffer ) const;
     void get_weights( std::size_t agent_idx, std::vector<double> & buffer ) const;
 
 private:
