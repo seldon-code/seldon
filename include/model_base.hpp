@@ -12,8 +12,10 @@ namespace Seldon
 class ModelBase
 {
 public:
+    int n_iterations                         = 0;
     virtual AgentBase * get_agent( int idx ) = 0; // Use this to get an abstract representation of the agent at idx
-    virtual void run()                       = 0;
+    virtual void iteration()                 = 0;
+    virtual bool finished()                  = 0;
 };
 
 } // namespace Seldon

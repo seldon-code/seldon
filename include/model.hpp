@@ -1,5 +1,6 @@
 #pragma once
 #include "model_base.hpp"
+#include <optional>
 
 namespace Seldon
 {
@@ -12,10 +13,30 @@ class Model : public ModelBase
 public:
     using AgentT = AgentT_;
     std::vector<AgentT> agents;
+
+    std::optional<int> max_iterations = std::nullopt;
+
     Model( size_t n_agents )
     {
         agents = std::vector<AgentT>( int( n_agents ), AgentT() );
     }
+
+    virtual void iteration()
+    {
+        n_iterations++;
+    };
+
+    virtual bool finished()
+    {
+        if( max_iterations.has_value() )
+        {
+            return max_iterations.value() <= n_iterations;
+        }
+        else
+        {
+            return false;
+        }
+    };
 
     AgentBase * get_agent( int idx ) override // For this to work AgentT needs to be a subclass of AgentBase
     {
