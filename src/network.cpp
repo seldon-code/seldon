@@ -1,4 +1,6 @@
 #include "network.hpp"
+#include "connectivity.hpp"
+#include <fmt/format.h>
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
@@ -57,6 +59,18 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections, std::optional<i
         weight_list.push_back( j_agent_weights );
 
     } // end of loop through n_agents
+
+    // Now that we have the neighbour list (or adjacency list)
+    // Run Tarjan's algorithm for strongly connected components
+    auto tarjan_scc = TarjanConnectivityAlgo( neighbour_list );
+
+    // For a strongly connected network, the number of SCCs should be 1
+    // Print a warning if this is not true
+    if( tarjan_scc.scc_list.size() != 1 )
+    {
+        fmt::print(
+            "WARNING: You have {} strongly connected components in your network!\n", tarjan_scc.scc_list.size() );
+    }
 }
 
 // Function for drawing k agents (indices), from n, without repitition
