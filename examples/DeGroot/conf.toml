@@ -1,7 +1,13 @@
+[simulation]
 model = "DeGroot"
+# rng_seed = 120 # Leaving this empty will pick a random seed
+
+[model]
+max_iterations = 20 # If not set, max iterations is infinite
+
+[DeGroot]
+convergence = 1e-3 # If not set, the default 1e-6 is used
 
 [network]
 number_of_agents = 300
 connections_per_agent = 10
-
-[DeGroot]
