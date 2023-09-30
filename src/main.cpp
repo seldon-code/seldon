@@ -48,17 +48,18 @@ int main( int argc, char * argv[] )
     fs::create_directories( output_dir_path ); // Create the output directory
 
     auto simulation = Seldon::Simulation( config_file_path.string() );
-
     Seldon::IO::network_to_dot_file( *simulation.network, ( output_dir_path / fs::path( "network.dot" ) ).string() );
 
-    auto filename = fmt::format( "iteration_{}.txt", 0 );
-    Seldon::IO::simulation_state_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
+    Seldon::IO::network_to_file( simulation, ( output_dir_path / fs::path( "network.txt" ) ).string() );
+
+    auto filename = fmt::format( "opinions_{}.txt", 0 );
+    Seldon::IO::opinions_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
 
     do
     {
         simulation.model->iteration();
-        filename = fmt::format( "iteration_{}.txt", simulation.model->n_iterations );
-        Seldon::IO::simulation_state_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
+        filename = fmt::format( "opinions_{}.txt", simulation.model->n_iterations );
+        Seldon::IO::opinions_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
     } while( !simulation.model->finished() );
 
     return 0;
