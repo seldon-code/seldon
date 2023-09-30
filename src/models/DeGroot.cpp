@@ -10,8 +10,10 @@ Seldon::DeGrootModel::DeGrootModel( int n_agents, Network & network )
     }
 }
 
-void Seldon::DeGrootModel::run()
+void Seldon::DeGrootModel::iteration()
 {
+    Model<AgentT>::iteration();
+
     auto neighbour_buffer = std::vector<size_t>();
     auto weight_buffer    = std::vector<double>();
     size_t j_index;
@@ -30,9 +32,17 @@ void Seldon::DeGrootModel::run()
         }
     }
 
+    max_opinion_diff = 0;
     // Update the original agent opinions
     for( std::size_t i = 0; i < agents.size(); i++ )
     {
-        agents[i] = agents_current_copy[i];
+        max_opinion_diff = std::max( max_opinion_diff, abs( agents[i].opinion - agents_current_copy[i].opinion ) );
+        agents[i]        = agents_current_copy[i];
     }
+}
+
+bool Seldon::DeGrootModel::finished()
+{
+    bool converged = max_opinion_diff < convergence_tol;
+    return Model<AgentT>::finished() || converged;
 }

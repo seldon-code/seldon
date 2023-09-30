@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <tuple>
 #include <vector>
 
@@ -27,7 +28,7 @@ public:
 
 private:
     std::vector<std::vector<size_t>> adjacency_list;
-    int num_nodes;
+    size_t num_nodes;
     std::vector<size_t> num;     // holding vertex numbers
     std::vector<size_t> lowest;  // lowest[v] : minimum number of a vertex reachable from v
     std::vector<bool> visited;   // visited so DFS has seen these vertices (not necessarily processed)

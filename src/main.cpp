@@ -49,16 +49,17 @@ int main( int argc, char * argv[] )
 
     auto simulation = Seldon::Simulation( config_file_path.string() );
 
-    Seldon::IO::network_to_dot_file( simulation.network, ( output_dir_path / fs::path( "network.dot" ) ).string() );
+    Seldon::IO::network_to_dot_file( *simulation.network, ( output_dir_path / fs::path( "network.dot" ) ).string() );
 
     auto filename = fmt::format( "iteration_{}.txt", 0 );
     Seldon::IO::simulation_state_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
-    for( size_t i = 1; i < 10; i++ )
+
+    do
     {
-        simulation.model->run();
-        filename = fmt::format( "iteration_{}.txt", i );
+        simulation.model->iteration();
+        filename = fmt::format( "iteration_{}.txt", simulation.model->n_iterations );
         Seldon::IO::simulation_state_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
-    }
+    } while( !simulation.model->finished() );
 
     return 0;
 }
