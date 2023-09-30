@@ -14,49 +14,50 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections, std::mt19937 & 
 {
     // Distributions to draw from                              // mersenne_twister_engine seeded with rd()
     std::uniform_real_distribution<> dis( 0.0, 1.0 ); // Values don't matter, will be normalized
-    auto j_idx_buffer = std::vector<size_t>(); // for the j_agents indices connected to i_agent (adjacencies/neighbours)
-    auto j_agent_weights = std::vector<double>(); // Vector of weights of the j neighbours of i
-    double norm_weight   = 0.0;                   // Factor for normalizing the weights so that the row sums to 1.0
+    auto incoming_neighbour_buffer
+        = std::vector<size_t>(); // for the j_agents indices connected to i_agent (adjacencies/neighbours)
+    auto incoming_neighbour_weights = std::vector<double>(); // Vector of weights of the j neighbours of i
+    double outgoing_norm_weight     = 0;
 
     // Loop through all the agents
     for( size_t i_agent = 0; i_agent < n_agents; ++i_agent )
     {
-        j_idx_buffer.clear();
-        j_agent_weights.clear();
+        outgoing_norm_weight = 0.0;
 
-        norm_weight = 0.0; // Sum of all weights per row
+        incoming_neighbour_buffer.clear();
+        incoming_neighbour_weights.clear();
 
         // Get the vector of sorted adjacencies, excluding i (include i later)
         // TODO: option for making the n_conections variable
-        this->draw_unique_k_from_n( n_connections, n_agents, j_idx_buffer );
+        this->draw_unique_k_from_n( i_agent, n_connections, n_agents, incoming_neighbour_buffer );
 
-        // Draw the weights, and calculate the normalizing factor
-        j_agent_weights.resize( j_idx_buffer.size() );
-        for( size_t j = 0; j < j_idx_buffer.size(); ++j )
+        incoming_neighbour_weights.resize( incoming_neighbour_buffer.size() );
+        for( size_t j = 0; j < incoming_neighbour_buffer.size(); ++j )
         {
-            j_agent_weights[j] = dis( *gen ); // Draw the weight
-            norm_weight += j_agent_weights[j];
+            incoming_neighbour_weights[j] = dis( *gen ); // Draw the weight
+            outgoing_norm_weight += incoming_neighbour_weights[j];
         }
 
         // Put the self-interaction as the last entry
         auto self_interaction_weight = dis( *gen );
-        norm_weight += self_interaction_weight;
-        j_idx_buffer.push_back( i_agent ); // Add the agent itself
-        j_agent_weights.push_back( self_interaction_weight );
+        outgoing_norm_weight += self_interaction_weight;
+
+        // outgoing_norm_weights += self_interaction_weight;
+        incoming_neighbour_buffer.push_back( i_agent ); // Add the agent itself
+        incoming_neighbour_weights.push_back( self_interaction_weight );
 
         // ---------
         // Normalize the weights so that the row sums to 1
         // Might be specific to the DeGroot model?
-        for( size_t j = 0; j < j_idx_buffer.size(); ++j )
+        for( size_t j = 0; j < incoming_neighbour_buffer.size(); ++j )
         {
-            j_agent_weights[j] /= norm_weight;
+            incoming_neighbour_weights[j] /= outgoing_norm_weight;
         }
-        // ---------
 
         // Add the neighbour vector for i_agent to the neighbour list
-        neighbour_list.push_back( j_idx_buffer );
+        neighbour_list.push_back( incoming_neighbour_buffer );
         // Add the weight interactions for the neighbours of i_agent
-        weight_list.push_back( j_agent_weights );
+        weight_list.push_back( incoming_neighbour_weights );
 
     } // end of loop through n_agents
 
@@ -74,7 +75,8 @@ Seldon::Network::Network( size_t n_agents, size_t n_connections, std::mt19937 & 
 }
 
 // Function for drawing k agents (indices), from n, without repitition
-void Seldon::Network::draw_unique_k_from_n( std::size_t k, std::size_t n, std::vector<std::size_t> & buffer )
+void Seldon::Network::draw_unique_k_from_n(
+    std::size_t ignore_idx, std::size_t k, std::size_t n, std::vector<std::size_t> & buffer )
 {
     struct SequenceGenerator
     {
@@ -85,8 +87,16 @@ void Seldon::Network::draw_unique_k_from_n( std::size_t k, std::size_t n, std::v
         using pointer           = size_t *; // or also value_type*
         using reference         = size_t &;
 
-        SequenceGenerator( size_t i ) : i( i ) {}
+        SequenceGenerator( const size_t i_, const size_t ignore_idx ) : i( i_ ), ignore_idx( ignore_idx )
+        {
+            if( i == ignore_idx )
+            {
+                i++;
+            }
+        }
         size_t i;
+        size_t ignore_idx;
+
         size_t & operator*()
         {
             return i;
@@ -98,12 +108,14 @@ void Seldon::Network::draw_unique_k_from_n( std::size_t k, std::size_t n, std::v
         SequenceGenerator & operator++()
         {
             i++;
+            if( i == ignore_idx )
+                i++;
             return *this;
         }
     };
 
     buffer.resize( k );
-    std::sample( SequenceGenerator( 0 ), SequenceGenerator( n ), buffer.begin(), k, *gen );
+    std::sample( SequenceGenerator( 0, ignore_idx ), SequenceGenerator( n, ignore_idx ), buffer.begin(), k, *gen );
 }
 
 void Seldon::Network::get_neighbours( std::size_t agent_idx, std::vector<size_t> & buffer ) const

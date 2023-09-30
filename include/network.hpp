@@ -30,7 +30,8 @@ private:
     // Function for getting a vector of k agents (corresponding to connections)
     // drawing from n agents (without duplication)
     // We later add the agent itself
-    void draw_unique_k_from_n( std::size_t k, std::size_t n, std::vector<std::size_t> & buffer );
+    void
+    draw_unique_k_from_n( std::size_t ignore_idx, std::size_t k, std::size_t n, std::vector<std::size_t> & buffer );
 };
 
 } // namespace Seldon
