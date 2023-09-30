@@ -39,7 +39,7 @@ inline void network_to_dot_file( const Network & network, std::string file_path 
     fs.close();
 }
 
-inline void simulation_state_to_file( Simulation & simulation, std::string file_path )
+inline void opinions_to_file( Simulation & simulation, std::string file_path )
 {
     std::fstream fs;
     fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );
@@ -48,9 +48,45 @@ inline void simulation_state_to_file( Simulation & simulation, std::string file_
     auto & model    = simulation.model;
     size_t n_agents = network->n_agents();
 
+    fmt::print( fs, "# idx_agent opinion[...]\n" );
     for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
     {
-        std::string row = fmt::format( "{} {}\n", idx_agent, model->get_agent( idx_agent )->to_string() );
+        std::string row = fmt::format( "{:<5} {:>25}\n", idx_agent, model->get_agent( idx_agent )->to_string() );
+        fs << row;
+    }
+    fs.close();
+}
+
+inline void network_to_file( Simulation & simulation, std::string file_path )
+{
+    std::fstream fs;
+    fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );
+
+    auto & network  = *simulation.network;
+    size_t n_agents = network.n_agents();
+
+    fmt::print( fs, "# idx_agent n_neighbours_out indices_neighbours_out[...] weights_out[...]\n" );
+    auto buffer_neighbours = std::vector<size_t>();
+    auto buffer_weights    = std::vector<Network::WeightT>();
+
+    for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
+    {
+        network.get_neighbours( idx_agent, buffer_neighbours );
+        network.get_weights( idx_agent, buffer_weights );
+
+        std::string row = fmt::format( "{:<5} {:<5} ", idx_agent, buffer_neighbours.size() );
+
+        for( const auto & idx_neighbour : buffer_neighbours )
+        {
+            row += fmt::format( "{:<5} ", idx_neighbour );
+        }
+
+        for( const auto & weight : buffer_weights )
+        {
+            row += fmt::format( "{:<25} ", weight );
+        }
+
+        row += "\n";
         fs << row;
     }
     fs.close();
