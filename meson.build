@@ -20,8 +20,7 @@ exe = executable('seldon', sources_seldon + 'src/main.cpp',
 
 
 tests = [
-  ['Test A', 'test/test_a.cpp'],
-  ['Test B', 'test/test_b.cpp']
+  ['Test Tarjan', 'test/test_tarjan.cpp'],
 ]
 
 Catch2 = dependency('Catch2', method : 'cmake', modules : ['Catch2::Catch2WithMain', 'Catch2::Catch2'])
