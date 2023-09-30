@@ -41,6 +41,10 @@ cd build
 ./seldon /path/to/config -o /path/to/output/dir
 ``` 
 
+#### Output files
+The file `network.txt` contains information about the network. 
+First column is the index of the agent, then the next column is the number of incoming agent connections *including* the agent itself. Subsequent columns are the neighbouring incoming agent indices and weights. In addition, every iteration produces a *double* opinion value for each agent. These are outputted to files named opinions_i.txt.
+
 ### Running Tests
 
 To run the tests, go into the build directory and run the following: 
