@@ -1,4 +1,5 @@
 #include "models/DeGroot.hpp"
+#include <cmath>
 #include <iterator>
 
 Seldon::DeGrootModel::DeGrootModel( int n_agents, Network & network )
@@ -36,7 +37,7 @@ void Seldon::DeGrootModel::iteration()
     // Update the original agent opinions
     for( std::size_t i = 0; i < agents.size(); i++ )
     {
-        max_opinion_diff = std::max( max_opinion_diff, abs( agents[i].opinion - agents_current_copy[i].opinion ) );
+        max_opinion_diff = std::max( max_opinion_diff, std::abs( agents[i].opinion - agents_current_copy[i].opinion ) );
         agents[i]        = agents_current_copy[i];
     }
 }

@@ -40,3 +40,11 @@ positional argument), and an optional output directory location. If the output l
 cd build
 ./seldon /path/to/config -o /path/to/output/dir
 ``` 
+
+### Running Tests
+
+To run the tests, go into the build directory and run the following: 
+
+```bash
+meson test
+```
