@@ -18,3 +18,4 @@ dependencies:
   - cpp-argparse
   - clang-format
   - tomlplusplus
+  - catch2 
