@@ -26,7 +26,7 @@ inline void network_to_dot_file( const Network & network, std::string file_path 
     {
         network.get_neighbours( idx_agent, buffer );
 
-        std::string row = fmt::format( "{} -> {{", idx_agent );
+        std::string row = fmt::format( "{} <- {{", idx_agent );
         for( size_t i = 0; i < buffer.size() - 1; i++ )
         {
             row += fmt::format( "{}, ", buffer[i] );
@@ -65,7 +65,7 @@ inline void network_to_file( Simulation & simulation, std::string file_path )
     auto & network  = *simulation.network;
     size_t n_agents = network.n_agents();
 
-    fmt::print( fs, "# idx_agent n_neighbours_out indices_neighbours_out[...] weights_out[...]\n" );
+    fmt::print( fs, "# idx_agent n_neighbours_in indices_neighbours_in[...] weights_in[...]\n" );
     auto buffer_neighbours = std::vector<size_t>();
     auto buffer_weights    = std::vector<Network::WeightT>();
 
