@@ -18,9 +18,9 @@ public:
     Model( size_t n_agents ) : agents( std::vector<AgentT>( int( n_agents ), AgentT() ) ) {}
     Model( std::vector<AgentT> && agents ) : agents( agents ) {}
 
-    virtual void iteration() = 0;
+    virtual void iteration() override = 0;
 
-    virtual bool finished()
+    virtual bool finished() override
     {
         if( max_iterations.has_value() )
         {
