@@ -18,7 +18,8 @@ public:
     int n_agents;
     std::unique_ptr<ModelBase> model;
     std::unique_ptr<Network> network;
-    Simulation( std::string toml_file );
+    Simulation(
+        std::string toml_file, std::optional<std::string> cli_network_file, std::optional<std::string> cli_agent_file );
 };
 
 } // namespace Seldon

@@ -13,7 +13,8 @@ enum class ModelType : unsigned int
     DeGroot
 };
 
-Seldon::Simulation::Simulation( std::string config_file )
+Seldon::Simulation::Simulation(
+    std::string config_file, std::optional<std::string> cli_network_file, std::optional<std::string> cli_agent_file )
 {
     std::set<std::string> allowed_models = { "DeGroot" };
 
@@ -47,9 +48,22 @@ Seldon::Simulation::Simulation( std::string config_file )
     }
 
     // Construct the network
-    n_agents          = tbl["network"]["number_of_agents"].value_or( 0 );
-    int n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
-    network           = generate_n_connections( n_agents, n_connections, gen );
+    std::optional<std::string> file = cli_network_file;
+    if( !file.has_value() ) // Check if toml file should be superceded by cli_network_file
+        file = tbl["network"]["file"].value<std::string>();
+
+    if( file.has_value() )
+    {
+        fmt::print( "Reading netwok from file {}\n", file.value() );
+        // TODO
+    }
+    else
+    {
+        fmt::print( "Generating network\n" );
+        n_agents          = tbl["network"]["number_of_agents"].value_or( 0 );
+        int n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
+        network           = generate_n_connections( n_agents, n_connections, gen );
+    }
 
     // Construct the model object
     // Generic model parameters

@@ -1,8 +1,8 @@
 #pragma once
 #include "network.hpp"
 #include <algorithm>
-#include <memory>
 #include <iterator>
+#include <memory>
 #include <random>
 
 namespace Seldon
