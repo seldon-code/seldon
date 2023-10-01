@@ -9,7 +9,7 @@ class AgentBase
 {
 public:
     virtual std::string to_string() const = 0;
-
+    virtual ~AgentBase()                  = default;
     // TODO: eventually a from_string might also be needed
     // virtual void from_string()          = 0;
 };

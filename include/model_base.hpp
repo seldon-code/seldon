@@ -16,6 +16,7 @@ public:
     virtual AgentBase * get_agent( int idx ) = 0; // Use this to get an abstract representation of the agent at idx
     virtual void iteration()                 = 0;
     virtual bool finished()                  = 0;
+    virtual ~ModelBase()                     = default;
 };
 
 } // namespace Seldon

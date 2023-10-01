@@ -17,8 +17,8 @@ void Seldon::DeGrootModel::iteration()
 
     auto neighbour_buffer = std::vector<size_t>();
     auto weight_buffer    = std::vector<double>();
-    size_t j_index;
-    double weight;
+    size_t j_index        = 0;
+    double weight         = 0.0;
 
     for( size_t i = 0; i < agents.size(); i++ )
     {

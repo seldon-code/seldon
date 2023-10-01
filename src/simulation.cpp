@@ -7,6 +7,7 @@
 #include <iostream>
 #include <optional>
 #include <set>
+#include <stdexcept>
 
 enum class ModelType : unsigned int
 {
@@ -42,7 +43,7 @@ Seldon::Simulation::Simulation(
 
     // Check if 'model' is one of the allowed values
     auto model_string = model_opt.value();
-    if( !allowed_models.count( model_string ) )
+    if( !allowed_models.contains( model_string ) )
     {
         throw std::runtime_error( fmt::format( "Unknown model type: '{}'!", model_string ) );
     }

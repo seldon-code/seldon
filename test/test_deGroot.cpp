@@ -22,7 +22,7 @@ TEST_CASE( "Test the DeGroot Model Symmetric", "[DeGroot]" )
     };
 
     auto gen     = std::mt19937();
-    auto network = Network( std::move( neighbour_list ), std::move( weight_list ), gen );
+    auto network = Network( std::move( neighbour_list ), std::move( weight_list ) );
     auto model   = DeGrootModel( n_agents, network );
 
     model.convergence_tol   = 1e-6;
@@ -36,7 +36,7 @@ TEST_CASE( "Test the DeGroot Model Symmetric", "[DeGroot]" )
     } while( !model.finished() );
 
     fmt::print( "N_iterations = {} (with convergence_tol {})\n", model.n_iterations, model.convergence_tol );
-    for( int i = 0; i < n_agents; i++ )
+    for( size_t i = 0; i < n_agents; i++ )
     {
         fmt::print( "Opinion {} = {}\n", i, model.agents[i].opinion );
         REQUIRE_THAT( model.agents[i].opinion, WithinAbs( 0.5, model.convergence_tol * 10.0 ) );

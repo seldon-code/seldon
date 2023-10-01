@@ -12,7 +12,8 @@ namespace Seldon
 namespace IO
 {
 
-inline void network_to_dot_file( const Network & network, std::string file_path )
+
+inline void network_to_dot_file( const Network & network, const std::string & file_path )
 {
     std::fstream fs;
     fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );
@@ -38,7 +39,7 @@ inline void network_to_dot_file( const Network & network, std::string file_path 
     fs.close();
 }
 
-inline void opinions_to_file( Simulation & simulation, std::string file_path )
+inline void opinions_to_file( Simulation & simulation, const std::string & file_path )
 {
     std::fstream fs;
     fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );
@@ -56,7 +57,7 @@ inline void opinions_to_file( Simulation & simulation, std::string file_path )
     fs.close();
 }
 
-inline void network_to_file( Simulation & simulation, std::string file_path )
+inline void network_to_file( Simulation & simulation, const std::string & file_path )
 {
     std::fstream fs;
     fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );

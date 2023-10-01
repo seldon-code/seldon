@@ -57,9 +57,9 @@ public:
         }
     }
 
-    virtual void iteration() override = 0;
+    void iteration() override = 0;
 
-    virtual bool finished() override
+    bool finished() override
     {
         if( max_iterations.has_value() )
         {
