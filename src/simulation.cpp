@@ -1,5 +1,6 @@
 #include "simulation.hpp"
 #include "models/DeGroot.hpp"
+#include "network_generation.hpp"
 #include "util/tomlplusplus.hpp"
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -48,7 +49,7 @@ Seldon::Simulation::Simulation( std::string config_file )
     // Construct the network
     n_agents          = tbl["network"]["number_of_agents"].value_or( 0 );
     int n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
-    network           = std::make_unique<Network>( n_agents, n_connections, gen );
+    network           = generate_n_connections( n_agents, n_connections, gen );
 
     // Construct the model object
     // Generic model parameters
