@@ -1,11 +1,8 @@
 #include "network.hpp"
 #include "connectivity.hpp"
 #include <fmt/format.h>
-#include <algorithm>
 #include <cstddef>
-#include <iterator>
 #include <optional>
-#include <set>
 
 Seldon::Network::Network(
     std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list )
