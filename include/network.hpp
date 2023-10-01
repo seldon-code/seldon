@@ -12,13 +12,12 @@ class Network
 public:
     using WeightT = double;
 
+    Network(
+        std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list,
+        std::mt19937 & gen );
+
     Network( std::size_t n_agents, std::size_t n_connections, std::mt19937 & gen );
-
-    std::size_t n_agents() const
-    {
-        return neighbour_list.size();
-    }
-
+    std::size_t n_agents() const;
     void get_neighbours( std::size_t agent_idx, std::vector<size_t> & buffer ) const;
     void get_weights( std::size_t agent_idx, std::vector<WeightT> & buffer ) const;
 

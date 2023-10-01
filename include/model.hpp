@@ -15,16 +15,10 @@ public:
     std::vector<AgentT> agents;
 
     std::optional<int> max_iterations = std::nullopt;
+    Model( size_t n_agents ) : agents( std::vector<AgentT>( int( n_agents ), AgentT() ) ) {}
+    Model( std::vector<AgentT> && agents ) : agents( agents ) {}
 
-    Model( size_t n_agents )
-    {
-        agents = std::vector<AgentT>( int( n_agents ), AgentT() );
-    }
-
-    virtual void iteration()
-    {
-        n_iterations++;
-    };
+    virtual void iteration() = 0;
 
     virtual bool finished()
     {
@@ -42,6 +36,12 @@ public:
     {
         return &agents[idx];
     }
+};
+
+template<typename AgentT_>
+void Seldon::Model<AgentT_>::iteration()
+{
+    n_iterations++;
 };
 
 } // namespace Seldon

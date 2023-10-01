@@ -7,6 +7,13 @@
 #include <optional>
 #include <set>
 
+Seldon::Network::Network(
+    std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list,
+    std::mt19937 & _gen )
+        : gen( &_gen ), neighbour_list( neighbour_list ), weight_list( weight_list )
+{
+}
+
 Seldon::Network::Network( size_t n_agents, size_t n_connections, std::mt19937 & _gen )
         : gen( &_gen ),
           neighbour_list( std::vector<std::vector<size_t>>( 0 ) ),
@@ -116,6 +123,11 @@ void Seldon::Network::draw_unique_k_from_n(
 
     buffer.resize( k );
     std::sample( SequenceGenerator( 0, ignore_idx ), SequenceGenerator( n, ignore_idx ), buffer.begin(), k, *gen );
+}
+
+size_t Seldon::Network::n_agents() const
+{
+    return neighbour_list.size();
 }
 
 void Seldon::Network::get_neighbours( std::size_t agent_idx, std::vector<size_t> & buffer ) const
