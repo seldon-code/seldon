@@ -5,7 +5,6 @@
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
-
 #include <cstddef>
 #include <string>
 namespace Seldon
@@ -74,19 +73,34 @@ inline void network_to_file( Simulation & simulation, std::string file_path )
         network.get_neighbours( idx_agent, buffer_neighbours );
         network.get_weights( idx_agent, buffer_weights );
 
-        std::string row = fmt::format( "{:<5} {:<5} ", idx_agent, buffer_neighbours.size() );
+        std::string row = fmt::format( "{:>5}, {:>5}, ", idx_agent, buffer_neighbours.size() );
 
         for( const auto & idx_neighbour : buffer_neighbours )
         {
-            row += fmt::format( "{:<5} ", idx_neighbour );
+            row += fmt::format( "{:>5}, ", idx_neighbour );
         }
 
-        for( const auto & weight : buffer_weights )
+        const auto n_weights = buffer_weights.size();
+        for( size_t i_weight = 0; i_weight < n_weights; i_weight++ )
         {
-            row += fmt::format( "{:<25} ", weight );
+            const auto & weight = buffer_weights[i_weight];
+            if( i_weight == n_weights - 1 ) // At the end of a row
+            {
+                if( idx_agent == n_agents - 1 ) // At the end of the file
+                {
+                    row += fmt::format( "{:>25}", weight );
+                }
+                else
+                {
+                    row += fmt::format( "{:>25}\n", weight );
+                }
+            }
+            else
+            {
+                row += fmt::format( "{:>25}, ", weight );
+            }
         }
 
-        row += "\n";
         fs << row;
     }
     fs.close();
