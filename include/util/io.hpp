@@ -50,7 +50,7 @@ inline void opinions_to_file( Simulation & simulation, std::string file_path )
     fmt::print( fs, "# idx_agent opinion[...]\n" );
     for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
     {
-        std::string row = fmt::format( "{:<5} {:>25}\n", idx_agent, model->get_agent( idx_agent )->to_string() );
+        std::string row = fmt::format( "{:>5}, {:>25}\n", idx_agent, model->get_agent( idx_agent )->to_string() );
         fs << row;
     }
     fs.close();

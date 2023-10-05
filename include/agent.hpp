@@ -14,9 +14,7 @@ public:
     Agent() = default;
     Agent( opinion_t opinion ) : opinion( opinion ) {}
 
-    // virtual void from_string() override
-    // {
-    // }
+    void from_string( const std::string & str );
 
     virtual std::string to_string() const override
     {
@@ -25,5 +23,11 @@ public:
 
     ~Agent() = default;
 };
+
+template<>
+inline void Agent<double>::from_string( const std::string & str )
+{
+    opinion = std::stod( str );
+}
 
 } // namespace Seldon

@@ -8,6 +8,7 @@
 #include <iterator>
 #include <stdexcept>
 #include <string>
+#include <util/misc.hpp>
 
 // Function for getting a vector of k agents (corresponding to connections)
 // drawing from n agents (without duplication)
@@ -112,29 +113,13 @@ std::unique_ptr<Seldon::Network> Seldon::generate_n_connections( int n_agents, i
     return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
 }
 
-std::string get_file_contents( const std::string & filename )
-{
-    std::ifstream in( filename, std::ios::in | std::ios::binary );
-    if( in )
-    {
-        std::string contents;
-        in.seekg( 0, std::ios::end );
-        contents.resize( in.tellg() );
-        in.seekg( 0, std::ios::beg );
-        in.read( &contents[0], contents.size() );
-        in.close();
-        return ( contents );
-    }
-    throw( std::runtime_error( "Cannot read in file." ) );
-}
-
 std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string & file )
 {
     using WeightT = Network::WeightT;
     std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
     std::vector<std::vector<WeightT>> weight_list;   // List for the interaction weights of each connection
 
-    std::string file_contents = get_file_contents( file );
+    std::string file_contents = Seldon::get_file_contents( file );
 
     // bool finished = false;
     size_t start_of_line = 0;

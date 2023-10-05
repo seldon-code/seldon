@@ -66,6 +66,7 @@ Seldon::Simulation::Simulation(
     }
 
     n_agents = network->n_agents();
+    fmt::print("Network has {} agents\n", n_agents);
 
     // Construct the model object
     // Generic model parameters
@@ -80,6 +81,13 @@ Seldon::Simulation::Simulation(
         auto model_DeGroot             = std::make_unique<DeGrootModel>( n_agents, *network );
         model_DeGroot->max_iterations  = max_iterations;
         model_DeGroot->convergence_tol = convergence;
+
+        // TODO: make this more general, ivoke on ModelBase or Model<T>?
+        if( cli_agent_file.has_value() )
+        {
+            fmt::print( "Reading agents from file {}\n", cli_agent_file.value() );
+            model_DeGroot->Agents_from_File( cli_agent_file.value() );
+        }
 
         model      = std::move( model_DeGroot );
         model_type = ModelType::DeGroot;

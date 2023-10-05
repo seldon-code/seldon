@@ -10,12 +10,9 @@ namespace fs = std::filesystem;
 
 int main( int argc, char * argv[] )
 {
-
     argparse::ArgumentParser program( "seldon" );
 
     program.add_argument( "config_file" ).help( "The config file to be used. Has to be in TOML format." );
-
-    // Output directory location
     program.add_argument( "-o", "--output" )
         .help( "Specify the output directory. Defaults to `path/to/config_file/output`" );
     program.add_argument( "-a", "--agents" )
@@ -41,7 +38,6 @@ int main( int argc, char * argv[] )
     fmt::print( "Using input file: {}\n", config_file_path.string() );
     fmt::print( "Output directory path set to: {}\n", output_dir_path.string() );
 
-    // Get the output directory path
     fs::create_directories( output_dir_path ); // Create the output directory
 
     auto simulation = Seldon::Simulation( config_file_path.string(), network_file, agent_file );
