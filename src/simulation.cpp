@@ -55,7 +55,7 @@ Seldon::Simulation::Simulation(
     if( file.has_value() )
     {
         fmt::print( "Reading netwok from file {}\n", file.value() );
-        // TODO
+        network = generate_from_file( file.value() );
     }
     else
     {
@@ -64,6 +64,8 @@ Seldon::Simulation::Simulation(
         int n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
         network           = generate_n_connections( n_agents, n_connections, gen );
     }
+
+    n_agents = network->n_agents();
 
     // Construct the model object
     // Generic model parameters

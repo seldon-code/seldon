@@ -1,7 +1,13 @@
 #include "network_generation.hpp"
 #include "network.hpp"
+#include <fmt/core.h>
+#include <fmt/ostream.h>
+#include <fmt/ranges.h>
 #include <algorithm>
+#include <fstream>
 #include <iterator>
+#include <stdexcept>
+#include <string>
 
 // Function for getting a vector of k agents (corresponding to connections)
 // drawing from n agents (without duplication)
@@ -106,4 +112,97 @@ std::unique_ptr<Seldon::Network> Seldon::generate_n_connections( int n_agents, i
     return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
 }
 
-using WeightT = double;
+std::string get_file_contents( const std::string & filename )
+{
+    std::ifstream in( filename, std::ios::in | std::ios::binary );
+    if( in )
+    {
+        std::string contents;
+        in.seekg( 0, std::ios::end );
+        contents.resize( in.tellg() );
+        in.seekg( 0, std::ios::beg );
+        in.read( &contents[0], contents.size() );
+        in.close();
+        return ( contents );
+    }
+    throw( std::runtime_error( "Cannot read in file." ) );
+}
+
+std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string & file )
+{
+    using WeightT = Network::WeightT;
+    std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
+    std::vector<std::vector<WeightT>> weight_list;   // List for the interaction weights of each connection
+
+    std::string file_contents = get_file_contents( file );
+
+    // bool finished = false;
+    size_t start_of_line = 0;
+    bool finished        = false;
+    while( !finished )
+    {
+        // Find the end of the current line
+        auto end_of_line = file_contents.find( '\n', start_of_line );
+        if( end_of_line == std::string::npos )
+        {
+            finished = true;
+        }
+
+        // Get the current line as a substring
+        auto line     = file_contents.substr( start_of_line, end_of_line - start_of_line );
+        start_of_line = end_of_line + 1;
+
+        // TODO: check if empty or comment
+        if( line.size() == 0 )
+        {
+            break;
+        }
+
+        if( line[0] == '#' )
+        {
+            continue;
+        }
+
+        // Parse the columns
+        neighbour_list.push_back( std::vector<size_t>( 0 ) );
+        weight_list.push_back( std::vector<WeightT>( 0 ) );
+
+        size_t start_of_column = 0;
+        bool finished_row      = false;
+        size_t idx_column      = 0;
+        size_t n_neighbours;
+        while( !finished_row )
+        {
+            auto end_of_column = line.find( ',', start_of_column );
+
+            if( end_of_column == std::string::npos )
+            {
+                finished_row = true;
+            }
+
+            auto column_substring = line.substr( start_of_column, end_of_column - start_of_column );
+            start_of_column       = end_of_column + 1;
+
+            // First column is idx_agent (does not get used)
+            if( idx_column == 1 ) // Second column contains the number of incoming neighbours
+            {
+                n_neighbours = std::stoi( column_substring );
+            }
+            else if(
+                idx_column >= 2
+                & idx_column < 2 + n_neighbours ) // The next n_neighbours columsn contain the neighbour indices
+            {
+                const auto idx_neighbour = std::stoi( column_substring );
+                neighbour_list.back().push_back( idx_neighbour );
+            }
+            else if( idx_column >= 2 + n_neighbours )
+            { // The rest of the columns are the weights
+                const auto weight = std::stod( column_substring );
+                weight_list.back().push_back( weight );
+            }
+            idx_column++;
+        }
+    }
+
+    return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
+}
