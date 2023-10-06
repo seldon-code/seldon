@@ -85,7 +85,7 @@ private:
         if( lowest[v] == num[v] )
         {
             scc.resize( 0 );
-            size_t scc_vertex;
+            size_t scc_vertex = 0;
             // Pop the stack
             scc_vertex = stack.back();
             stack.pop_back();

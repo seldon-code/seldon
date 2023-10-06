@@ -16,12 +16,10 @@ public:
 
     void from_string( const std::string & str );
 
-    virtual std::string to_string() const override
+    std::string to_string() const override
     {
         return fmt::format( "{}", opinion );
     }
-
-    ~Agent() = default;
 };
 
 template<>

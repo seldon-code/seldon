@@ -30,3 +30,8 @@ jobs:
       run: |
         meson setup build
         meson compile -C build
+
+    - name: Test with meson
+      shell: pixi run bash {0}
+      run: |
+        meson test -C build
