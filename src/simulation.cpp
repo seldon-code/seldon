@@ -1,5 +1,6 @@
 #include "simulation.hpp"
 #include "models/DeGroot.hpp"
+#include "network_generation.hpp"
 #include "util/tomlplusplus.hpp"
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -12,7 +13,8 @@ enum class ModelType : unsigned int
     DeGroot
 };
 
-Seldon::Simulation::Simulation( std::string config_file )
+Seldon::Simulation::Simulation(
+    std::string config_file, std::optional<std::string> cli_network_file, std::optional<std::string> cli_agent_file )
 {
     std::set<std::string> allowed_models = { "DeGroot" };
 
@@ -46,9 +48,25 @@ Seldon::Simulation::Simulation( std::string config_file )
     }
 
     // Construct the network
-    n_agents          = tbl["network"]["number_of_agents"].value_or( 0 );
-    int n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
-    network           = std::make_unique<Network>( n_agents, n_connections, gen );
+    std::optional<std::string> file = cli_network_file;
+    if( !file.has_value() ) // Check if toml file should be superceded by cli_network_file
+        file = tbl["network"]["file"].value<std::string>();
+
+    if( file.has_value() )
+    {
+        fmt::print( "Reading netwok from file {}\n", file.value() );
+        network = generate_from_file( file.value() );
+    }
+    else
+    {
+        fmt::print( "Generating network\n" );
+        n_agents          = tbl["network"]["number_of_agents"].value_or( 0 );
+        int n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
+        network           = generate_n_connections( n_agents, n_connections, gen );
+    }
+
+    n_agents = network->n_agents();
+    fmt::print("Network has {} agents\n", n_agents);
 
     // Construct the model object
     // Generic model parameters
@@ -63,6 +81,13 @@ Seldon::Simulation::Simulation( std::string config_file )
         auto model_DeGroot             = std::make_unique<DeGrootModel>( n_agents, *network );
         model_DeGroot->max_iterations  = max_iterations;
         model_DeGroot->convergence_tol = convergence;
+
+        // TODO: make this more general, ivoke on ModelBase or Model<T>?
+        if( cli_agent_file.has_value() )
+        {
+            fmt::print( "Reading agents from file {}\n", cli_agent_file.value() );
+            model_DeGroot->Agents_from_File( cli_agent_file.value() );
+        }
 
         model      = std::move( model_DeGroot );
         model_type = ModelType::DeGroot;
