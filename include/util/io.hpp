@@ -47,7 +47,7 @@ inline void opinions_to_file( Simulation & simulation, const std::string & file_
     auto & model    = simulation.model;
     size_t n_agents = network->n_agents();
 
-    fmt::print( fs, "# idx_agent opinion[...]\n" );
+    fmt::print( fs, "# idx_agent, opinion[...]\n" );
     for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
     {
         std::string row = fmt::format( "{:>5}, {:>25}\n", idx_agent, model->get_agent( idx_agent )->to_string() );
@@ -64,7 +64,7 @@ inline void network_to_file( Simulation & simulation, const std::string & file_p
     auto & network  = *simulation.network;
     size_t n_agents = network.n_agents();
 
-    fmt::print( fs, "# idx_agent n_neighbours_in indices_neighbours_in[...] weights_in[...]\n" );
+    fmt::print( fs, "# idx_agent, n_neighbours_in, indices_neighbours_in[...], weights_in[...]\n" );
     auto buffer_neighbours = std::vector<size_t>();
     auto buffer_weights    = std::vector<Network::WeightT>();
 
