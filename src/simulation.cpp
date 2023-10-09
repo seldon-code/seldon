@@ -67,7 +67,7 @@ Seldon::Simulation::Simulation(
     }
 
     n_agents = network->n_agents();
-    fmt::print("Network has {} agents\n", n_agents);
+    fmt::print( "Network has {} agents\n", n_agents );
 
     // Construct the model object
     // Generic model parameters

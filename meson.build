@@ -10,6 +10,7 @@ sources_seldon = [
   'src/network_generation.cpp',
   'src/model.cpp',
   'src/models/DeGroot.cpp',
+  'src/models/ActivityDrivenModel.cpp',
   'src/util/tomlplusplus.cpp'
 ]
 

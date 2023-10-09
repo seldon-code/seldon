@@ -27,8 +27,8 @@ TEST_CASE( "Test the DeGroot Model Symmetric", "[DeGroot]" )
 
     model.convergence_tol   = 1e-6;
     model.max_iterations    = 100;
-    model.agents[0].opinion = 0.0;
-    model.agents[1].opinion = 1.0;
+    model.agents[0].data = 0.0;
+    model.agents[1].data = 1.0;
 
     do
     {
@@ -38,7 +38,7 @@ TEST_CASE( "Test the DeGroot Model Symmetric", "[DeGroot]" )
     fmt::print( "N_iterations = {} (with convergence_tol {})\n", model.n_iterations, model.convergence_tol );
     for( size_t i = 0; i < n_agents; i++ )
     {
-        fmt::print( "Opinion {} = {}\n", i, model.agents[i].opinion );
-        REQUIRE_THAT( model.agents[i].opinion, WithinAbs( 0.5, model.convergence_tol * 10.0 ) );
+        fmt::print( "Opinion {} = {}\n", i, model.agents[i].data );
+        REQUIRE_THAT( model.agents[i].data, WithinAbs( 0.5, model.convergence_tol * 10.0 ) );
     }
 }
