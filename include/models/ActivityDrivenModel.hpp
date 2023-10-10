@@ -1,4 +1,5 @@
 #pragma once
+
 #include "model.hpp"
 #include "network.hpp"
 #include <random>
@@ -14,7 +15,7 @@ struct ActivityAgentType
 };
 
 template<>
-std::string Agent<ActivityAgentType>::to_string() const
+inline std::string Agent<ActivityAgentType>::to_string() const
 {
     return fmt::format( "{}, {}", data.opinion, data.activity );
 };
@@ -46,7 +47,7 @@ public:
 
     ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen );
 
-    // void iteration() override;
+    void iteration() override;
     // bool finished() overteration() override;
     // bool finished() override;
 };
