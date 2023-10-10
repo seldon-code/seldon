@@ -21,7 +21,6 @@ TEST_CASE( "Test the DeGroot Model Symmetric", "[DeGroot]" )
         { 0.2, 0.8 },
     };
 
-    auto gen     = std::mt19937();
     auto network = Network( std::move( neighbour_list ), std::move( weight_list ) );
     auto model   = DeGrootModel( n_agents, network );
 
