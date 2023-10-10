@@ -19,7 +19,7 @@ public:
     Model( size_t n_agents ) : agents( std::vector<AgentT>( int( n_agents ), AgentT() ) ) {}
     Model( std::vector<AgentT> && agents ) : agents( agents ) {}
 
-    void Agents_from_File( const std::string & file )
+    void agents_from_file( const std::string & file ) override
     {
         agents.clear();
 
@@ -39,7 +39,7 @@ public:
             auto line     = file_contents.substr( start_of_line, end_of_line - start_of_line );
             start_of_line = end_of_line + 1;
             // TODO: check if empty or comment
-            if( line.size() == 0 )
+            if( line.empty() )
             {
                 break;
             }
@@ -57,7 +57,10 @@ public:
         }
     }
 
-    void iteration() override = 0;
+    void iteration() override
+    {
+        n_iterations++;
+    };
 
     bool finished() override
     {
@@ -75,12 +78,6 @@ public:
     {
         return &agents[idx];
     }
-};
-
-template<typename AgentT_>
-void Seldon::Model<AgentT_>::iteration()
-{
-    n_iterations++;
 };
 
 } // namespace Seldon

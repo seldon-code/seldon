@@ -90,7 +90,14 @@ Seldon::Simulation::Simulation(
     }
     else if( model_string == "ActivityDriven" )
     {
-        auto model_activityDriven = std::make_unique<ActivityAgentModel>( n_agents, *network, gen );
-        model                     = std::move( model_activityDriven );
+        auto model_activityDriven         = std::make_unique<ActivityAgentModel>( n_agents, *network, gen );
+        model_activityDriven->max_iterations = max_iterations;
+        model                                = std::move( model_activityDriven );
+    }
+
+    if( cli_agent_file.has_value() )
+    {
+        fmt::print( "Reading agents from file {}\n", cli_agent_file.value() );
+        model->agents_from_file( cli_agent_file.value() );
     }
 }
