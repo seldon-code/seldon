@@ -10,11 +10,6 @@
 #include <set>
 #include <stdexcept>
 
-enum class ModelType : unsigned int
-{
-    DeGroot
-};
-
 Seldon::Simulation::Simulation(
     std::string config_file, std::optional<std::string> cli_network_file, std::optional<std::string> cli_agent_file )
 {
@@ -76,7 +71,6 @@ Seldon::Simulation::Simulation(
     // Generic model parameters
     std::optional<int> max_iterations = tbl["model"]["max_iterations"].value<int>();
 
-    ModelType model_type;
     if( model_string == "DeGroot" )
     {
         // DeGroot specific parameters
@@ -92,8 +86,7 @@ Seldon::Simulation::Simulation(
             fmt::print( "Reading agents from file {}\n", cli_agent_file.value() );
             model_DeGroot->Agents_from_File( cli_agent_file.value() );
         }
-        model      = std::move( model_DeGroot );
-        model_type = ModelType::DeGroot;
+        model = std::move( model_DeGroot );
     }
     else if( model_string == "ActivityDriven" )
     {
