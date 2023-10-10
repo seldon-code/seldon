@@ -23,5 +23,7 @@ Seldon::ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network,
 
 void Seldon::ActivityAgentModel::iteration()
 {
-    throw std::runtime_error( "ActivityAgentModel::iteration():: Not implemented!" );
+    Model<AgentT>::iteration();
+
+    // throw std::runtime_error( "ActivityAgentModel::iteration():: Not implemented!" );
 }

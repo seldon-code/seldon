@@ -4,6 +4,7 @@
 #include "model.hpp"
 #include "network.hpp"
 #include <random>
+#include <stdexcept>
 #include <vector>
 
 namespace Seldon
@@ -21,6 +22,13 @@ inline std::string Agent<ActivityAgentData>::to_string() const
     return fmt::format( "{}, {}", data.opinion, data.activity );
 };
 
+template<>
+inline void Agent<ActivityAgentData>::from_string( const std::string & str )
+{
+    // TODO
+    throw std::runtime_error( "Agent<ActivityAgentData>::from_string not implemented yet" );
+};
+
 class ActivityAgentModel : public Model<Agent<ActivityAgentData>>
 {
     using AgentT = Agent<ActivityAgentData>;
@@ -31,9 +39,10 @@ private:
     std::vector<AgentT> agents_current_copy;
     // Random number generation
     std::mt19937 & gen; // reference to simulation Mersenne-Twister engine
+
+public:
     // Model-specific parameters
     double dt = 0.1; // Timestep for the integration of the coupled ODEs
-
     // Various free parameters
     int m        = 10;    // Number of agents contacted, when the agent is active
     double eps   = 0.01;  // Minimum activity epsilon; a_i belongs to [epsilon,1]
@@ -45,8 +54,7 @@ private:
     double reciprocity = 0.5;
     double K; // Social interaction strength; K>0
 
-public:
-    double convergence_tol = 1e-12;
+    double convergence_tol = 1e-12; // TODO: ??
 
     ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen );
 
