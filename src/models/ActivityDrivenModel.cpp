@@ -1,14 +1,12 @@
 #include "models/ActivityDrivenModel.hpp"
 #include <random>
 
-Seldon::ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network )
-        : Model<AgentT>( n_agents ), network( network ), agents_current_copy( std::vector<AgentT>( n_agents ) )
+Seldon::ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen )
+        : Model<AgentT>( n_agents ), network( network ), agents_current_copy( std::vector<AgentT>( n_agents ) ), gen( gen )
 {   
     // TODO: take this from simulation 
-    int rng_seed = std::random_device()();
-    auto gen = std::mt19937( rng_seed ); // TODO
-    std::uniform_int_distribution<> dis( -1, 1 ); // Opinion initial values 
-    std::uniform_int_distribution<> dist_activity( 0, 1 ); // Uniform random variable for activities 
+    std::uniform_real_distribution<> dis( -1, 1 ); // Opinion initial values 
+    std::uniform_real_distribution<> dist_activity( 0, 1 ); // Uniform random variable for activities 
 
     // Initial conditions for the opinions, initialize to [-1,1]
     // The activities should be drawn from a power law distribution
