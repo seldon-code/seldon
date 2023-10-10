@@ -1,5 +1,6 @@
 #pragma once
 
+#include "agent.hpp"
 #include "model.hpp"
 #include "network.hpp"
 #include <random>
@@ -8,20 +9,21 @@
 namespace Seldon
 {
 
-struct ActivityAgentType
+struct ActivityAgentData
 {
     double opinion  = 0; // x_i
     double activity = 0; // a_i
 };
 
 template<>
-inline std::string Agent<ActivityAgentType>::to_string() const
+inline std::string Agent<ActivityAgentData>::to_string() const
 {
     return fmt::format( "{}, {}", data.opinion, data.activity );
 };
 
-class ActivityAgentModel : public Model<Agent<ActivityAgentType>>
+class ActivityAgentModel : public Model<Agent<ActivityAgentData>>
 {
+    using AgentT = Agent<ActivityAgentData>;
 
 private:
     double max_opinion_diff = 0;
@@ -31,6 +33,7 @@ private:
     std::mt19937 & gen; // reference to simulation Mersenne-Twister engine
     // Model-specific parameters
     double dt = 0.1; // Timestep for the integration of the coupled ODEs
+
     // Various free parameters
     int m        = 10;    // Number of agents contacted, when the agent is active
     double eps   = 0.01;  // Minimum activity epsilon; a_i belongs to [epsilon,1]

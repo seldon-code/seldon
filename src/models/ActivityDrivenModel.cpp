@@ -1,8 +1,9 @@
 #include "models/ActivityDrivenModel.hpp"
 #include <random>
+#include <stdexcept>
 
 Seldon::ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen )
-        : Model<AgentT>( n_agents ),
+        : Model<Seldon::ActivityAgentModel::AgentT>( n_agents ),
           network( network ),
           agents_current_copy( std::vector<AgentT>( n_agents ) ),
           gen( gen )
@@ -20,4 +21,7 @@ Seldon::ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network,
     }
 }
 
-void Seldon::ActivityAgentModel::iteration() {}
+void Seldon::ActivityAgentModel::iteration()
+{
+    throw std::runtime_error( "ActivityAgentModel::iteration():: Not implemented!" );
+}

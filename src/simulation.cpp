@@ -1,4 +1,5 @@
 #include "simulation.hpp"
+#include "models/ActivityDrivenModel.hpp"
 #include "models/DeGroot.hpp"
 #include "network_generation.hpp"
 #include "util/tomlplusplus.hpp"
@@ -17,7 +18,7 @@ enum class ModelType : unsigned int
 Seldon::Simulation::Simulation(
     std::string config_file, std::optional<std::string> cli_network_file, std::optional<std::string> cli_agent_file )
 {
-    std::set<std::string> allowed_models = { "DeGroot" };
+    std::set<std::string> allowed_models = { "DeGroot", "ActivityDriven" };
 
     toml::table tbl;
     tbl = toml::parse_file( config_file );
@@ -47,6 +48,8 @@ Seldon::Simulation::Simulation(
     {
         throw std::runtime_error( fmt::format( "Unknown model type: '{}'!", model_string ) );
     }
+
+    fmt::print( "Model type: {}\n", model_string );
 
     // Construct the network
     std::optional<std::string> file = cli_network_file;
@@ -89,8 +92,12 @@ Seldon::Simulation::Simulation(
             fmt::print( "Reading agents from file {}\n", cli_agent_file.value() );
             model_DeGroot->Agents_from_File( cli_agent_file.value() );
         }
-
         model      = std::move( model_DeGroot );
         model_type = ModelType::DeGroot;
+    }
+    else if( model_string == "ActivityDriven" )
+    {
+        auto model_activityDriven = std::make_unique<ActivityAgentModel>( n_agents, *network, gen );
+        model                     = std::move( model_activityDriven );
     }
 }
