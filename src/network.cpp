@@ -3,6 +3,7 @@
 #include <fmt/format.h>
 #include <cstddef>
 #include <optional>
+#include <stdexcept>
 
 Seldon::Network::Network(
     std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list )
@@ -28,22 +29,45 @@ size_t Seldon::Network::n_agents() const
 
 void Seldon::Network::get_neighbours( std::size_t agent_idx, std::vector<size_t> & buffer ) const
 {
-    // TODO: rewrite this using std::span
-    const size_t n_edges = neighbour_list[agent_idx].size();
-    buffer.resize( n_edges );
-    for( size_t i_edge = 0; i_edge < n_edges; i_edge++ )
-    {
-        buffer[i_edge] = neighbour_list[agent_idx][i_edge];
-    }
+    buffer = neighbour_list[agent_idx];
 }
 
-void Seldon::Network::get_weights( std::size_t agent_idx, std::vector<double> & buffer ) const
+void Seldon::Network::set_neighbours_and_weights(
+    std::size_t agent_idx, const std::vector<size_t> & buffer_neighbours,
+    const std::vector<Seldon::Network::WeightT> & buffer_weights )
 {
-    // TODO: rewrite this using std::span
-    const size_t n_edges = weight_list[agent_idx].size();
-    buffer.resize( n_edges );
-    for( size_t i_edge = 0; i_edge < n_edges; i_edge++ )
+    if( buffer_neighbours.size() != buffer_weights.size() )
+        [[unlikely]]
+        {
+            throw std::runtime_error(
+                "Network::set_neighbours_and_weights: both buffers need to have the same length!" );
+        }
+
+    neighbour_list[agent_idx] = buffer_neighbours;
+    weight_list[agent_idx]    = buffer_weights;
+}
+
+void Seldon::Network::get_weights( std::size_t agent_idx, std::vector<Seldon::Network::WeightT> & buffer ) const
+{
+    buffer = weight_list[agent_idx];
+}
+
+void Seldon::Network::transpose()
+{
+    std::vector<std::vector<size_t>> neighbour_list_transpose( n_agents(), std::vector<size_t>( 0 ) );
+    std::vector<std::vector<WeightT>> weight_list_transpose( n_agents(), std::vector<WeightT>( 0 ) );
+
+    for( size_t i_agent = 0; i_agent < n_agents(); i_agent++ )
     {
-        buffer[i_edge] = weight_list[agent_idx][i_edge];
+        for( size_t i_neighbour = 0; i_neighbour < neighbour_list[i_agent].size(); i_neighbour++ )
+        {
+            const auto neighbour = neighbour_list[i_agent][i_neighbour];
+            const auto weight    = weight_list[i_agent][i_neighbour];
+            neighbour_list_transpose[neighbour].push_back( i_agent );
+            weight_list_transpose[neighbour].push_back( weight );
+        }
     }
+
+    neighbour_list = std::move( neighbour_list_transpose );
+    weight_list    = std::move( weight_list_transpose );
 }
