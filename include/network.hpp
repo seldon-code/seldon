@@ -19,6 +19,9 @@ public:
     void get_weights( std::size_t agent_idx, std::vector<WeightT> & buffer ) const;
 
     void set_neighbours_and_weights(
+        std::size_t agent_idx, const std::vector<size_t> & buffer_neighbours, const WeightT & weight );
+
+    void set_neighbours_and_weights(
         std::size_t agent_idx, const std::vector<size_t> & buffer_neighbours,
         const std::vector<WeightT> & buffer_weights );
 
