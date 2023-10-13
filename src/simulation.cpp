@@ -84,17 +84,19 @@ Seldon::Simulation::Simulation(
     else if( model_string == "ActivityDriven" )
     {
         auto model_activityDriven         = std::make_unique<ActivityAgentModel>( n_agents, *network, gen );
-        model_activityDriven->dt          = tbl["ActivityDriven"]["dt"].value_or<double>( 0.1 );
+        model_activityDriven->dt          = tbl["ActivityDriven"]["dt"].value_or<double>( 0.01 );
         model_activityDriven->m           = tbl["ActivityDriven"]["m"].value_or<size_t>( 10 );
         model_activityDriven->eps         = tbl["ActivityDriven"]["eps"].value_or<double>( 0.01 );
         model_activityDriven->gamma       = tbl["ActivityDriven"]["gamma"].value_or<double>( 2.1 );
-        model_activityDriven->homophily   = tbl["ActivityDriven"]["homophily"].value_or<double>( 0.0 );
+        model_activityDriven->homophily   = tbl["ActivityDriven"]["homophily"].value_or<double>( 0.5 );
         model_activityDriven->reciprocity = tbl["ActivityDriven"]["reciprocity"].value_or<double>( 0.5 );
-        model_activityDriven->alpha       = tbl["ActivityDriven"]["alpha"].value_or<double>( 1.0 );
-        model_activityDriven->K           = tbl["ActivityDriven"]["K"].value_or<double>( 1.0 );
+        model_activityDriven->alpha       = tbl["ActivityDriven"]["alpha"].value_or<double>( 3.0 );
+        model_activityDriven->K           = tbl["ActivityDriven"]["K"].value_or<double>( 3.0 );
 
         model_activityDriven->max_iterations = max_iterations;
-        model                                = std::move( model_activityDriven );
+
+        model_activityDriven->get_agents_from_power_law();
+        model = std::move( model_activityDriven );
     }
 
     if( cli_agent_file.has_value() )
