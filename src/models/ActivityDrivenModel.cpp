@@ -8,9 +8,10 @@ Seldon::ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network,
           agents_current_copy( std::vector<AgentT>( n_agents ) ),
           gen( gen )
 {
-    // TODO: take this from simulation
     std::uniform_real_distribution<> dis( -1, 1 );          // Opinion initial values
     std::uniform_real_distribution<> dist_activity( 0, 1 ); // Uniform random variable for activities
+    gamma = 2.1;
+    eps = 0.01; 
 
     // Initial conditions for the opinions, initialize to [-1,1]
     // The activities should be drawn from a power law distribution
@@ -18,6 +19,7 @@ Seldon::ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network,
     {
         agents[i].data.opinion = dis( gen ); // Draw the opinion value
         // Draw from a power law distribution (1-gamma)/(1-eps^(1-gamma)) * a^(-gamma)
+        agents[i].data.activity = std::pow( (1-std::pow(eps,(1-gamma)) ) * dist_activity( gen ) + std::pow(eps,(1-gamma)) , (1/(1-gamma)) );
     }
 }
 
