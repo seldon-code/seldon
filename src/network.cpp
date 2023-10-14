@@ -59,6 +59,12 @@ void Seldon::Network::set_neighbours_and_weights(
     weight_list[agent_idx]    = buffer_weights;
 }
 
+void Seldon::Network::push_back_neighbour_and_weight( size_t i, size_t j, WeightT w )
+{
+    neighbour_list[i].push_back( j );
+    weight_list[i].push_back( w );
+}
+
 void Seldon::Network::get_weights( std::size_t agent_idx, std::vector<Seldon::Network::WeightT> & buffer ) const
 {
     buffer = weight_list[agent_idx];
