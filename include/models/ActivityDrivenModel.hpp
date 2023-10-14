@@ -3,8 +3,11 @@
 #include "agent.hpp"
 #include "model.hpp"
 #include "network.hpp"
+#include <cstddef>
 #include <random>
+#include <set>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 namespace Seldon
@@ -39,6 +42,7 @@ private:
     std::vector<AgentT> agents_current_copy;
     // Random number generation
     std::mt19937 & gen; // reference to simulation Mersenne-Twister engine
+    std::set<std::pair<size_t, size_t>> reciprocal_edge_buffer{};
 
 public:
     // Model-specific parameters

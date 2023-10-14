@@ -34,8 +34,11 @@ void Seldon::ActivityAgentModel::iteration()
 {
     Model<AgentT>::iteration();
 
-    std::uniform_real_distribution<> dis_activation( 0.0, 1.0 ); // Opinion initial values
+    std::uniform_real_distribution<> dis_activation( 0.0, 1.0 );    // Opinion initial values
+    std::uniform_real_distribution<> dis_reciprocation( 0.0, 1.0 ); // Opinion initial values
     std::vector<size_t> contacted_agents{};
+
+    reciprocal_edge_buffer.clear(); // Clear the reciprocal edge buffer
 
     for( size_t idx_agent = 0; idx_agent < network.n_agents(); idx_agent++ )
     {
@@ -49,6 +52,14 @@ void Seldon::ActivityAgentModel::iteration()
             Seldon::draw_unique_k_from_n(
                 idx_agent, m, network.n_agents(), contacted_agents,
                 gen ); // now contacted_agents contains the indices of the contacted agents
+
+            // Fill the outgoing edges into the reciprocal edge buffer
+            for( const auto & idx_outgoing : contacted_agents )
+            {
+                reciprocal_edge_buffer.insert(
+                    { idx_agent, idx_outgoing } ); // insert the edge idx_agent -> idx_outgoing
+            }
+
             // Set the *outgoing* edges
             network.set_neighbours_and_weights( idx_agent, contacted_agents, 1.0 );
         }
@@ -56,9 +67,25 @@ void Seldon::ActivityAgentModel::iteration()
         {
             network.set_neighbours_and_weights( idx_agent, {}, {} );
         }
+    }
 
-        // TODO: implement reciprocity
-        // ...
+    // Reciprocity check
+    for( size_t idx_agent = 0; idx_agent < network.n_agents(); idx_agent++ )
+    {
+        // Get the outgoing edges
+        network.get_neighbours( idx_agent, contacted_agents );
+        // For each outgoing edge we check if the reverse edge already exists
+        for( const auto & idx_outgoing : contacted_agents )
+        {
+            // If the edge is not reciprocated
+            if( !reciprocal_edge_buffer.contains( { idx_outgoing, idx_agent } ) )
+            {
+                if( dis_reciprocation( gen ) < reciprocity )
+                {
+                    network.push_back_neighbour_and_weight( idx_outgoing, idx_agent, 1.0 );
+                }
+            }
+        }
     }
 
     network.transpose(); // transpose the network, so that we have incoming edges
