@@ -101,4 +101,31 @@ void reservoir_sampling_A_ExpJ(
     }
 }
 
+/**
+ * @brief Power law distribution for random numbers.
+ * A continuous random distribution on the range [eps, infty) with equal
+ * distribution
+ * p(x) = (1-gamma)/(1-eps^(1-gamma)) * x^(-gamma)
+ */
+template<typename ScalarT = double>
+class power_law_distribution
+{
+private:
+    ScalarT eps;
+    ScalarT gamma;
+    std::uniform_real_distribution<ScalarT> dist
+        = std::uniform_real_distribution<ScalarT>( 0.0, 1.0 ); // Uniform random variable for activities
+
+public:
+    power_law_distribution( ScalarT eps, ScalarT gamma ) : eps( eps ), gamma( gamma ) {}
+
+    template<typename Generator>
+    ScalarT operator()( Generator & gen )
+    {
+        return std::pow(
+            ( 1.0 - std::pow( eps, ( 1.0 - gamma ) ) ) * dist( gen ) + std::pow( eps, ( 1.0 - gamma ) ),
+            ( 1.0 / ( 1.0 - gamma ) ) );
+    }
+};
+
 } // namespace Seldon
