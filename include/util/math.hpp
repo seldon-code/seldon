@@ -103,8 +103,9 @@ void reservoir_sampling_A_ExpJ(
 
 /**
  * @brief Power law distribution for random numbers.
- * A continuous random distribution on the range [eps, infty) with equal
- * distribution
+ * A continuous random distribution on the range [eps, infty)
+ * with p(x) ~ x^(-gamma)
+ * Including normalization the PDF is
  * p(x) = (1-gamma)/(1-eps^(1-gamma)) * x^(-gamma)
  */
 template<typename ScalarT = double>
