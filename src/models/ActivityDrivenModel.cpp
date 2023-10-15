@@ -47,11 +47,17 @@ void Seldon::ActivityAgentModel::iteration()
 
         if( activated )
         {
-            // Contact m_agents according to the homophily distribution
-            // TODO: use homophily stuff instead of uniform
-            Seldon::draw_unique_k_from_n(
-                idx_agent, m, network.n_agents(), contacted_agents,
-                gen ); // now contacted_agents contains the indices of the contacted agents
+
+            // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
+            // Not normalised since, this is taken care of by the reservoir sampling
+            auto weight_callback = [idx_agent, this]( size_t j ) {
+                if( idx_agent == j ) // The agent does not contact itself
+                    return 0.0;
+                return std::pow(
+                    std::abs( this->agents[idx_agent].data.opinion - this->agents[j].data.opinion ), this->homophily );
+            };
+
+            Seldon::reservoir_sampling_A_ExpJ( m, network.n_agents(), weight_callback, contacted_agents, gen );
 
             // Fill the outgoing edges into the reciprocal edge buffer
             for( const auto & idx_outgoing : contacted_agents )
