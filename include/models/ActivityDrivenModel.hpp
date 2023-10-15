@@ -28,8 +28,9 @@ inline std::string Agent<ActivityAgentData>::to_string() const
 template<>
 inline void Agent<ActivityAgentData>::from_string( const std::string & str )
 {
-    // TODO
-    throw std::runtime_error( "Agent<ActivityAgentData>::from_string not implemented yet" );
+    auto pos_comma = str.find_first_of( ',' );
+    data.opinion   = std::stod( str.substr( 0, pos_comma ) );
+    data.activity  = std::stod( str.substr( pos_comma+1, str.size() ) );
 };
 
 class ActivityAgentModel : public Model<Agent<ActivityAgentData>>
