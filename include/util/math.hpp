@@ -1,7 +1,9 @@
 #pragma once
 #include <algorithm>
 #include <cstddef>
+#include <queue>
 #include <random>
+#include <utility>
 #include <vector>
 
 namespace Seldon
@@ -51,6 +53,52 @@ inline void draw_unique_k_from_n(
 
     buffer.resize( k );
     std::sample( SequenceGenerator( 0, ignore_idx ), SequenceGenerator( n, ignore_idx ), buffer.begin(), k, gen );
+}
+
+template<typename WeightCallbackT>
+void reservoir_sampling_A_ExpJ(
+    size_t k, size_t n, WeightCallbackT weight, std::vector<std::size_t> & buffer, std::mt19937 & mt )
+{
+    std::uniform_real_distribution<double> distribution( 0.0, 1.0 );
+
+    std::vector<size_t> reservoir( k );
+    using QueueItemT = std::pair<size_t, double>;
+
+    auto compare = []( const QueueItemT & item1, const QueueItemT & item2 ) { return item1.second > item2.second; };
+    std::priority_queue<QueueItemT, std::vector<QueueItemT>, decltype( compare )> H;
+
+    size_t idx = 0;
+    while( idx < n & H.size() < k )
+    {
+        double r = std::pow( distribution( mt ), 1.0 / weight( idx ) );
+        H.push( { idx, r } );
+        idx++;
+    }
+
+    auto X = std::log( distribution( mt ) ) / std::log( H.top().second );
+    while( idx < n )
+    {
+        auto w = weight( idx );
+        X -= w;
+        if( X <= 0 )
+        {
+            auto t                     = std::pow( H.top().second, w );
+            auto uniform_from_t_to_one = distribution( mt ) * ( 1.0 - t ) + t; // Random number in interval [t, 1.0]
+            auto r                     = std::pow( uniform_from_t_to_one, 1.0 / w );
+            H.pop();
+            H.push( { idx, r } );
+            X = std::log( distribution( mt ) ) / std::log( H.top().second );
+        }
+        idx++;
+    }
+
+    buffer.resize( H.size() );
+
+    for( size_t i = 0; i < k; i++ )
+    {
+        buffer[i] = H.top().first;
+        H.pop();
+    }
 }
 
 } // namespace Seldon
