@@ -25,7 +25,7 @@ public:
         std::size_t agent_idx, const std::vector<size_t> & buffer_neighbours,
         const std::vector<WeightT> & buffer_weights );
 
-    void push_back_neighbour_and_weight(size_t i, size_t j, WeightT w);
+    void push_back_neighbour_and_weight( size_t i, size_t j, WeightT w );
 
     void transpose();
 

@@ -45,6 +45,9 @@ private:
     std::mt19937 & gen; // reference to simulation Mersenne-Twister engine
     std::set<std::pair<size_t, size_t>> reciprocal_edge_buffer{};
 
+    void get_euler_slopes( std::vector<double> & k_previous, double factor, std::vector<double> & k_buffer );
+    void get_euler_slopes( std::vector<double> & k_buffer );
+
 public:
     // Model-specific parameters
     double dt = 0.01; // Timestep for the integration of the coupled ODEs

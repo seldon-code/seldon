@@ -46,7 +46,8 @@ void Seldon::ActivityAgentModel::iteration()
 
             // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
             // Not normalised since this is taken care of by the reservoir sampling
-            auto weight_callback = [idx_agent, this]( size_t j ) {
+            auto weight_callback = [idx_agent, this]( size_t j )
+            {
                 if( idx_agent == j ) // The agent does not contact itself
                     return 0.0;
                 return std::pow(
@@ -92,30 +93,78 @@ void Seldon::ActivityAgentModel::iteration()
 
     network.transpose(); // transpose the network, so that we have incoming edges
 
-    // Integrate the ODE
+    // Integrate the ODE using 4th order Runge-Kutta
+    auto k1_buffer = std::vector<double>();
+    auto k2_buffer = std::vector<double>();
+    auto k3_buffer = std::vector<double>();
+    auto k4_buffer = std::vector<double>();
+
+    // k_1 =   hf(x_n,y_n)
+    get_euler_slopes( k1_buffer );
+
+    // k_2  =   hf(x_n+1/2h,y_n+1/2k_1)
+    get_euler_slopes( k1_buffer, 0.5, k2_buffer );
+
+    // k_3  =   hf(x_n+1/2h,y_n+1/2k_2)
+    get_euler_slopes( k2_buffer, 0.5, k3_buffer );
+
+    // k_4  =   hf(x_n+h,y_n+k_3)
+    get_euler_slopes( k3_buffer, 1.0, k4_buffer );
+
+    // Update the agent opinions
+    for( size_t idx_agent = 0; idx_agent < network.n_agents(); ++idx_agent )
+    {
+        // y_(n+1) =   y_n+1/6k_1+1/3k_2+1/3k_3+1/6k_4+O(h^5)
+        agents[idx_agent].data.opinion
+            += ( k1_buffer[idx_agent] + 2 * k2_buffer[idx_agent] + 2 * k3_buffer[idx_agent] + k4_buffer[idx_agent] )
+               / 6.0;
+    }
+}
+
+void Seldon::ActivityAgentModel::get_euler_slopes( std::vector<double> & k_buffer )
+{
+    // k_1   =   hf(x_n,y_n)
+    // h is the timestep
     auto neighbour_buffer = std::vector<size_t>();
     size_t j_index        = 0;
 
-    agents_current_copy = agents; // Set the copy to the current state of agents. TODO: this is somewhat wasteful since
-                                  // activities are not changing
+    k_buffer.resize( network.n_agents() );
 
-    for( size_t i = 0; i < network.n_agents(); i++ )
+    for( size_t idx_agent = 0; idx_agent < network.n_agents(); ++idx_agent )
     {
-        network.get_neighbours( i, neighbour_buffer ); // Get the incoming neighbours
+        network.get_neighbours( idx_agent, neighbour_buffer ); // Get the incoming neighbours
+        k_buffer[idx_agent] = -agents[idx_agent].data.opinion;
+        // Loop through neighbouring agents
         for( size_t j = 0; j < neighbour_buffer.size(); j++ )
         {
-            // TODO: currently this uses an euler integration -> use RK4
             j_index = neighbour_buffer[j];
-            agents_current_copy[i].data.opinion
-                += dt * ( -agents[i].data.opinion + K * ( std::tanh( alpha * agents[j_index].data.opinion ) ) );
+            k_buffer[idx_agent] += K * ( std::tanh( alpha * agents[j_index].data.opinion ) );
         }
+        // Multiply by the timestep
+        k_buffer[idx_agent] *= dt;
     }
+}
 
-    // Update the agents from the copy
-    for( std::size_t i = 0; i < agents.size(); i++ )
+void Seldon::ActivityAgentModel::get_euler_slopes(
+    std::vector<double> & k_previous, double factor, std::vector<double> & k_buffer )
+{
+    // h is the timestep
+    auto neighbour_buffer = std::vector<size_t>();
+    size_t j_index        = 0;
+
+    k_buffer.resize( network.n_agents() );
+
+    for( size_t idx_agent = 0; idx_agent < network.n_agents(); ++idx_agent )
     {
-        max_opinion_diff
-            = std::max( max_opinion_diff, std::abs( agents[i].data.opinion - agents_current_copy[i].data.opinion ) );
-        agents[i] = agents_current_copy[i];
+        network.get_neighbours( idx_agent, neighbour_buffer ); // Get the incoming neighbours
+        k_buffer[idx_agent] = -( agents[idx_agent].data.opinion + factor * k_previous[idx_agent] );
+        // Loop through neighbouring agents
+        for( size_t j = 0; j < neighbour_buffer.size(); j++ )
+        {
+            j_index = neighbour_buffer[j];
+            k_buffer[idx_agent] += K * ( std::tanh( alpha * ( agents[j_index].data.opinion + factor * k_previous[j_index] ) ) );
+        }
+        // Multiply by the timestep
+        k_buffer[idx_agent] *= dt;
     }
 }
