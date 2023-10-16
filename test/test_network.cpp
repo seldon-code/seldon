@@ -1,6 +1,7 @@
 #include "network.hpp"
 #include "network_generation.hpp"
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 #include <cstddef>
 #include <random>
 #include <set>
@@ -28,13 +29,9 @@ TEST_CASE( "Testing the network class" )
     std::vector<Seldon::Network::WeightT> buffer_w_get{};
     network->get_neighbours( 3, buffer_n_get );
     network->get_weights( 3, buffer_w_get );
-    for( size_t i = 0; i < buffer_n_get.size(); i++ )
-    {
-        // CAREFUL: this assumes that the order of edges has been preserved
-        // which at the moment seems reasonable ... but you never know
-        REQUIRE( buffer_n[i] == buffer_n_get[i] );
-        REQUIRE( buffer_w[i] == buffer_w_get[i] );
-    }
+
+    REQUIRE_THAT(buffer_n_get, Catch::Matchers::UnorderedRangeEquals(buffer_n));
+    REQUIRE_THAT(buffer_w_get, Catch::Matchers::UnorderedRangeEquals(buffer_w));
 
     // Now we test the transpose() function
 
@@ -69,7 +66,6 @@ TEST_CASE( "Testing the network class" )
             std::tuple<size_t, size_t, Network::WeightT> edge{
                 neighbour, i_agent, weight
             }; // Note that i_agent and neighbour are flipped compared to before
-
             REQUIRE( old_edges.contains( edge ) ); // can we find the transposed edge?
             old_edges.extract( edge );             // extract the edge afterwards
         }
