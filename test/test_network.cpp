@@ -30,8 +30,8 @@ TEST_CASE( "Testing the network class" )
     network->get_neighbours( 3, buffer_n_get );
     network->get_weights( 3, buffer_w_get );
 
-    REQUIRE_THAT(buffer_n_get, Catch::Matchers::UnorderedRangeEquals(buffer_n));
-    REQUIRE_THAT(buffer_w_get, Catch::Matchers::UnorderedRangeEquals(buffer_w));
+    REQUIRE_THAT( buffer_n_get, Catch::Matchers::UnorderedRangeEquals( buffer_n ) );
+    REQUIRE_THAT( buffer_w_get, Catch::Matchers::UnorderedRangeEquals( buffer_w ) );
 
     // Now we test the transpose() function
 
@@ -65,7 +65,7 @@ TEST_CASE( "Testing the network class" )
             auto weight    = buffer_w[i_neighbour];
             std::tuple<size_t, size_t, Network::WeightT> edge{
                 neighbour, i_agent, weight
-            }; // Note that i_agent and neighbour are flipped compared to before
+            };                                     // Note that i_agent and neighbour are flipped compared to before
             REQUIRE( old_edges.contains( edge ) ); // can we find the transposed edge?
             old_edges.extract( edge );             // extract the edge afterwards
         }
