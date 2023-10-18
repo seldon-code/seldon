@@ -33,7 +33,7 @@ int main( int argc, char * argv[] )
     std::optional<std::string> agent_file          = program.present<std::string>( "-a" );
     std::optional<std::string> network_file        = program.present<std::string>( "-n" );
     std::optional<std::string> output_dir_path_cli = program.present<std::string>( "-o" );
-    fs::path output_dir_path = output_dir_path_cli.value_or( config_file_path.parent_path() / fs::path( "output" ) );
+    fs::path output_dir_path                       = output_dir_path_cli.value_or( fs::path( "./output" ) );
 
     fmt::print( "Using input file: {}\n", config_file_path.string() );
     fmt::print( "Output directory path set to: {}\n", output_dir_path.string() );

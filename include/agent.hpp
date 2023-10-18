@@ -20,7 +20,7 @@ public:
 
     std::string to_string() const override
     {
-        return fmt::format( "{}", data );
+        return fmt::format( "{:.16f}", data );
     }
 };
 
