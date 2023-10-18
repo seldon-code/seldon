@@ -2,8 +2,11 @@
 model = "ActivityDriven"
 # rng_seed = 120 # Leaving this empty will pick a random seed
 
+[io]
+n_output_network = 20 # Write the network every 20 iterations
+
 [model]
-max_iterations = 20 # If not set, max iterations is infinite
+max_iterations = 500 # If not set, max iterations is infinite
 
 [ActivityDriven]
 dt = 0.01    # Timestep for the integration of the coupled ODEs
