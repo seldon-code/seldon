@@ -38,7 +38,7 @@ void Seldon::Network::set_neighbours_and_weights(
     neighbour_list[agent_idx] = buffer_neighbours;
 
     weight_list[agent_idx].resize( buffer_neighbours.size() );
-    for( auto w : weight_list[agent_idx] )
+    for( auto & w : weight_list[agent_idx] )
     {
         w = weight;
     }

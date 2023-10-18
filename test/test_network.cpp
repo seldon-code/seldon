@@ -27,7 +27,7 @@ TEST_CASE( "Testing the network class" )
     std::vector<Seldon::Network::WeightT> weight{ 0.5, 0.5 }; // new weights (const)
     network->set_neighbours_and_weights( 3, neigh, 0.5 );
     network->get_weights( 3, buffer_w_get );
-    REQUIRE_THAT( buffer_w_get, Catch::Matchers::UnorderedRangeEquals( buffer_w_get ) );
+    REQUIRE_THAT( weight, Catch::Matchers::UnorderedRangeEquals( buffer_w_get ) );
 
     // Change the connections for agent 3
     std::vector<size_t> buffer_n{ { 0, 10, 15 } };                   // new neighbours
