@@ -1,6 +1,8 @@
 project('seldon', 'cpp',
   version : '0.1',
-  default_options : ['warning_level=3', 'cpp_std=c++20'])
+  default_options : ['warning_level=3', 'cpp_std=c++20', ])
+
+add_global_arguments('-Wno-unused-local-typedefs', language : 'cpp')
 
 incdir = include_directories('include')
 

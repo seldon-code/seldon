@@ -4,6 +4,7 @@
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 #include <algorithm>
+#include <cstddef>
 #include <fstream>
 #include <iterator>
 #include <stdexcept>
@@ -11,7 +12,8 @@
 #include <util/math.hpp>
 #include <util/misc.hpp>
 
-std::unique_ptr<Seldon::Network> Seldon::generate_n_connections( int n_agents, int n_connections, std::mt19937 & gen )
+std::unique_ptr<Seldon::Network>
+Seldon::generate_n_connections( size_t n_agents, int n_connections, std::mt19937 & gen )
 {
     using WeightT = Network::WeightT;
 
@@ -129,8 +131,8 @@ std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string &
                 n_neighbours = std::stoi( column_substring );
             }
             else if(
-                idx_column >= 2
-                & idx_column < 2 + n_neighbours ) // The next n_neighbours columsn contain the neighbour indices
+                ( idx_column >= 2 )
+                && ( idx_column < 2 + n_neighbours ) ) // The next n_neighbours columsn contain the neighbour indices
             {
                 const auto idx_neighbour = std::stoi( column_substring );
                 neighbour_list.back().push_back( idx_neighbour );

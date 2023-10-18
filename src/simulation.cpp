@@ -5,13 +5,15 @@
 #include "util/tomlplusplus.hpp"
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <cstddef>
 #include <iostream>
 #include <optional>
 #include <set>
 #include <stdexcept>
 
 Seldon::Simulation::Simulation(
-    std::string config_file, std::optional<std::string> cli_network_file, std::optional<std::string> cli_agent_file )
+    const std::string & config_file, const std::optional<std::string> & cli_network_file,
+    const std::optional<std::string> & cli_agent_file )
 {
     std::set<std::string> allowed_models = { "DeGroot", "ActivityDriven" };
 
@@ -29,8 +31,20 @@ Seldon::Simulation::Simulation(
         rng_seed = std::random_device()();
         fmt::print( "INFO: Seeding with seed {}!\n", rng_seed.value() );
     }
-
     gen = std::mt19937( rng_seed.value() );
+
+    // Parse output settings
+    auto n_output_network = tbl["io"]["n_output_network"].value<size_t>();
+    if( n_output_network.has_value() )
+    {
+        output_settings.n_output_network = n_output_network.value();
+    }
+
+    auto n_output_agents = tbl["io"]["n_output_agents"].value<size_t>();
+    if( n_output_agents.has_value() )
+    {
+        output_settings.n_output_agents = n_output_agents.value();
+    }
 
     // Check if the 'model' keyword exists
     std::optional<std::string> model_opt = tbl["simulation"]["model"].value<std::string>();

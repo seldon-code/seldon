@@ -42,19 +42,34 @@ int main( int argc, char * argv[] )
 
     auto simulation = Seldon::Simulation( config_file_path.string(), network_file, agent_file );
 
-    fmt::print( "{}", simulation.model->get_agent( 0 )->to_string() );
+    // Seldon::IO::network_to_dot_file( *simulation.network, ( output_dir_path / fs::path( "network.dot" ) ).string() );
 
-    Seldon::IO::network_to_dot_file( *simulation.network, ( output_dir_path / fs::path( "network.dot" ) ).string() );
-    Seldon::IO::network_to_file( simulation, ( output_dir_path / fs::path( "network.txt" ) ).string() );
+    Seldon::IO::network_to_file( simulation, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );
     auto filename = fmt::format( "opinions_{}.txt", 0 );
     Seldon::IO::opinions_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
 
+    const std::optional<size_t> n_output_agents  = simulation.output_settings.n_output_agents;
+    const std::optional<size_t> n_output_network = simulation.output_settings.n_output_network;
     do
     {
         simulation.model->iteration();
-        filename = fmt::format( "opinions_{}.txt", simulation.model->n_iterations );
-        Seldon::IO::opinions_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
+
+        // Write out the opinion?
+        if( n_output_agents.has_value() && ( simulation.model->n_iterations % n_output_agents.value() == 0 ) )
+        {
+            filename = fmt::format( "opinions_{}.txt", simulation.model->n_iterations );
+            Seldon::IO::opinions_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
+        }
+
+        // Write out the network?
+        if( n_output_network.has_value() && ( simulation.model->n_iterations % n_output_network.value() == 0 ) )
+        {
+            filename = fmt::format( "network_{}.txt", simulation.model->n_iterations );
+            Seldon::IO::network_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
+        }
+
     } while( !simulation.model->finished() );
 
+    fmt::print( "Finished after {} iterations.\n", simulation.model->n_iterations );
     return 0;
 }
