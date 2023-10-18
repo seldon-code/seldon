@@ -28,7 +28,8 @@ public:
     std::unique_ptr<Network> network;
     OutputSettings output_settings;
     Simulation(
-        std::string toml_file, std::optional<std::string> cli_network_file, std::optional<std::string> cli_agent_file );
+        const std::string & config_file, const std::optional<std::string> & cli_network_file,
+        const std::optional<std::string> & cli_agent_file );
 };
 
 } // namespace Seldon

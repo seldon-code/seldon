@@ -38,7 +38,7 @@ inline void draw_unique_k_from_n(
         {
             return i;
         };
-        bool operator==( const SequenceGenerator & it1 )
+        bool operator==( const SequenceGenerator & it1 ) const
         {
             return i == it1.i;
         };
@@ -68,7 +68,7 @@ void reservoir_sampling_A_ExpJ(
     std::priority_queue<QueueItemT, std::vector<QueueItemT>, decltype( compare )> H;
 
     size_t idx = 0;
-    while( idx < n & H.size() < k )
+    while( ( idx < n ) && ( H.size() < k ) )
     {
         double r = std::pow( distribution( mt ), 1.0 / weight( idx ) );
         H.push( { idx, r } );

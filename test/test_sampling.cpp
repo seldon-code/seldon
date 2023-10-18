@@ -99,13 +99,13 @@ TEST_CASE( "Testing sampling functions" )
         std::vector<size_t> histogram( n, 0 ); // Count how often each element occurs amongst all samples
 
         auto weight_callback = []( size_t idx ) {
-            if( ( idx == ignore_idx ) | ( idx == ignore_idx2 ) )
+            if( ( idx == ignore_idx ) || ( idx == ignore_idx2 ) )
             {
                 return 0.0;
             }
             else
             {
-                std::abs( double( n / 2.0 ) - double( idx ) );
+                return std::abs( double( n / 2.0 ) - double( idx ) );
             }
         };
 

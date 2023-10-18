@@ -12,7 +12,8 @@
 #include <stdexcept>
 
 Seldon::Simulation::Simulation(
-    std::string config_file, std::optional<std::string> cli_network_file, std::optional<std::string> cli_agent_file )
+    const std::string & config_file, const std::optional<std::string> & cli_network_file,
+    const std::optional<std::string> & cli_agent_file )
 {
     std::set<std::string> allowed_models = { "DeGroot", "ActivityDriven" };
 
