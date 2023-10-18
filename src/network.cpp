@@ -48,10 +48,12 @@ void Seldon::Network::set_neighbours_and_weights(
     std::size_t agent_idx, const std::vector<size_t> & buffer_neighbours,
     const std::vector<Seldon::Network::WeightT> & buffer_weights )
 {
-    if( buffer_neighbours.size() != buffer_weights.size() ) [[unlikely]]
-    {
-        throw std::runtime_error( "Network::set_neighbours_and_weights: both buffers need to have the same length!" );
-    }
+    if( buffer_neighbours.size() != buffer_weights.size() )
+        [[unlikely]]
+        {
+            throw std::runtime_error(
+                "Network::set_neighbours_and_weights: both buffers need to have the same length!" );
+        }
 
     neighbour_list[agent_idx] = buffer_neighbours;
     weight_list[agent_idx]    = buffer_weights;
