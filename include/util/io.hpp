@@ -12,7 +12,6 @@ namespace Seldon
 namespace IO
 {
 
-
 inline void network_to_dot_file( const Network & network, const std::string & file_path )
 {
     std::fstream fs;

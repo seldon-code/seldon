@@ -7,7 +7,7 @@ Seldon::DeGrootModel::DeGrootModel( int n_agents, Network & network )
 {
     for( size_t i = 0; i < agents.size(); i++ )
     {
-        agents[i].opinion = double( i ) / double( agents.size() );
+        agents[i].data = double( i ) / double( agents.size() );
     }
 }
 
@@ -24,12 +24,12 @@ void Seldon::DeGrootModel::iteration()
     {
         network.get_neighbours( i, neighbour_buffer );
         network.get_weights( i, weight_buffer );
-        agents_current_copy[i].opinion = 0.0;
+        agents_current_copy[i].data = 0.0;
         for( size_t j = 0; j < neighbour_buffer.size(); j++ )
         {
             j_index = neighbour_buffer[j];
             weight  = weight_buffer[j];
-            agents_current_copy[i].opinion += weight * agents[j_index].opinion;
+            agents_current_copy[i].data += weight * agents[j_index].data;
         }
     }
 
@@ -37,7 +37,7 @@ void Seldon::DeGrootModel::iteration()
     // Update the original agent opinions
     for( std::size_t i = 0; i < agents.size(); i++ )
     {
-        max_opinion_diff = std::max( max_opinion_diff, std::abs( agents[i].opinion - agents_current_copy[i].opinion ) );
+        max_opinion_diff = std::max( max_opinion_diff, std::abs( agents[i].data - agents_current_copy[i].data ) );
         agents[i]        = agents_current_copy[i];
     }
 }

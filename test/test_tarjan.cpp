@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_all.hpp>
 
 #include "connectivity.hpp"
 #include <fmt/format.h>
@@ -49,7 +50,7 @@ TEST_CASE( "Test for Tarjan's algorithm for strongly connected networks", "[tarj
 
     // List of SCC
     // [[5, 4], [3], [2, 1, 0], [9, 8, 7, 6]]
-    fmt::print( "SCC = {}\n", tarjan_scc.scc_list );
+    INFO( fmt::format( "SCC = {}\n", tarjan_scc.scc_list ) );
 
     std::set<std::set<size_t>> expected_scc{ { 5, 4 }, { 3 }, { 2, 1, 0 }, { 9, 8, 7, 6 } };
 
@@ -61,5 +62,5 @@ TEST_CASE( "Test for Tarjan's algorithm for strongly connected networks", "[tarj
     }
 
     // There should be 4 strongly connected components
-    REQUIRE( tarjan_scc.scc_list.size() == 4 );
+    REQUIRE_THAT( tarjan_scc.scc_list, Catch::Matchers::SizeIs( 4 ) );
 }
