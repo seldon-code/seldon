@@ -42,8 +42,6 @@ int main( int argc, char * argv[] )
 
     auto simulation = Seldon::Simulation( config_file_path.string(), network_file, agent_file );
 
-    fmt::print( "{}", simulation.model->get_agent( 0 )->to_string() );
-
     Seldon::IO::network_to_dot_file( *simulation.network, ( output_dir_path / fs::path( "network.dot" ) ).string() );
     Seldon::IO::network_to_file( simulation, ( output_dir_path / fs::path( "network.txt" ) ).string() );
     auto filename = fmt::format( "opinions_{}.txt", 0 );
