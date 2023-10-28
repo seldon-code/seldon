@@ -9,14 +9,16 @@ n_output_network = 20 # Write the network every 20 iterations
 max_iterations = 500 # If not set, max iterations is infinite
 
 [ActivityDriven]
-dt = 0.01    # Timestep for the integration of the coupled ODEs
-m  = 10     # Number of agents contacted, when the agent is active
-eps = 0.01  # Minimum activity epsilon; a_i belongs to [epsilon,1]
-gamma = 2.1 # Exponent of activity power law distribution of activities
-reciprocity = 0.5 # probability that when agent i contacts j via weighted reservoir sampling, j also sends feedback to i. So every agent can have more than m incoming connections
-homophily = 0.5 # aka beta. if zero, agents pick their interaction partners at random
-alpha = 3.0 # Controversialness of the issue, must be greater than 0.
-K = 3.0 # Social interaction strength
+dt = 0.01               # Timestep for the integration of the coupled ODEs
+m = 10                  # Number of agents contacted, when the agent is active
+eps = 0.01              # Minimum activity epsilon; a_i belongs to [epsilon,1]
+gamma = 2.1             # Exponent of activity power law distribution of activities
+reciprocity = 0.5       # probability that when agent i contacts j via weighted reservoir sampling, j also sends feedback to i. So every agent can have more than m incoming connections
+homophily = 0.5         # aka beta. if zero, agents pick their interaction partners at random
+alpha = 3.0             # Controversialness of the issue, must be greater than 0.
+K = 3.0                 # Social interaction strength
+mean_activities = false # Use the mean value of the powerlaw distribution for the activities of all agents
+mean_weights = false    # Use the meanfield approximation of the network edges
 
 [network]
 number_of_agents = 1000
