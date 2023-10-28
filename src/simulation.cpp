@@ -97,15 +97,17 @@ Seldon::Simulation::Simulation(
     }
     else if( model_string == "ActivityDriven" )
     {
-        auto model_activityDriven         = std::make_unique<ActivityAgentModel>( n_agents, *network, gen );
-        model_activityDriven->dt          = tbl["ActivityDriven"]["dt"].value_or<double>( 0.01 );
-        model_activityDriven->m           = tbl["ActivityDriven"]["m"].value_or<size_t>( 10 );
-        model_activityDriven->eps         = tbl["ActivityDriven"]["eps"].value_or<double>( 0.01 );
-        model_activityDriven->gamma       = tbl["ActivityDriven"]["gamma"].value_or<double>( 2.1 );
-        model_activityDriven->homophily   = tbl["ActivityDriven"]["homophily"].value_or<double>( 0.5 );
-        model_activityDriven->reciprocity = tbl["ActivityDriven"]["reciprocity"].value_or<double>( 0.5 );
-        model_activityDriven->alpha       = tbl["ActivityDriven"]["alpha"].value_or<double>( 3.0 );
-        model_activityDriven->K           = tbl["ActivityDriven"]["K"].value_or<double>( 3.0 );
+        auto model_activityDriven             = std::make_unique<ActivityAgentModel>( n_agents, *network, gen );
+        model_activityDriven->dt              = tbl["ActivityDriven"]["dt"].value_or<double>( 0.01 );
+        model_activityDriven->m               = tbl["ActivityDriven"]["m"].value_or<size_t>( 10 );
+        model_activityDriven->eps             = tbl["ActivityDriven"]["eps"].value_or<double>( 0.01 );
+        model_activityDriven->gamma           = tbl["ActivityDriven"]["gamma"].value_or<double>( 2.1 );
+        model_activityDriven->homophily       = tbl["ActivityDriven"]["homophily"].value_or<double>( 0.5 );
+        model_activityDriven->reciprocity     = tbl["ActivityDriven"]["reciprocity"].value_or<double>( 0.5 );
+        model_activityDriven->alpha           = tbl["ActivityDriven"]["alpha"].value_or<double>( 3.0 );
+        model_activityDriven->K               = tbl["ActivityDriven"]["K"].value_or<double>( 3.0 );
+        model_activityDriven->mean_activities = tbl["ActivityDriven"]["mean_activities"].value_or<bool>( false );
+        model_activityDriven->mean_weights    = tbl["ActivityDriven"]["mean_weights"].value_or<bool>( false );
 
         model_activityDriven->max_iterations = max_iterations;
 
