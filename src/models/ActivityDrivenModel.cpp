@@ -27,16 +27,12 @@ void Seldon::ActivityAgentModel::get_agents_from_power_law()
     }
 }
 
-void Seldon::ActivityAgentModel::iteration()
+void Seldon::ActivityAgentModel::update_network_probabilistic()
 {
-    Model<AgentT>::iteration();
-
-    std::uniform_real_distribution<> dis_activation( 0.0, 1.0 );    // Opinion initial values
-    std::uniform_real_distribution<> dis_reciprocation( 0.0, 1.0 ); // Opinion initial values
+    std::uniform_real_distribution<> dis_activation( 0.0, 1.0 );
+    std::uniform_real_distribution<> dis_reciprocation( 0.0, 1.0 );
     std::vector<size_t> contacted_agents{};
-
     reciprocal_edge_buffer.clear(); // Clear the reciprocal edge buffer
-
     for( size_t idx_agent = 0; idx_agent < network.n_agents(); idx_agent++ )
     {
         // Test if the agent is activated
@@ -44,7 +40,6 @@ void Seldon::ActivityAgentModel::iteration()
 
         if( activated )
         {
-
             // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
             // Not normalised since this is taken care of by the reservoir sampling
             auto weight_callback = [idx_agent, this]( size_t j ) {
@@ -92,9 +87,32 @@ void Seldon::ActivityAgentModel::iteration()
     }
 
     network.transpose(); // transpose the network, so that we have incoming edges
+}
+
+void Seldon::ActivityAgentModel::update_network_mean()
+{
+    
+}
+
+void Seldon::ActivityAgentModel::update_network()
+{
+    if( !mean_weights )
+    {
+        update_network_probabilistic();
+    }
+    else
+    {
+        update_network_mean();
+    }
+}
+
+void Seldon::ActivityAgentModel::iteration()
+{
+    Model<AgentT>::iteration();
+
+    update_network();
 
     // Integrate the ODE using 4th order Runge-Kutta
-
     // k_1 =   hf(x_n,y_n)
     get_euler_slopes( k1_buffer, [this]( size_t i ) { return this->agents[i].data.opinion; } );
     // k_2  =   hf(x_n+1/2h,y_n+1/2k_1)

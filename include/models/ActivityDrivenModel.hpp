@@ -75,6 +75,10 @@ private:
         }
     }
 
+    void update_network_probabilistic();
+    void update_network_mean();
+    void update_network();
+
 public:
     // Model-specific parameters
     double dt = 0.01; // Timestep for the integration of the coupled ODEs
@@ -88,6 +92,9 @@ public:
     // j also sends feedback to i. So every agent can have more than m incoming connections
     double reciprocity = 0.5;
     double K           = 3.0; // Social interaction strength; K>0
+
+    bool mean_activities = false;
+    bool mean_weights    = false;
 
     double convergence_tol = 1e-12; // TODO: ??
 
