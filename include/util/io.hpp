@@ -73,7 +73,16 @@ inline void network_to_file( Simulation & simulation, const std::string & file_p
         network.get_neighbours( idx_agent, buffer_neighbours );
         network.get_weights( idx_agent, buffer_weights );
 
-        std::string row = fmt::format( "{:>5}, {:>5}, ", idx_agent, buffer_neighbours.size() );
+        std::string row = fmt::format( "{:>5}, {:>5}", idx_agent, buffer_neighbours.size() );
+
+        if( buffer_neighbours.empty() )
+        {
+            row += "\n";
+        }
+        else
+        {
+            row += ", ";
+        }
 
         for( const auto & idx_neighbour : buffer_neighbours )
         {
