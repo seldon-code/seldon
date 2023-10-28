@@ -70,6 +70,16 @@ void Seldon::Network::get_weights( std::size_t agent_idx, std::vector<Seldon::Ne
     buffer = weight_list[agent_idx];
 }
 
+void Seldon::Network::set_weights( std::size_t agent_idx, const std::vector<Seldon::Network::WeightT> & weights )
+{
+    if( neighbour_list[agent_idx].size() != weights.size() )
+        [[unlikely]]
+        {
+            throw std::runtime_error( "Network::set_weights: tried to set weights of the wrong size!" );
+        }
+    weight_list[agent_idx] = weights;
+}
+
 void Seldon::Network::transpose()
 {
     std::vector<std::vector<size_t>> neighbour_list_transpose( n_agents(), std::vector<size_t>( 0 ) );
