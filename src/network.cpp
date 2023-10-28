@@ -70,6 +70,31 @@ void Seldon::Network::get_weights( std::size_t agent_idx, std::vector<Seldon::Ne
     buffer = weight_list[agent_idx];
 }
 
+std::size_t Seldon::Network::get_n_edges( std::size_t agent_idx ) const
+{
+    return neighbour_list[agent_idx].size();
+}
+
+Seldon::Network::WeightT & Seldon::Network::get_weight( std::size_t agent_idx, std::size_t i_weight )
+{
+    if( i_weight >= weight_list[agent_idx].size() )
+        [[unlikely]]
+        {
+            throw std::runtime_error( "Network::get_weight: requested weight does not exist!" );
+        }
+    return weight_list[agent_idx][i_weight];
+}
+
+std::size_t & Seldon::Network::get_neighbour( std::size_t agent_idx, std::size_t i_neighbour )
+{
+    if( i_neighbour >= neighbour_list[agent_idx].size() )
+        [[unlikely]]
+        {
+            throw std::runtime_error( "Network::get_neighbour: requested neighbour does not exist!" );
+        }
+    return neighbour_list[agent_idx][i_neighbour];
+}
+
 void Seldon::Network::set_weights( std::size_t agent_idx, const std::vector<Seldon::Network::WeightT> & weights )
 {
     if( neighbour_list[agent_idx].size() != weights.size() )

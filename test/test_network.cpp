@@ -33,6 +33,17 @@ TEST_CASE( "Testing the network class" )
     network->set_weights( 3, weight );
     network->get_weights( 3, buffer_w_get );
     REQUIRE_THAT( weight, Catch::Matchers::UnorderedRangeEquals( buffer_w_get ) );
+    REQUIRE( network->get_n_edges( 3 ) == 2 );
+
+    size_t & n = network->get_neighbour( 3, 0 );
+    REQUIRE( n == neigh[0] );
+    n = 2;
+    REQUIRE( network->get_neighbour( 3, 0 ) == 2 );
+
+    Seldon::Network::WeightT & w = network->get_weight( 3, 1 );
+    REQUIRE( w == 0.55 );
+    w = 0.9;
+    REQUIRE( network->get_weight( 3, 1 ) == w );
 
     // Change the connections for agent 3
     std::vector<size_t> buffer_n{ { 0, 10, 15 } };                   // new neighbours
