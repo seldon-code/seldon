@@ -75,7 +75,15 @@ Seldon::Simulation::Simulation(
         fmt::print( "Generating network\n" );
         n_agents          = tbl["network"]["number_of_agents"].value_or( 0 );
         int n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
-        network           = generate_n_connections( n_agents, n_connections, gen );
+        if( model_string == "ActivityDriven" && tbl["ActivityDriven"]["mean_weights"].value_or( false ) )
+        {
+            // Generate a fully-connected network with weights set to the default 0.0
+            network = generate_fully_connected( n_agents );
+        }
+        else
+        {
+            network = generate_n_connections( n_agents, n_connections, gen );
+        }
     }
 
     n_agents = network->n_agents();
