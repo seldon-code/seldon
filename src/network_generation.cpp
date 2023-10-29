@@ -95,7 +95,7 @@ std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string &
         start_of_line = end_of_line + 1;
 
         // TODO: check if empty or comment
-        if( line.size() == 0 )
+        if( line.empty() )
         {
             break;
         }
@@ -106,13 +106,13 @@ std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string &
         }
 
         // Parse the columns
-        neighbour_list.push_back( std::vector<size_t>( 0 ) );
-        weight_list.push_back( std::vector<WeightT>( 0 ) );
+        neighbour_list.emplace_back( 0 );
+        weight_list.emplace_back( 0 );
 
         size_t start_of_column = 0;
         bool finished_row      = false;
         size_t idx_column      = 0;
-        size_t n_neighbours;
+        size_t n_neighbours    = 0;
         while( !finished_row )
         {
             auto end_of_column = line.find( ',', start_of_column );
