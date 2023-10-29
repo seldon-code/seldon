@@ -102,6 +102,15 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
 
 void Seldon::ActivityAgentModel::update_network_mean()
 {
+    using WeightT = Network::WeightT;
+    std::vector<WeightT> weights( network.n_agents(), 0.0 );
+
+    // Set all weights to zero in the beginning
+    for( size_t idx_agent = 0; idx_agent < network.n_agents(); idx_agent++ )
+    {
+        network.set_weights( idx_agent, weights );
+    }
+
     auto probability_helper = []( double omega, size_t m )
     {
         double p = 0;
@@ -128,24 +137,20 @@ void Seldon::ActivityAgentModel::update_network_mean()
             normalization += weight_callback( k );
         }
 
-        std::vector<Network::WeightT> weights = {};
-        for( size_t k = 0; k < network.n_agents(); k++ )
+        // Go through all the neighbours of idx_agent
+        for( size_t j = 0; j < network.n_agents(); j++ )
         {
-            double omega = weight_callback( k ) / normalization;
-            weights.push_back( probability_helper( omega, m ) );
+            double omega = weight_callback( j ) / normalization;
+            // We have calculated the outgoing weight i->j
+            // Set the incoming agent weight, j-i in weight list
+            auto & win_ji = network.get_weight( j, idx_agent );
+            win_ji += probability_helper( omega, m );
+
+            // Handle the reciprocity for j->i
+            // Update incoming weight i-j
+            auto & win_ij = network.get_weight( idx_agent, j );
+            win_ij += win_ji * reciprocity;
         }
-
-        network.set_weights( idx_agent, weights );
-
-        // Seldon::reservoir_sampling_A_ExpJ( m, network.n_agents(), weight_callback, contacted_agents, gen );
-        // // Fill the outgoing edges into the reciprocal edge buffer
-        // for( const auto & idx_outgoing : contacted_agents )
-        // {
-        //     reciprocal_edge_buffer.insert( { idx_agent, idx_outgoing } ); // insert the edge idx_agent -> idx_outgoing
-        // }
-
-        // Set the *outgoing* edges
-        // network.set_neighbours_and_weights( idx_agent, contacted_agents, 1.0 );
     }
 }
 
