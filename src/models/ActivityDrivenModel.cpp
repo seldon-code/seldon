@@ -1,8 +1,10 @@
 #include "models/ActivityDrivenModel.hpp"
+#include "network.hpp"
 #include "util/math.hpp"
 #include <cstddef>
 #include <random>
 #include <stdexcept>
+#include <vector>
 
 Seldon::ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen )
         : Model<Seldon::ActivityAgentModel::AgentT>( n_agents ),
@@ -98,7 +100,52 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
     network.transpose(); // transpose the network, so that we have incoming edges
 }
 
-void Seldon::ActivityAgentModel::update_network_mean() {}
+void Seldon::ActivityAgentModel::update_network_mean()
+{
+    auto probability_helper = []( double omega, size_t m ) {
+        double p = 0;
+        for( size_t i = 1; i <= m; i++ )
+            p += ( std::pow( -omega, i + 1 ) + omega ) / ( omega + 1 );
+        return p;
+    };
+
+    for( size_t idx_agent = 0; idx_agent < network.n_agents(); idx_agent++ )
+    {
+        // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
+        // Not normalised since this is taken care of by the reservoir sampling
+        auto weight_callback = [idx_agent, this]( size_t j ) {
+            if( idx_agent == j ) // The agent does not contact itself
+                return 0.0;
+            return std::pow(
+                std::abs( this->agents[idx_agent].data.opinion - this->agents[j].data.opinion ), -this->homophily );
+        };
+
+        double normalization = 0;
+        for( size_t k = 0; k < network.n_agents(); k++ )
+        {
+            normalization += weight_callback( k );
+        }
+
+        std::vector<Network::WeightT> weights = {};
+        for( size_t k = 0; k < network.n_agents(); k++ )
+        {
+            double omega = weight_callback( k ) / normalization;
+            weights.push_back( probability_helper( omega, m ) );
+        }
+
+        network.set_weights( idx_agent, weights );
+
+        // Seldon::reservoir_sampling_A_ExpJ( m, network.n_agents(), weight_callback, contacted_agents, gen );
+        // // Fill the outgoing edges into the reciprocal edge buffer
+        // for( const auto & idx_outgoing : contacted_agents )
+        // {
+        //     reciprocal_edge_buffer.insert( { idx_agent, idx_outgoing } ); // insert the edge idx_agent -> idx_outgoing
+        // }
+
+        // Set the *outgoing* edges
+        // network.set_neighbours_and_weights( idx_agent, contacted_agents, 1.0 );
+    }
+}
 
 void Seldon::ActivityAgentModel::update_network()
 {
