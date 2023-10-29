@@ -56,6 +56,7 @@ private:
     {
         // h is the timestep
         auto neighbour_buffer = std::vector<size_t>();
+        auto weight_buffer = std::vector<Network::WeightT>();
         size_t j_index        = 0;
 
         k_buffer.resize( network.n_agents() );
@@ -63,12 +64,13 @@ private:
         for( size_t idx_agent = 0; idx_agent < network.n_agents(); ++idx_agent )
         {
             network.get_neighbours( idx_agent, neighbour_buffer ); // Get the incoming neighbours
+            network.get_weights(idx_agent, weight_buffer); // Get incoming weights
             k_buffer[idx_agent] = -opinion( idx_agent );
             // Loop through neighbouring agents
             for( size_t j = 0; j < neighbour_buffer.size(); j++ )
             {
                 j_index = neighbour_buffer[j];
-                k_buffer[idx_agent] += K * std::tanh( alpha * opinion( j_index ) );
+                k_buffer[idx_agent] += K * weight_buffer[j] * std::tanh( alpha * opinion( j_index ) );
             }
             // Multiply by the timestep
             k_buffer[idx_agent] *= dt;
