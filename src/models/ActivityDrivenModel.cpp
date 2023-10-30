@@ -9,7 +9,7 @@
 Seldon::ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen )
         : Model<Seldon::ActivityAgentModel::AgentT>( n_agents ),
           network( network ),
-          agents_current_copy( std::vector<AgentT>( n_agents ) ),
+          contact_prob_list( std::vector<std::vector<Network::WeightT>>() ),
           gen( gen )
 {
 }
@@ -109,6 +109,7 @@ void Seldon::ActivityAgentModel::update_network_mean()
     for( size_t idx_agent = 0; idx_agent < network.n_agents(); idx_agent++ )
     {
         network.set_weights( idx_agent, weights );
+        contact_prob_list[idx_agent] = weights; // set to zero
     }
 
     auto probability_helper = []( double omega, size_t m )
@@ -138,18 +139,35 @@ void Seldon::ActivityAgentModel::update_network_mean()
         }
 
         // Go through all the neighbours of idx_agent
+        // Calculate the probability of i contacting j (in 1 to m rounds, assuming
+        // the agent is activated
         for( size_t j = 0; j < network.n_agents(); j++ )
         {
             double omega = weight_callback( j ) / normalization;
-            // We have calculated the outgoing weight i->j
+            // We can calculate the probability of i contacting j ( i->j )
+            // Update contact prob_list (outgoing)
+            contact_prob_list[idx_agent][j] = probability_helper( omega, m );
+        }
+
+        // Calculate the actual weights and reciprocity
+        for( size_t j = 0; j < network.n_agents(); j++ )
+        {
+            double prob_contact_ij = contact_prob_list[idx_agent][j];
+            double prob_contact_ji = contact_prob_list[j][idx_agent];
+
             // Set the incoming agent weight, j-i in weight list
             auto & win_ji = network.get_weight( j, idx_agent );
-            win_ji += probability_helper( omega, m );
+            win_ji += agents[idx_agent].data.activity * prob_contact_ij;
 
             // Handle the reciprocity for j->i
             // Update incoming weight i-j
             auto & win_ij = network.get_weight( idx_agent, j );
-            win_ij += win_ji * reciprocity;
+            // The probability of reciprocating is
+            // Prob(j is not activated)*prob(reciprocity) + Prob(j is active but i is not chosen)*prob(reciprocity)
+            // And prob(reciprocity) is basically the weight * reciprocity
+            double prob_cond_reciprocity = win_ji * reciprocity;
+            win_ij += ( 1 - agents[j].data.activity ) * prob_cond_reciprocity
+                      + ( agents[j].data.activity * ( 1 - prob_contact_ji ) ) * prob_cond_reciprocity;
         }
     }
 }
