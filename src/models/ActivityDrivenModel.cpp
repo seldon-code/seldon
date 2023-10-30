@@ -9,7 +9,7 @@
 Seldon::ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen )
         : Model<Seldon::ActivityAgentModel::AgentT>( n_agents ),
           network( network ),
-          contact_prob_list( std::vector<std::vector<Network::WeightT>>() ),
+          contact_prob_list( std::vector<std::vector<Network::WeightT>>( n_agents ) ),
           gen( gen )
 {
 }
@@ -148,7 +148,10 @@ void Seldon::ActivityAgentModel::update_network_mean()
             // Update contact prob_list (outgoing)
             contact_prob_list[idx_agent][j] = probability_helper( omega, m );
         }
+    }
 
+    for( size_t idx_agent = 0; idx_agent < network.n_agents(); idx_agent++ )
+    {
         // Calculate the actual weights and reciprocity
         for( size_t j = 0; j < network.n_agents(); j++ )
         {
