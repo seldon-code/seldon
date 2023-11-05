@@ -52,8 +52,7 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
         {
             // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
             // Not normalised since this is taken care of by the reservoir sampling
-            auto weight_callback = [idx_agent, this]( size_t j )
-            {
+            auto weight_callback = [idx_agent, this]( size_t j ) {
                 if( idx_agent == j ) // The agent does not contact itself
                     return 0.0;
                 return std::pow(
@@ -112,8 +111,7 @@ void Seldon::ActivityAgentModel::update_network_mean()
         contact_prob_list[idx_agent] = weights; // set to zero
     }
 
-    auto probability_helper = []( double omega, size_t m )
-    {
+    auto probability_helper = []( double omega, size_t m ) {
         double p = 0;
         for( size_t i = 1; i <= m; i++ )
             p += ( std::pow( -omega, i + 1 ) + omega ) / ( omega + 1 );
@@ -124,8 +122,7 @@ void Seldon::ActivityAgentModel::update_network_mean()
     {
         // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
         // Not normalised since this is taken care of by the reservoir sampling
-        auto weight_callback = [idx_agent, this]( size_t j )
-        {
+        auto weight_callback = [idx_agent, this]( size_t j ) {
             if( idx_agent == j ) // The agent does not contact itself
                 return 0.0;
             return std::pow(
@@ -146,7 +143,7 @@ void Seldon::ActivityAgentModel::update_network_mean()
             double omega = weight_callback( j ) / normalization;
             // We can calculate the probability of i contacting j ( i->j )
             // Update contact prob_list (outgoing)
-            contact_prob_list[idx_agent][j] = probability_helper( omega, m );
+            contact_prob_list[idx_agent][j] = agents[idx_agent].data.activity * probability_helper( omega, m );
         }
     }
 
@@ -155,12 +152,12 @@ void Seldon::ActivityAgentModel::update_network_mean()
         // Calculate the actual weights and reciprocity
         for( size_t j = 0; j < network.n_agents(); j++ )
         {
-            double prob_contact_ij = contact_prob_list[idx_agent][j];
+            double prob_contact_ij = contact_prob_list[idx_agent][j]; // outgoing probabilites
             double prob_contact_ji = contact_prob_list[j][idx_agent];
 
             // Set the incoming agent weight, j-i in weight list
             auto & win_ji = network.get_weight( j, idx_agent );
-            win_ji += agents[idx_agent].data.activity * prob_contact_ij;
+            win_ji += prob_contact_ij;
 
             // Handle the reciprocity for j->i
             // Update incoming weight i-j
@@ -168,9 +165,15 @@ void Seldon::ActivityAgentModel::update_network_mean()
             // The probability of reciprocating is
             // Prob(j is not activated)*prob(reciprocity) + Prob(j is active but i is not chosen)*prob(reciprocity)
             // And prob(reciprocity) is basically the weight * reciprocity
-            double prob_cond_reciprocity = win_ji * reciprocity;
-            win_ij += ( 1 - agents[j].data.activity ) * prob_cond_reciprocity
-                      + ( agents[j].data.activity * ( 1 - prob_contact_ji ) ) * prob_cond_reciprocity;
+            // double prob_cond_reciprocity = win_ji * reciprocity;
+
+            win_ij += ( 1.0 - prob_contact_ji ) * reciprocity * prob_contact_ij;
+
+            // win_ij += ( 1 - agents[j].data.activity ) * prob_cond_reciprocity
+            //           + ( agents[j].data.activity * ( 1 - prob_contact_ji ) ) * prob_cond_reciprocity;
+
+            // win_ij += ( 1 - agents[j].data.activity ) * prob_cond_reciprocity
+            //           + ( agents[j].data.activity * ( 1 - prob_contact_ji ) ) * prob_cond_reciprocity;
         }
     }
 }
