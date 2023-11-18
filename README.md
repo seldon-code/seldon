@@ -22,13 +22,20 @@ micromamba create -f environment.yml
 micromamba activate seldonenv
 ```
 
-### Compilation
+### Compilation and Installation
 
 We use `meson` to compile and build Seldon. 
 
 ```bash
 meson setup build
 meson compile -C build
+```
+
+To install `seldon` to your `conda` environment, run the following:
+
+```bash
+meson setup build --prefix $CONDA_PREFIX
+meson install -C build
 ```
 
 ### Quick Start 
@@ -40,6 +47,12 @@ positional argument), and an optional output directory location. If the output l
 cd build
 ./seldon /path/to/config -o /path/to/output/dir
 ``` 
+
+If you've installed it, you can simply run `seldon` anywhere.
+
+```bash
+seldon /path/to/config -o /path/to/output/dir
+```
 
 #### Output files
 The file `network.txt` contains information about the network. 
