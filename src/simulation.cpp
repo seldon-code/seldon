@@ -46,6 +46,12 @@ Seldon::Simulation::Simulation(
         output_settings.n_output_agents = n_output_agents.value();
     }
 
+    auto print_progress = tbl["io"]["print_progress"].value<bool>();
+    if( print_progress.has_value() )
+    {
+        output_settings.print_progress = print_progress.value();
+    }
+
     // Check if the 'model' keyword exists
     std::optional<std::string> model_opt = tbl["simulation"]["model"].value<std::string>();
     if( !model_opt.has_value() )

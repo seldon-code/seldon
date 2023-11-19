@@ -4,6 +4,7 @@ model = "ActivityDriven"
 
 [io]
 n_output_network = 20 # Write the network every 20 iterations
+print_progress = true # Print the iteration time ; if not set, then always print
 
 [model]
 max_iterations = 500 # If not set, max iterations is infinite

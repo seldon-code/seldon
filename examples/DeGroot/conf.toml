@@ -2,6 +2,9 @@
 model = "DeGroot"
 # rng_seed = 120 # Leaving this empty will pick a random seed
 
+[io]
+print_progress = false # Print the iteration time ; if not set, then always prints
+
 [model]
 max_iterations = 20 # If not set, max iterations is infinite
 

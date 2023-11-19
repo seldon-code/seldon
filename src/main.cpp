@@ -53,8 +53,8 @@ int main( int argc, char * argv[] )
     const std::optional<size_t> n_output_agents  = simulation.output_settings.n_output_agents;
     const std::optional<size_t> n_output_network = simulation.output_settings.n_output_network;
 
+    typedef std::chrono::milliseconds ms;
     auto t_simulation_start = std::chrono::high_resolution_clock::now();
-    auto print_progress     = true;
     do
     {
         auto t_iter_start = std::chrono::high_resolution_clock::now();
@@ -62,12 +62,14 @@ int main( int argc, char * argv[] )
         simulation.model->iteration();
 
         auto t_iter_end = std::chrono::high_resolution_clock::now();
-        auto iter_time  = std::chrono::duration_cast<std::chrono::seconds>( t_iter_end - t_iter_start );
+        auto iter_time  = std::chrono::duration_cast<ms>( t_iter_end - t_iter_start );
 
         // Print the iteration time?
-        if( print_progress )
+        if( simulation.output_settings.print_progress )
         {
-            fmt::print( "Iteration {}   iter_time = {:%Hh %Mm %Ss}\n", simulation.model->n_iterations, iter_time );
+            fmt::print(
+                "Iteration {}   iter_time = {:%Hh %Mm %Ss} \n", simulation.model->n_iterations,
+                std::chrono::floor<ms>( iter_time ) );
         }
 
         // Write out the opinion?
@@ -87,10 +89,11 @@ int main( int argc, char * argv[] )
     } while( !simulation.model->finished() );
 
     auto t_simulation_end = std::chrono::high_resolution_clock::now();
-    auto total_time       = std::chrono::duration_cast<std::chrono::seconds>( t_simulation_end - t_simulation_start );
+    auto total_time       = std::chrono::duration_cast<ms>( t_simulation_end - t_simulation_start );
 
     fmt::print( "-----------------------------------------------------------------\n" );
     fmt::print(
-        "Finished after {} iterations, total time = {:%Hh %Mm %Ss}\n", simulation.model->n_iterations, total_time );
+        "Finished after {} iterations, total time = {:%Hh %Mm %Ss}\n", simulation.model->n_iterations,
+        std::chrono::floor<ms>( total_time ) );
     return 0;
 }
