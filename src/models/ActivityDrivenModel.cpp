@@ -3,7 +3,6 @@
 #include "util/math.hpp"
 #include <cstddef>
 #include <random>
-#include <stdexcept>
 #include <vector>
 
 Seldon::ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen )
@@ -124,12 +123,12 @@ void Seldon::ActivityAgentModel::update_network_mean()
     {
         // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
         // Not normalised since this is taken care of by the reservoir sampling
-        auto weight_callback = [idx_agent, this]( size_t j )
-        {
-            if( idx_agent == j ) // The agent does not contact itself
+        auto weight_callback = [idx_agent, this]( size_t j ) {
+            constexpr double tolerance = 1e-16;
+            auto opinion_diff = std::abs( this->agents[idx_agent].data.opinion - this->agents[j].data.opinion );
+            if( opinion_diff < tolerance )
                 return 0.0;
-            return std::pow(
-                std::abs( this->agents[idx_agent].data.opinion - this->agents[j].data.opinion ), -this->homophily );
+            return std::pow( opinion_diff, -this->homophily );
         };
 
         double normalization = 0;
