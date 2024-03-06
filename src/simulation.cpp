@@ -5,6 +5,7 @@
 #include "util/tomlplusplus.hpp"
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <fmt/ranges.h>
 #include <cstddef>
 #include <iostream>
 #include <optional>
@@ -125,8 +126,35 @@ Seldon::Simulation::Simulation(
 
         model_activityDriven->max_iterations = max_iterations;
 
+        // bot
+        model_activityDriven->bot_present = tbl["ActivityDriven"]["bot_present"].value_or<bool>( false );
+
+        if( model_activityDriven->bot_present )
+        {
+            model_activityDriven->n_bots = tbl["ActivityDriven"]["n_bots"].value_or<size_t>( 0 );
+
+            fmt::print( "Using {} bots\n", model_activityDriven->n_bots );
+
+            auto bot_opinion = tbl["ActivityDriven"]["bot_opinion"];
+            auto bot_m        = tbl["ActivityDriven"]["bot_m"];
+            auto bot_activity = tbl["ActivityDriven"]["bot_activity"];
+
+            for( size_t i = 0; i < model_activityDriven->n_bots; i++ )
+            {
+                model_activityDriven->bot_opinion.push_back( bot_opinion[i].value_or<double>( 0.0 ) );
+                model_activityDriven->bot_m.push_back( bot_m[i].value_or<size_t>( 0 ) );
+                model_activityDriven->bot_activity.push_back( bot_activity[i].value_or<double>( 0.0 ) );
+            }
+
+            fmt::print( "Bot opinions {}\n", model_activityDriven->bot_opinion );
+            fmt::print( "Bot m {}\n", model_activityDriven->bot_m );
+            fmt::print( "Bot activities {}\n", model_activityDriven->bot_activity );
+        }
+
         model_activityDriven->get_agents_from_power_law();
         model = std::move( model_activityDriven );
+
+        fmt::print( "Finished model setup\n" );
     }
 
     if( cli_agent_file.has_value() )

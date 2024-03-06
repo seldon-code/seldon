@@ -22,5 +22,5 @@ mean_activities = false # Use the mean value of the powerlaw distribution for th
 mean_weights = true    # Use the meanfield approximation of the network edges
 
 [network]
-number_of_agents = 1000
+number_of_agents = 100
 connections_per_agent = 10
