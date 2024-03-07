@@ -45,13 +45,15 @@ int main( int argc, char * argv[] )
     auto simulation = Seldon::Simulation( config_file_path.string(), network_file, agent_file );
 
     // Seldon::IO::network_to_dot_file( *simulation.network, ( output_dir_path / fs::path( "network.dot" ) ).string() );
-
     Seldon::IO::network_to_file( simulation, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );
     auto filename = fmt::format( "opinions_{}.txt", 0 );
     Seldon::IO::opinions_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
 
     const std::optional<size_t> n_output_agents  = simulation.output_settings.n_output_agents;
     const std::optional<size_t> n_output_network = simulation.output_settings.n_output_network;
+
+    fmt::print( "=================================================================\n" );
+    fmt::print( "Starting simulation\n" );
 
     typedef std::chrono::milliseconds ms;
     auto t_simulation_start = std::chrono::high_resolution_clock::now();
@@ -95,5 +97,7 @@ int main( int argc, char * argv[] )
     fmt::print(
         "Finished after {} iterations, total time = {:%Hh %Mm %Ss}\n", simulation.model->n_iterations,
         std::chrono::floor<ms>( total_time ) );
+    fmt::print( "=================================================================\n" );
+
     return 0;
 }
