@@ -17,6 +17,7 @@ class Simulation
         // Write out the agents/network every n iterations, nullopt means never
         std::optional<size_t> n_output_agents  = 1;
         std::optional<size_t> n_output_network = std::nullopt;
+        bool print_progress                    = true; // Print the iteration time, by default always prints
     };
 
 private:

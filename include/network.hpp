@@ -16,7 +16,16 @@ public:
     std::size_t n_agents() const;
 
     void get_neighbours( std::size_t agent_idx, std::vector<size_t> & buffer ) const;
+
     void get_weights( std::size_t agent_idx, std::vector<WeightT> & buffer ) const;
+
+    std::size_t get_n_edges( std::size_t agent_idx ) const;
+
+    WeightT & get_weight( std::size_t agent_idx, std::size_t i_weight );
+
+    std::size_t & get_neighbour( std::size_t agent_idx, std::size_t i_neighbour );
+
+    void set_weights( std::size_t agent_idx, const std::vector<WeightT> & weights );
 
     void set_neighbours_and_weights(
         std::size_t agent_idx, const std::vector<size_t> & buffer_neighbours, const WeightT & weight );

@@ -22,8 +22,8 @@ Seldon::generate_n_connections( size_t n_agents, int n_connections, std::mt19937
     std::uniform_real_distribution<> dis( 0.0, 1.0 ); // Values don't matter, will be normalized
     auto incoming_neighbour_buffer
         = std::vector<size_t>(); // for the j_agents indices connected to i_agent (adjacencies/neighbours)
-    auto incoming_neighbour_weights = std::vector<double>(); // Vector of weights of the j neighbours of i
-    double outgoing_norm_weight     = 0;
+    auto incoming_neighbour_weights = std::vector<WeightT>(); // Vector of weights of the j neighbours of i
+    WeightT outgoing_norm_weight    = 0;
 
     // Loop through all the agents and create the neighbour_list and weight_list
     for( size_t i_agent = 0; i_agent < n_agents; ++i_agent )
@@ -95,7 +95,7 @@ std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string &
         start_of_line = end_of_line + 1;
 
         // TODO: check if empty or comment
-        if( line.size() == 0 )
+        if( line.empty() )
         {
             break;
         }
@@ -106,13 +106,13 @@ std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string &
         }
 
         // Parse the columns
-        neighbour_list.push_back( std::vector<size_t>( 0 ) );
-        weight_list.push_back( std::vector<WeightT>( 0 ) );
+        neighbour_list.emplace_back( 0 );
+        weight_list.emplace_back( 0 );
 
         size_t start_of_column = 0;
         bool finished_row      = false;
         size_t idx_column      = 0;
-        size_t n_neighbours;
+        size_t n_neighbours    = 0;
         while( !finished_row )
         {
             auto end_of_column = line.find( ',', start_of_column );
@@ -145,6 +145,89 @@ std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string &
             idx_column++;
         }
     }
+
+    return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
+}
+
+// Create a fully connected network, with each weight initialized to the same user-defined
+// value, weight. The neighbours include the agent itself as well.
+std::unique_ptr<Seldon::Network> Seldon::generate_fully_connected( size_t n_agents, Network::WeightT weight )
+{
+    using WeightT = Network::WeightT;
+
+    std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
+    std::vector<std::vector<WeightT>> weight_list;   // List for the interaction weights of each connection
+    auto incoming_neighbour_buffer
+        = std::vector<size_t>( n_agents ); // for the j_agents indices connected to i_agent (adjacencies/neighbours)
+    auto incoming_neighbour_weights
+        = std::vector<WeightT>( n_agents, weight ); // Vector of weights of the j neighbours of i
+
+    // Create the incoming_neighbour_buffer once. This will contain all agents, including itself
+    for( size_t i_agent = 0; i_agent < n_agents; ++i_agent )
+    {
+        incoming_neighbour_buffer[i_agent] = i_agent;
+    }
+
+    // Loop through all the agents and update the neighbour_list and weight_list
+    for( size_t i_agent = 0; i_agent < n_agents; ++i_agent )
+    {
+        // Add the neighbour vector for i_agent to the neighbour list
+        neighbour_list.push_back( incoming_neighbour_buffer );
+        // Add the weight interactions for the neighbours of i_agent
+        weight_list.push_back( incoming_neighbour_weights );
+
+    } // end of loop through n_agents
+
+    return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
+}
+
+// Create a fully connected network, with each incoming weight initialized to some value from a
+// distribution, normalized to 1.
+std::unique_ptr<Seldon::Network> Seldon::generate_fully_connected( size_t n_agents, std::mt19937 & gen )
+{
+    using WeightT = Network::WeightT;
+
+    std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
+    std::vector<std::vector<WeightT>> weight_list;   // List for the interaction weights of each connection
+    auto incoming_neighbour_buffer
+        = std::vector<size_t>( n_agents ); // for the j_agents indices connected to i_agent (adjacencies/neighbours)
+    std::uniform_real_distribution<> dis( 0.0, 1.0 );                   // Values don't matter, will be normalized
+    auto incoming_neighbour_weights = std::vector<WeightT>( n_agents ); // Vector of weights of the j neighbours of i
+    WeightT outgoing_norm_weight    = 0;
+
+    // Create the incoming_neighbour_buffer once. This will contain all agents, including itself
+    for( size_t i_agent = 0; i_agent < n_agents; ++i_agent )
+    {
+        incoming_neighbour_buffer[i_agent] = i_agent;
+    }
+
+    // Loop through all the agents and create the neighbour_list and weight_list
+    for( size_t i_agent = 0; i_agent < n_agents; ++i_agent )
+    {
+
+        outgoing_norm_weight = 0.0;
+
+        // Initialize the weights
+        for( size_t j = 0; j < n_agents; ++j )
+        {
+            incoming_neighbour_weights[j] = dis( gen ); // Draw the weight
+            outgoing_norm_weight += incoming_neighbour_weights[j];
+        }
+
+        // ---------
+        // Normalize the weights so that the row sums to 1
+        // Might be specific to the DeGroot model?
+        for( size_t j = 0; j < incoming_neighbour_buffer.size(); ++j )
+        {
+            incoming_neighbour_weights[j] /= outgoing_norm_weight;
+        }
+
+        // Add the neighbour vector for i_agent to the neighbour list
+        neighbour_list.push_back( incoming_neighbour_buffer );
+        // Add the weight interactions for the neighbours of i_agent
+        weight_list.push_back( incoming_neighbour_weights );
+
+    } // end of loop through n_agents
 
     return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
 }

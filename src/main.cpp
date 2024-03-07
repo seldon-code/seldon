@@ -1,8 +1,10 @@
 #include "models/DeGroot.hpp"
 #include "simulation.hpp"
+#include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <argparse/argparse.hpp>
+#include <chrono>
 #include <filesystem>
 #include <string>
 #include <util/io.hpp>
@@ -43,16 +45,34 @@ int main( int argc, char * argv[] )
     auto simulation = Seldon::Simulation( config_file_path.string(), network_file, agent_file );
 
     // Seldon::IO::network_to_dot_file( *simulation.network, ( output_dir_path / fs::path( "network.dot" ) ).string() );
-
     Seldon::IO::network_to_file( simulation, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );
     auto filename = fmt::format( "opinions_{}.txt", 0 );
     Seldon::IO::opinions_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
 
     const std::optional<size_t> n_output_agents  = simulation.output_settings.n_output_agents;
     const std::optional<size_t> n_output_network = simulation.output_settings.n_output_network;
+
+    fmt::print( "=================================================================\n" );
+    fmt::print( "Starting simulation\n" );
+
+    typedef std::chrono::milliseconds ms;
+    auto t_simulation_start = std::chrono::high_resolution_clock::now();
     do
     {
+        auto t_iter_start = std::chrono::high_resolution_clock::now();
+
         simulation.model->iteration();
+
+        auto t_iter_end = std::chrono::high_resolution_clock::now();
+        auto iter_time  = std::chrono::duration_cast<ms>( t_iter_end - t_iter_start );
+
+        // Print the iteration time?
+        if( simulation.output_settings.print_progress )
+        {
+            fmt::print(
+                "Iteration {}   iter_time = {:%Hh %Mm %Ss} \n", simulation.model->n_iterations,
+                std::chrono::floor<ms>( iter_time ) );
+        }
 
         // Write out the opinion?
         if( n_output_agents.has_value() && ( simulation.model->n_iterations % n_output_agents.value() == 0 ) )
@@ -70,6 +90,14 @@ int main( int argc, char * argv[] )
 
     } while( !simulation.model->finished() );
 
-    fmt::print( "Finished after {} iterations.\n", simulation.model->n_iterations );
+    auto t_simulation_end = std::chrono::high_resolution_clock::now();
+    auto total_time       = std::chrono::duration_cast<ms>( t_simulation_end - t_simulation_start );
+
+    fmt::print( "-----------------------------------------------------------------\n" );
+    fmt::print(
+        "Finished after {} iterations, total time = {:%Hh %Mm %Ss}\n", simulation.model->n_iterations,
+        std::chrono::floor<ms>( total_time ) );
+    fmt::print( "=================================================================\n" );
+
     return 0;
 }

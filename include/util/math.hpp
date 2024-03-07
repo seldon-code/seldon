@@ -127,6 +127,12 @@ public:
             ( 1.0 - std::pow( eps, ( 1.0 - gamma ) ) ) * dist( gen ) + std::pow( eps, ( 1.0 - gamma ) ),
             ( 1.0 / ( 1.0 - gamma ) ) );
     }
+
+    ScalarT mean()
+    {
+        return -( 1.0 - gamma ) / ( 2.0 - gamma ) * std::pow( eps, 2.0 - gamma )
+               / ( 1.0 - std::pow( eps, 1.0 - gamma ) );
+    }
 };
 
 } // namespace Seldon

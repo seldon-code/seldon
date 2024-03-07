@@ -1,6 +1,6 @@
 project('seldon', 'cpp',
   version : '0.1',
-  default_options : ['warning_level=3', 'cpp_std=c++20', ])
+  default_options : ['warning_level=3', 'cpp_std=c++20', 'optimization=3'])
 
 add_global_arguments('-Wno-unused-local-typedefs', language : 'cpp')
 
@@ -27,6 +27,7 @@ tests = [
   ['Test Tarjan', 'test/test_tarjan.cpp'],
   ['Test DeGroot', 'test/test_deGroot.cpp'],
   ['Test Network', 'test/test_network.cpp'],
+  ['Test Network Generation', 'test/test_network_generation.cpp'],
   ['Test Sampling', 'test/test_sampling.cpp'],
 ]
 

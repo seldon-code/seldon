@@ -5,6 +5,7 @@
 #include "util/tomlplusplus.hpp"
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <fmt/ranges.h>
 #include <cstddef>
 #include <iostream>
 #include <optional>
@@ -46,6 +47,12 @@ Seldon::Simulation::Simulation(
         output_settings.n_output_agents = n_output_agents.value();
     }
 
+    auto print_progress = tbl["io"]["print_progress"].value<bool>();
+    if( print_progress.has_value() )
+    {
+        output_settings.print_progress = print_progress.value();
+    }
+
     // Check if the 'model' keyword exists
     std::optional<std::string> model_opt = tbl["simulation"]["model"].value<std::string>();
     if( !model_opt.has_value() )
@@ -75,7 +82,15 @@ Seldon::Simulation::Simulation(
         fmt::print( "Generating network\n" );
         n_agents          = tbl["network"]["number_of_agents"].value_or( 0 );
         int n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
-        network           = generate_n_connections( n_agents, n_connections, gen );
+        if( model_string == "ActivityDriven" && tbl["ActivityDriven"]["mean_weights"].value_or( false ) )
+        {
+            // Generate a fully-connected network with weights set to the default 0.0
+            network = generate_fully_connected( n_agents );
+        }
+        else
+        {
+            network = generate_n_connections( n_agents, n_connections, gen );
+        }
     }
 
     n_agents = network->n_agents();
@@ -97,20 +112,49 @@ Seldon::Simulation::Simulation(
     }
     else if( model_string == "ActivityDriven" )
     {
-        auto model_activityDriven         = std::make_unique<ActivityAgentModel>( n_agents, *network, gen );
-        model_activityDriven->dt          = tbl["ActivityDriven"]["dt"].value_or<double>( 0.01 );
-        model_activityDriven->m           = tbl["ActivityDriven"]["m"].value_or<size_t>( 10 );
-        model_activityDriven->eps         = tbl["ActivityDriven"]["eps"].value_or<double>( 0.01 );
-        model_activityDriven->gamma       = tbl["ActivityDriven"]["gamma"].value_or<double>( 2.1 );
-        model_activityDriven->homophily   = tbl["ActivityDriven"]["homophily"].value_or<double>( 0.5 );
-        model_activityDriven->reciprocity = tbl["ActivityDriven"]["reciprocity"].value_or<double>( 0.5 );
-        model_activityDriven->alpha       = tbl["ActivityDriven"]["alpha"].value_or<double>( 3.0 );
-        model_activityDriven->K           = tbl["ActivityDriven"]["K"].value_or<double>( 3.0 );
+        auto model_activityDriven             = std::make_unique<ActivityAgentModel>( n_agents, *network, gen );
+        model_activityDriven->dt              = tbl["ActivityDriven"]["dt"].value_or<double>( 0.01 );
+        model_activityDriven->m               = tbl["ActivityDriven"]["m"].value_or<size_t>( 10 );
+        model_activityDriven->eps             = tbl["ActivityDriven"]["eps"].value_or<double>( 0.01 );
+        model_activityDriven->gamma           = tbl["ActivityDriven"]["gamma"].value_or<double>( 2.1 );
+        model_activityDriven->homophily       = tbl["ActivityDriven"]["homophily"].value_or<double>( 0.5 );
+        model_activityDriven->reciprocity     = tbl["ActivityDriven"]["reciprocity"].value_or<double>( 0.5 );
+        model_activityDriven->alpha           = tbl["ActivityDriven"]["alpha"].value_or<double>( 3.0 );
+        model_activityDriven->K               = tbl["ActivityDriven"]["K"].value_or<double>( 3.0 );
+        model_activityDriven->mean_activities = tbl["ActivityDriven"]["mean_activities"].value_or<bool>( false );
+        model_activityDriven->mean_weights    = tbl["ActivityDriven"]["mean_weights"].value_or<bool>( false );
 
         model_activityDriven->max_iterations = max_iterations;
 
+        // bot
+        model_activityDriven->bot_present = tbl["ActivityDriven"]["bot_present"].value_or<bool>( false );
+
+        if( model_activityDriven->bot_present )
+        {
+            model_activityDriven->n_bots = tbl["ActivityDriven"]["n_bots"].value_or<size_t>( 0 );
+
+            fmt::print( "Using {} bots\n", model_activityDriven->n_bots );
+
+            auto bot_opinion  = tbl["ActivityDriven"]["bot_opinion"];
+            auto bot_m        = tbl["ActivityDriven"]["bot_m"];
+            auto bot_activity = tbl["ActivityDriven"]["bot_activity"];
+
+            for( size_t i = 0; i < model_activityDriven->n_bots; i++ )
+            {
+                model_activityDriven->bot_opinion.push_back( bot_opinion[i].value_or<double>( 0.0 ) );
+                model_activityDriven->bot_m.push_back( bot_m[i].value_or<size_t>( 0 ) );
+                model_activityDriven->bot_activity.push_back( bot_activity[i].value_or<double>( 0.0 ) );
+            }
+
+            fmt::print( "Bot opinions {}\n", model_activityDriven->bot_opinion );
+            fmt::print( "Bot m {}\n", model_activityDriven->bot_m );
+            fmt::print( "Bot activities {}\n", model_activityDriven->bot_activity );
+        }
+
         model_activityDriven->get_agents_from_power_law();
         model = std::move( model_activityDriven );
+
+        fmt::print( "Finished model setup\n" );
     }
 
     if( cli_agent_file.has_value() )

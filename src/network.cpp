@@ -48,12 +48,10 @@ void Seldon::Network::set_neighbours_and_weights(
     std::size_t agent_idx, const std::vector<size_t> & buffer_neighbours,
     const std::vector<Seldon::Network::WeightT> & buffer_weights )
 {
-    if( buffer_neighbours.size() != buffer_weights.size() )
-        [[unlikely]]
-        {
-            throw std::runtime_error(
-                "Network::set_neighbours_and_weights: both buffers need to have the same length!" );
-        }
+    if( buffer_neighbours.size() != buffer_weights.size() ) [[unlikely]]
+    {
+        throw std::runtime_error( "Network::set_neighbours_and_weights: both buffers need to have the same length!" );
+    }
 
     neighbour_list[agent_idx] = buffer_neighbours;
     weight_list[agent_idx]    = buffer_weights;
@@ -68,6 +66,38 @@ void Seldon::Network::push_back_neighbour_and_weight( size_t i, size_t j, Weight
 void Seldon::Network::get_weights( std::size_t agent_idx, std::vector<Seldon::Network::WeightT> & buffer ) const
 {
     buffer = weight_list[agent_idx];
+}
+
+std::size_t Seldon::Network::get_n_edges( std::size_t agent_idx ) const
+{
+    return neighbour_list[agent_idx].size();
+}
+
+Seldon::Network::WeightT & Seldon::Network::get_weight( std::size_t agent_idx, std::size_t i_weight )
+{
+    if( i_weight >= weight_list[agent_idx].size() ) [[unlikely]]
+    {
+        throw std::runtime_error( "Network::get_weight: requested weight does not exist!" );
+    }
+    return weight_list[agent_idx][i_weight];
+}
+
+std::size_t & Seldon::Network::get_neighbour( std::size_t agent_idx, std::size_t i_neighbour )
+{
+    if( i_neighbour >= neighbour_list[agent_idx].size() ) [[unlikely]]
+    {
+        throw std::runtime_error( "Network::get_neighbour: requested neighbour does not exist!" );
+    }
+    return neighbour_list[agent_idx][i_neighbour];
+}
+
+void Seldon::Network::set_weights( std::size_t agent_idx, const std::vector<Seldon::Network::WeightT> & weights )
+{
+    if( neighbour_list[agent_idx].size() != weights.size() ) [[unlikely]]
+    {
+        throw std::runtime_error( "Network::set_weights: tried to set weights of the wrong size!" );
+    }
+    weight_list[agent_idx] = weights;
 }
 
 void Seldon::Network::transpose()
