@@ -60,7 +60,8 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
         {
             // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
             // Not normalised since this is taken care of by the reservoir sampling
-            auto weight_callback = [idx_agent, this]( size_t j ) {
+            auto weight_callback = [idx_agent, this]( size_t j )
+            {
                 if( idx_agent == j ) // The agent does not contact itself
                     return 0.0;
                 return std::pow(
@@ -126,7 +127,8 @@ void Seldon::ActivityAgentModel::update_network_mean()
         contact_prob_list[idx_agent] = weights; // set to zero
     }
 
-    auto probability_helper = []( double omega, size_t m ) {
+    auto probability_helper = []( double omega, size_t m )
+    {
         double p = 0;
         for( size_t i = 1; i <= m; i++ )
             p += ( std::pow( -omega, i + 1 ) + omega ) / ( omega + 1 );
@@ -137,7 +139,8 @@ void Seldon::ActivityAgentModel::update_network_mean()
     {
         // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
         // Not normalised since this is taken care of by the reservoir sampling
-        auto weight_callback = [idx_agent, this]( size_t j ) {
+        auto weight_callback = [idx_agent, this]( size_t j )
+        {
             constexpr double tolerance = 1e-16;
             auto opinion_diff = std::abs( this->agents[idx_agent].data.opinion - this->agents[j].data.opinion );
             if( opinion_diff < tolerance )

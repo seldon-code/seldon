@@ -135,7 +135,7 @@ Seldon::Simulation::Simulation(
 
             fmt::print( "Using {} bots\n", model_activityDriven->n_bots );
 
-            auto bot_opinion = tbl["ActivityDriven"]["bot_opinion"];
+            auto bot_opinion  = tbl["ActivityDriven"]["bot_opinion"];
             auto bot_m        = tbl["ActivityDriven"]["bot_m"];
             auto bot_activity = tbl["ActivityDriven"]["bot_activity"];
 
