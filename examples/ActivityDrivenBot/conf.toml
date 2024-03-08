@@ -1,0 +1,32 @@
+[simulation]
+model = "ActivityDriven"
+rng_seed = 120           # Leaving this empty will pick a random seed
+
+[io]
+n_output_network = 1  # Write the network every 20 iterations
+print_progress = false # Print the iteration time ; if not set, then always print
+
+[model]
+max_iterations = 1000 # If not set, max iterations is infinite
+
+[ActivityDriven]
+dt = 0.01               # Timestep for the integration of the coupled ODEs
+m = 10                  # Number of agents contacted, when the agent is active
+eps = 0.01              # Minimum activity epsilon; a_i belongs to [epsilon,1]
+gamma = 2.1             # Exponent of activity power law distribution of activities
+reciprocity = 0.5       # probability that when agent i contacts j via weighted reservoir sampling, j also sends feedback to i. So every agent can have more than m incoming connections
+homophily = 3.0         # aka beta. if zero, agents pick their interaction partners at random
+alpha = 0.25               # Controversialness of the issue, must be greater than 0.
+K = 3.0                 # Social interaction strength
+mean_activities = false # Use the mean value of the powerlaw distribution for the activities of all agents
+mean_weights = false 
+
+bot_present = true
+n_bots = 2
+bot_m = [300, 300]
+bot_activity = [1.0, 1.0]
+bot_opinion = [-2, 2]
+
+[network]
+number_of_agents = 1000
+connections_per_agent = 5
