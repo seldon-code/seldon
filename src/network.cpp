@@ -1,6 +1,7 @@
 #include "network.hpp"
 #include "connectivity.hpp"
 #include <fmt/format.h>
+#include <algorithm>
 #include <cstddef>
 #include <stdexcept>
 
@@ -37,20 +38,16 @@ std::span<size_t> Seldon::Network::get_neighbours( std::size_t agent_idx )
 }
 
 void Seldon::Network::set_neighbours_and_weights(
-    std::size_t agent_idx, const std::vector<size_t> & buffer_neighbours, const WeightT & weight )
+    std::size_t agent_idx, std::span<const size_t> buffer_neighbours, const WeightT & weight )
 {
-    neighbour_list[agent_idx] = buffer_neighbours;
-
+    neighbour_list[agent_idx].assign( buffer_neighbours.begin(), buffer_neighbours.end() );
     weight_list[agent_idx].resize( buffer_neighbours.size() );
-    for( auto & w : weight_list[agent_idx] )
-    {
-        w = weight;
-    }
+    std::fill( weight_list[agent_idx].begin(), weight_list[agent_idx].end(), weight );
 }
 
 void Seldon::Network::set_neighbours_and_weights(
-    std::size_t agent_idx, const std::vector<size_t> & buffer_neighbours,
-    const std::vector<Seldon::Network::WeightT> & buffer_weights )
+    std::size_t agent_idx, std::span<const size_t> buffer_neighbours,
+    std::span<const Seldon::Network::WeightT> buffer_weights )
 {
     if( buffer_neighbours.size() != buffer_weights.size() )
         [[unlikely]]
@@ -59,8 +56,8 @@ void Seldon::Network::set_neighbours_and_weights(
                 "Network::set_neighbours_and_weights: both buffers need to have the same length!" );
         }
 
-    neighbour_list[agent_idx] = buffer_neighbours;
-    weight_list[agent_idx]    = buffer_weights;
+    neighbour_list[agent_idx].assign( buffer_neighbours.begin(), buffer_neighbours.end() );
+    weight_list[agent_idx].assign( buffer_weights.begin(), buffer_weights.end() );
 }
 
 void Seldon::Network::push_back_neighbour_and_weight( size_t i, size_t j, WeightT w )
@@ -84,14 +81,14 @@ std::size_t Seldon::Network::get_n_edges( std::size_t agent_idx ) const
     return neighbour_list[agent_idx].size();
 }
 
-void Seldon::Network::set_weights( std::size_t agent_idx, const std::vector<Seldon::Network::WeightT> & weights )
+void Seldon::Network::set_weights( std::size_t agent_idx, std::span<const Seldon::Network::WeightT> weights )
 {
     if( neighbour_list[agent_idx].size() != weights.size() )
         [[unlikely]]
         {
             throw std::runtime_error( "Network::set_weights: tried to set weights of the wrong size!" );
         }
-    weight_list[agent_idx] = weights;
+    weight_list[agent_idx].assign( weights.begin(), weights.end() );
 }
 
 void Seldon::Network::transpose()
