@@ -3,6 +3,7 @@
 #include <fmt/format.h>
 #include <algorithm>
 #include <cstddef>
+#include <numeric>
 #include <stdexcept>
 
 Seldon::Network::Network(
@@ -25,6 +26,20 @@ Seldon::Network::Network(
 size_t Seldon::Network::n_agents() const
 {
     return neighbour_list.size();
+}
+
+std::size_t Seldon::Network::n_edges( std::optional<std::size_t> agent_idx ) const
+{
+    if( agent_idx.has_value() )
+    {
+        return neighbour_list[agent_idx.value()].size();
+    }
+    else
+    {
+        return std::transform_reduce(
+            neighbour_list.cbegin(), neighbour_list.cend(), 0, std::plus{},
+            []( const auto & neigh_list ) { return neigh_list.size(); } );
+    }
 }
 
 std::span<const size_t> Seldon::Network::get_neighbours( std::size_t agent_idx ) const
@@ -74,11 +89,6 @@ std::span<const Seldon::Network::WeightT> Seldon::Network::get_weights( std::siz
 std::span<Seldon::Network::WeightT> Seldon::Network::get_weights( std::size_t agent_idx )
 {
     return std::span<Seldon::Network::WeightT>( weight_list[agent_idx].begin(), weight_list[agent_idx].end() );
-}
-
-std::size_t Seldon::Network::get_n_edges( std::size_t agent_idx ) const
-{
-    return neighbour_list[agent_idx].size();
 }
 
 void Seldon::Network::set_weights( std::size_t agent_idx, std::span<const Seldon::Network::WeightT> weights )

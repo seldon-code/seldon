@@ -89,7 +89,7 @@ Seldon::Simulation::Simulation(
         }
         else
         {
-            network = generate_n_connections( n_agents, n_connections, gen );
+            network = generate_n_connections( n_agents, n_connections, true, gen );
         }
     }
 

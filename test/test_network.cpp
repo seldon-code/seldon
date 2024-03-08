@@ -11,13 +11,15 @@ TEST_CASE( "Testing the network class" )
     using namespace Seldon;
 
     // Generate some network
-    const int n_agents      = 20;
-    const int n_connections = 10;
+    const size_t n_agents      = 20;
+    const size_t n_connections = 10;
     std::mt19937 gen( 0 );
-    auto network = generate_n_connections( n_agents, n_connections, gen );
+    auto network = generate_n_connections( n_agents, n_connections, false, gen );
 
     // Does n_agents work?
     REQUIRE( network->n_agents() == n_agents );
+    // Does n_edges work?
+    REQUIRE( network->n_edges() == n_agents * n_connections );
 
     // Check that the function for setting neighbours and a single weight work
     // Agent 3
@@ -30,11 +32,12 @@ TEST_CASE( "Testing the network class" )
 
     SECTION( "Checking that set_weight, get_neighbour work" )
     {
+
         weight = { 0.25, 0.55 };
         network->set_weights( 3, weight );
         auto buffer_w_get = network->get_weights( 3 );
         REQUIRE_THAT( weight, Catch::Matchers::UnorderedRangeEquals( buffer_w_get ) );
-        REQUIRE( network->get_n_edges( 3 ) == 2 );
+        REQUIRE( network->n_edges( 3 ) == 2 );
 
         size_t & n = network->get_neighbours( 3 )[0];
         REQUIRE( n == neigh[0] );

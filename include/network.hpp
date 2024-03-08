@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <optional>
 #include <span>
 #include <vector>
 
@@ -13,14 +14,18 @@ public:
 
     Network( std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list );
 
+    // Gives the total number of nodes in the network
     std::size_t n_agents() const;
+
+    /* Gives the number of edges going out from agent_idx.
+       If agent_idx is nullopt, give the total number of edges
+    */
+    std::size_t n_edges( std::optional<std::size_t> agent_idx = std::nullopt ) const;
 
     std::span<const size_t> get_neighbours( std::size_t agent_idx ) const;
     std::span<size_t> get_neighbours( std::size_t agent_idx );
     std::span<const WeightT> get_weights( std::size_t agent_idx ) const;
     std::span<WeightT> get_weights( std::size_t agent_idx );
-
-    std::size_t get_n_edges( std::size_t agent_idx ) const;
 
     void set_weights( std::size_t agent_idx, std::span<const WeightT> weights );
 
