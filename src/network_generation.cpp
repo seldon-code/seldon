@@ -69,7 +69,8 @@ Seldon::generate_n_connections( size_t n_agents, size_t n_connections, bool self
 
     } // end of loop through n_agents
 
-    return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
+    return std::make_unique<Network>(
+        std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
 }
 
 std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string & file )
@@ -148,7 +149,8 @@ std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string &
         }
     }
 
-    return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
+    return std::make_unique<Network>(
+        std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
 }
 
 // Create a fully connected network, with each weight initialized to the same user-defined
@@ -180,7 +182,8 @@ std::unique_ptr<Seldon::Network> Seldon::generate_fully_connected( size_t n_agen
 
     } // end of loop through n_agents
 
-    return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
+    return std::make_unique<Network>(
+        std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
 }
 
 // Create a fully connected network, with each incoming weight initialized to some value from a
@@ -231,5 +234,6 @@ std::unique_ptr<Seldon::Network> Seldon::generate_fully_connected( size_t n_agen
 
     } // end of loop through n_agents
 
-    return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
+    return std::make_unique<Network>(
+        std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
 }

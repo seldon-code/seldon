@@ -47,6 +47,8 @@ void Seldon::ActivityAgentModel::get_agents_from_power_law()
 
 void Seldon::ActivityAgentModel::update_network_probabilistic()
 {
+    network = Network( {}, {}, Network::EdgeDirection::Outgoing );
+
     std::uniform_real_distribution<> dis_activation( 0.0, 1.0 );
     std::uniform_real_distribution<> dis_reciprocation( 0.0, 1.0 );
     std::vector<size_t> contacted_agents{};

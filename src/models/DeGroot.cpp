@@ -5,6 +5,14 @@
 Seldon::DeGrootModel::DeGrootModel( int n_agents, Network & network )
         : Model<AgentT>( n_agents ), network( network ), agents_current_copy( std::vector<AgentT>( n_agents ) )
 {
+    // For a strongly connected network, the number of SCCs should be 1
+    // Print a warning if this is not true
+    auto n_components = network.strongly_connected_components().size();
+    if( n_components != 1 )
+    {
+        fmt::print( "WARNING: You have {} strongly connected components in your network!\n", n_components );
+    }
+
     for( size_t i = 0; i < agents.size(); i++ )
     {
         agents[i].data = double( i ) / double( agents.size() );

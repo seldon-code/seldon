@@ -7,20 +7,10 @@
 #include <stdexcept>
 
 Seldon::Network::Network(
-    std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list )
-        : neighbour_list( neighbour_list ), weight_list( weight_list )
+    std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list,
+    EdgeDirection direction )
+        : neighbour_list( neighbour_list ), weight_list( weight_list ), _direction( direction )
 {
-    // Now that we have the neighbour list (or adjacency list)
-    // Run Tarjan's algorithm for strongly connected components
-    auto tarjan_scc = TarjanConnectivityAlgo( neighbour_list );
-
-    // For a strongly connected network, the number of SCCs should be 1
-    // Print a warning if this is not true
-    if( tarjan_scc.scc_list.size() != 1 )
-    {
-        fmt::print(
-            "WARNING: You have {} strongly connected components in your network!\n", tarjan_scc.scc_list.size() );
-    }
 }
 
 size_t Seldon::Network::n_agents() const
@@ -40,6 +30,19 @@ std::size_t Seldon::Network::n_edges( std::optional<std::size_t> agent_idx ) con
             neighbour_list.cbegin(), neighbour_list.cend(), 0, std::plus{},
             []( const auto & neigh_list ) { return neigh_list.size(); } );
     }
+}
+
+const Seldon::Network::EdgeDirection & Seldon::Network::direction() const
+{
+    return _direction;
+}
+
+std::vector<std::vector<size_t>> Seldon::Network::strongly_connected_components() const
+{
+    // Now that we have the neighbour list (or adjacency list)
+    // Run Tarjan's algorithm for strongly connected components
+    auto tarjan_scc = TarjanConnectivityAlgo( neighbour_list );
+    return tarjan_scc.scc_list;
 }
 
 std::span<const size_t> Seldon::Network::get_neighbours( std::size_t agent_idx ) const
@@ -65,11 +68,9 @@ void Seldon::Network::set_neighbours_and_weights(
     std::span<const Seldon::Network::WeightT> buffer_weights )
 {
     if( buffer_neighbours.size() != buffer_weights.size() )
-        [[unlikely]]
-        {
-            throw std::runtime_error(
-                "Network::set_neighbours_and_weights: both buffers need to have the same length!" );
-        }
+    {
+        throw std::runtime_error( "Network::set_neighbours_and_weights: both buffers need to have the same length!" );
+    }
 
     neighbour_list[agent_idx].assign( buffer_neighbours.begin(), buffer_neighbours.end() );
     weight_list[agent_idx].assign( buffer_weights.begin(), buffer_weights.end() );
@@ -94,11 +95,23 @@ std::span<Seldon::Network::WeightT> Seldon::Network::get_weights( std::size_t ag
 void Seldon::Network::set_weights( std::size_t agent_idx, std::span<const Seldon::Network::WeightT> weights )
 {
     if( neighbour_list[agent_idx].size() != weights.size() )
-        [[unlikely]]
-        {
-            throw std::runtime_error( "Network::set_weights: tried to set weights of the wrong size!" );
-        }
+    {
+        throw std::runtime_error( "Network::set_weights: tried to set weights of the wrong size!" );
+    }
     weight_list[agent_idx].assign( weights.begin(), weights.end() );
+}
+
+void Seldon::Network::swap_direction()
+{
+    // Swap the edge direction
+    if( direction() == EdgeDirection::Incoming )
+    {
+        _direction = EdgeDirection::Outgoing;
+    }
+    else
+    {
+        _direction = EdgeDirection::Incoming;
+    }
 }
 
 void Seldon::Network::transpose()
@@ -117,6 +130,7 @@ void Seldon::Network::transpose()
         }
     }
 
+    swap_direction();
     neighbour_list = std::move( neighbour_list_transpose );
     weight_list    = std::move( weight_list_transpose );
 }
