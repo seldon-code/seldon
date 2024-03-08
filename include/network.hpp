@@ -16,14 +16,12 @@ public:
     std::size_t n_agents() const;
 
     std::span<const size_t> get_neighbours( std::size_t agent_idx ) const;
+    std::span<size_t> get_neighbours( std::size_t agent_idx );
 
     std::span<const WeightT> get_weights( std::size_t agent_idx ) const;
+    std::span<WeightT> get_weights( std::size_t agent_idx );
 
     std::size_t get_n_edges( std::size_t agent_idx ) const;
-
-    WeightT & get_weight( std::size_t agent_idx, std::size_t i_weight );
-
-    std::size_t & get_neighbour( std::size_t agent_idx, std::size_t i_neighbour );
 
     void set_weights( std::size_t agent_idx, const std::vector<WeightT> & weights );
 

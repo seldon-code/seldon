@@ -178,12 +178,12 @@ void Seldon::ActivityAgentModel::update_network_mean()
             double prob_contact_ji = contact_prob_list[j][idx_agent];
 
             // Set the incoming agent weight, j-i in weight list
-            auto & win_ji = network.get_weight( j, idx_agent );
+            double & win_ji = network.get_weights( j )[idx_agent];
             win_ji += prob_contact_ij;
 
             // Handle the reciprocity for j->i
             // Update incoming weight i-j
-            auto & win_ij = network.get_weight( idx_agent, j );
+            double & win_ij = network.get_weights( idx_agent )[j];
 
             // The probability of reciprocating is
             win_ij += ( 1.0 - prob_contact_ji ) * reciprocity * prob_contact_ij;

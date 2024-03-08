@@ -36,15 +36,15 @@ TEST_CASE( "Testing the network class" )
         REQUIRE_THAT( weight, Catch::Matchers::UnorderedRangeEquals( buffer_w_get ) );
         REQUIRE( network->get_n_edges( 3 ) == 2 );
 
-        size_t & n = network->get_neighbour( 3, 0 );
+        size_t & n = network->get_neighbours( 3 )[0];
         REQUIRE( n == neigh[0] );
         n = 2;
-        REQUIRE( network->get_neighbour( 3, 0 ) == 2 );
+        REQUIRE( network->get_neighbours( 3 )[0] == 2 );
 
-        Seldon::Network::WeightT & w = network->get_weight( 3, 1 );
+        Seldon::Network::WeightT & w = network->get_weights( 3 )[1];
         REQUIRE( w == 0.55 );
         w = 0.9;
-        REQUIRE( network->get_weight( 3, 1 ) == w );
+        REQUIRE( network->get_weights( 3 )[1] == w );
     }
 
     SECTION( "Checking that set_neighbours_and_weights works with a vector of weights, push_back and transpose" )
