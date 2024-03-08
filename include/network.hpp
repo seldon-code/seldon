@@ -1,6 +1,6 @@
 #pragma once
 #include <cstddef>
-#include <optional>
+#include <span>
 #include <vector>
 
 namespace Seldon
@@ -15,9 +15,9 @@ public:
 
     std::size_t n_agents() const;
 
-    void get_neighbours( std::size_t agent_idx, std::vector<size_t> & buffer ) const;
+    std::span<const size_t> get_neighbours( std::size_t agent_idx ) const;
 
-    void get_weights( std::size_t agent_idx, std::vector<WeightT> & buffer ) const;
+    std::span<const WeightT> get_weights( std::size_t agent_idx ) const;
 
     std::size_t get_n_edges( std::size_t agent_idx ) const;
 

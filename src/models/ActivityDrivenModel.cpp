@@ -96,7 +96,7 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
     for( size_t idx_agent = 0; idx_agent < network.n_agents(); idx_agent++ )
     {
         // Get the outgoing edges
-        network.get_neighbours( idx_agent, contacted_agents );
+        auto contacted_agents = network.get_neighbours( idx_agent );
         // For each outgoing edge we check if the reverse edge already exists
         for( const auto & idx_outgoing : contacted_agents )
         {

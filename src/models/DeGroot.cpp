@@ -15,15 +15,13 @@ void Seldon::DeGrootModel::iteration()
 {
     Model<AgentT>::iteration();
 
-    auto neighbour_buffer = std::vector<size_t>();
-    auto weight_buffer    = std::vector<double>();
-    size_t j_index        = 0;
-    double weight         = 0.0;
+    size_t j_index = 0;
+    double weight  = 0.0;
 
     for( size_t i = 0; i < agents.size(); i++ )
     {
-        network.get_neighbours( i, neighbour_buffer );
-        network.get_weights( i, weight_buffer );
+        auto neighbour_buffer       = network.get_neighbours( i );
+        auto weight_buffer          = network.get_weights( i );
         agents_current_copy[i].data = 0.0;
         for( size_t j = 0; j < neighbour_buffer.size(); j++ )
         {

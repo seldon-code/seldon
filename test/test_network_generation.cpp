@@ -30,8 +30,8 @@ TEST_CASE( "Testing the network generation functions" )
             // All neighbours should be equal to neigh
             for( size_t i = 0; i < n_agents; ++i )
             {
-                network->get_neighbours( i, buffer_n_get );
-                network->get_weights( i, buffer_w_get );
+                auto buffer_n_get = network->get_neighbours( i );
+                auto buffer_w_get = network->get_weights( i );
                 REQUIRE_THAT( buffer_n_get, Catch::Matchers::UnorderedRangeEquals( neigh ) );
                 REQUIRE_THAT( buffer_w_get, Catch::Matchers::UnorderedRangeEquals( weights ) );
             }

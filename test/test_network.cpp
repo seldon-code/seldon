@@ -21,19 +21,18 @@ TEST_CASE( "Testing the network class" )
 
     // Check that the function for setting neighbours and a single weight work
     // Agent 3
-    std::vector<size_t> buffer_n_get{};                       // buffer for getting neighbours
-    std::vector<Seldon::Network::WeightT> buffer_w_get{};     // buffer for getting the weights
     std::vector<size_t> neigh{ { 0, 10 } };                   // new neighbours
     std::vector<Seldon::Network::WeightT> weight{ 0.5, 0.5 }; // new weights (const)
     network->set_neighbours_and_weights( 3, neigh, 0.5 );
-    network->get_weights( 3, buffer_w_get );
+    auto buffer_w_get = network->get_weights( 3 );
+
     REQUIRE_THAT( weight, Catch::Matchers::UnorderedRangeEquals( buffer_w_get ) );
 
     SECTION( "Checking that set_weight, get_neighbour work" )
     {
         weight = { 0.25, 0.55 };
         network->set_weights( 3, weight );
-        network->get_weights( 3, buffer_w_get );
+        auto buffer_w_get = network->get_weights( 3 );
         REQUIRE_THAT( weight, Catch::Matchers::UnorderedRangeEquals( buffer_w_get ) );
         REQUIRE( network->get_n_edges( 3 ) == 2 );
 
@@ -56,8 +55,8 @@ TEST_CASE( "Testing the network class" )
         network->set_neighbours_and_weights( 3, buffer_n, buffer_w );
 
         // Make sure the changes worked
-        network->get_neighbours( 3, buffer_n_get );
-        network->get_weights( 3, buffer_w_get );
+        auto buffer_n_get = network->get_neighbours( 3 );
+        auto buffer_w_get = network->get_weights( 3 );
 
         REQUIRE_THAT( buffer_n_get, Catch::Matchers::UnorderedRangeEquals( buffer_n ) );
         REQUIRE_THAT( buffer_w_get, Catch::Matchers::UnorderedRangeEquals( buffer_w ) );
@@ -67,8 +66,8 @@ TEST_CASE( "Testing the network class" )
         buffer_w.push_back( 1.0 );                            // new weight for this new connection
         network->push_back_neighbour_and_weight( 3, 5, 1.0 ); // new connection added with weight
         // Check that the change worked for the push_back function
-        network->get_neighbours( 3, buffer_n_get );
-        network->get_weights( 3, buffer_w_get );
+        buffer_n_get = network->get_neighbours( 3 );
+        buffer_w_get = network->get_weights( 3 );
         REQUIRE_THAT( buffer_n_get, Catch::Matchers::UnorderedRangeEquals( buffer_n ) );
         REQUIRE_THAT( buffer_w_get, Catch::Matchers::UnorderedRangeEquals( buffer_w ) );
 
@@ -78,8 +77,8 @@ TEST_CASE( "Testing the network class" )
         std::set<std::tuple<size_t, size_t, Network::WeightT>> old_edges;
         for( size_t i_agent = 0; i_agent < network->n_agents(); i_agent++ )
         {
-            network->get_neighbours( i_agent, buffer_n );
-            network->get_weights( i_agent, buffer_w );
+            auto buffer_n = network->get_neighbours( i_agent );
+            auto buffer_w = network->get_weights( i_agent );
 
             for( size_t i_neighbour = 0; i_neighbour < buffer_n.size(); i_neighbour++ )
             {
@@ -95,8 +94,8 @@ TEST_CASE( "Testing the network class" )
         // Now we go over the transposed network and try to re-identify all edges
         for( size_t i_agent = 0; i_agent < network->n_agents(); i_agent++ )
         {
-            network->get_neighbours( i_agent, buffer_n );
-            network->get_weights( i_agent, buffer_w );
+            auto buffer_n = network->get_neighbours( i_agent );
+            auto buffer_w = network->get_weights( i_agent );
 
             for( size_t i_neighbour = 0; i_neighbour < buffer_n.size(); i_neighbour++ )
             {

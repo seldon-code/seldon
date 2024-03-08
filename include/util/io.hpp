@@ -18,12 +18,11 @@ inline void network_to_dot_file( const Network & network, const std::string & fi
     fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );
 
     size_t n_agents = network.n_agents();
-    auto buffer     = std::vector<size_t>();
     fmt::print( fs, "digraph G {{\n" );
 
     for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
     {
-        network.get_neighbours( idx_agent, buffer );
+        auto buffer = network.get_neighbours( idx_agent );
 
         std::string row = fmt::format( "{} <- {{", idx_agent );
         for( size_t i = 0; i < buffer.size() - 1; i++ )
@@ -65,13 +64,11 @@ inline void network_to_file( Simulation & simulation, const std::string & file_p
     size_t n_agents = network.n_agents();
 
     fmt::print( fs, "# idx_agent, n_neighbours_in, indices_neighbours_in[...], weights_in[...]\n" );
-    auto buffer_neighbours = std::vector<size_t>();
-    auto buffer_weights    = std::vector<Network::WeightT>();
 
     for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
     {
-        network.get_neighbours( idx_agent, buffer_neighbours );
-        network.get_weights( idx_agent, buffer_weights );
+        auto buffer_neighbours = network.get_neighbours( idx_agent );
+        auto buffer_weights    = network.get_weights( idx_agent );
 
         std::string row = fmt::format( "{:>5}, {:>5}", idx_agent, buffer_neighbours.size() );
 
