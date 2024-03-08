@@ -101,7 +101,7 @@ void Seldon::Network::set_weights( std::size_t agent_idx, std::span<const Seldon
     weight_list[agent_idx].assign( weights.begin(), weights.end() );
 }
 
-void Seldon::Network::swap_direction()
+void Seldon::Network::toggle_direction()
 {
     // Swap the edge direction
     if( direction() == EdgeDirection::Incoming )
@@ -130,7 +130,7 @@ void Seldon::Network::transpose()
         }
     }
 
-    swap_direction();
+    toggle_direction();
     neighbour_list = std::move( neighbour_list_transpose );
     weight_list    = std::move( weight_list_transpose );
 }

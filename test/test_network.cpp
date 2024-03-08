@@ -92,7 +92,12 @@ TEST_CASE( "Testing the network class" )
             }
         }
 
+        auto old_direction = network->direction();
         network->transpose();
+        auto new_direction = network->direction();
+
+        // Direction should have changed as well
+        REQUIRE( old_direction != new_direction);
 
         // Now we go over the transposed network and try to re-identify all edges
         for( size_t i_agent = 0; i_agent < network->n_agents(); i_agent++ )
