@@ -101,20 +101,7 @@ void Seldon::Network::set_weights( std::size_t agent_idx, std::span<const Seldon
     weight_list[agent_idx].assign( weights.begin(), weights.end() );
 }
 
-void Seldon::Network::toggle_direction()
-{
-    // Swap the edge direction
-    if( direction() == EdgeDirection::Incoming )
-    {
-        _direction = EdgeDirection::Outgoing;
-    }
-    else
-    {
-        _direction = EdgeDirection::Incoming;
-    }
-}
-
-void Seldon::Network::transpose()
+void Seldon::Network::toggle_incoming_outgoing()
 {
     std::vector<std::vector<size_t>> neighbour_list_transpose( n_agents(), std::vector<size_t>( 0 ) );
     std::vector<std::vector<WeightT>> weight_list_transpose( n_agents(), std::vector<WeightT>( 0 ) );
@@ -130,7 +117,28 @@ void Seldon::Network::transpose()
         }
     }
 
-    toggle_direction();
     neighbour_list = std::move( neighbour_list_transpose );
     weight_list    = std::move( weight_list_transpose );
+
+    // Swap the edge direction
+    switch_direction_flag();
+}
+
+void Seldon::Network::transpose()
+{
+    toggle_incoming_outgoing();
+    switch_direction_flag();
+}
+
+void Seldon::Network::switch_direction_flag()
+{
+    // Swap the edge direction
+    if( direction() == EdgeDirection::Incoming )
+    {
+        _direction = EdgeDirection::Outgoing;
+    }
+    else
+    {
+        _direction = EdgeDirection::Incoming;
+    }
 }

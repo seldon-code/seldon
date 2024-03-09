@@ -7,6 +7,21 @@
 namespace Seldon
 {
 
+/*
+    A class that represents a directed graph using adjacency lists.
+    Either incoming or outgoing edges are stored.
+    To switch between the different representations (in/out)
+    and the network and its transpose (N/N^T), refer to the following table:
+
+              | N (inc)   |  N (out)  |  N^T (inc) | N^T (out) |
+    ------------------------------------------------------------
+    N (inc)   |     X     |  toggle   |  transpose |   switch  |
+    N (out)   |  toggle   |     X     |  switch    | transpose |
+    N^T (inc) | transpose |   switch  |      X     |  toggle   |
+    N^T (out) |   switch  | transpose |   toggle   |     X     |
+
+    Note: switch is equivalent to toggle + transpose, but much cheaper!
+*/
 class Network
 {
 public:
@@ -78,16 +93,23 @@ public:
     void push_back_neighbour_and_weight( size_t agent_idx_i, size_t agent_idx_j, WeightT w );
 
     /*
-    Switches the directionality and *changes the topolgy*.
-    *Note*: This is cheap and changes the effective network topology by simply changing the directionality flag.
+    Transposes the network, without switching the direction flag (expensive).
+    Example: N(inc) -> N(inc)^T
     */
     void transpose();
 
     /*
-    Switches the directionality *without changing the topolgy*. *Note*: This is expensive and toggles the
-    directionality, while compensating by changing the adjacency list.
+    Switches the direction flag *without* transposing the network (expensive)
+    Example: N(inc) -> N(out)
     */
-    void toggle_direction();
+    void toggle_incoming_outgoing();
+
+    /*
+    Only switches the direction flag. This effectively transposes the network and, simultaneously, changes its
+    representation.
+    Example: N(inc) -> N^T(out)
+    */
+    void switch_direction_flag();
 
 private:
     std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
