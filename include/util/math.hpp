@@ -59,6 +59,9 @@ template<typename WeightCallbackT>
 void reservoir_sampling_A_ExpJ(
     size_t k, size_t n, WeightCallbackT weight, std::vector<std::size_t> & buffer, std::mt19937 & mt )
 {
+    if( k == 0 )
+        return;
+
     std::uniform_real_distribution<double> distribution( 0.0, 1.0 );
 
     std::vector<size_t> reservoir( k );
