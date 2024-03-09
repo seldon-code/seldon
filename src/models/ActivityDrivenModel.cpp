@@ -47,6 +47,8 @@ void Seldon::ActivityAgentModel::get_agents_from_power_law()
 
 void Seldon::ActivityAgentModel::update_network_probabilistic()
 {
+    network = Network( {}, {}, Network::EdgeDirection::Outgoing );
+
     std::uniform_real_distribution<> dis_activation( 0.0, 1.0 );
     std::uniform_real_distribution<> dis_reciprocation( 0.0, 1.0 );
     std::vector<size_t> contacted_agents{};
@@ -60,7 +62,8 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
         {
             // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
             // Not normalised since this is taken care of by the reservoir sampling
-            auto weight_callback = [idx_agent, this]( size_t j ) {
+            auto weight_callback = [idx_agent, this]( size_t j )
+            {
                 if( idx_agent == j ) // The agent does not contact itself
                     return 0.0;
                 return std::pow(
@@ -96,7 +99,7 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
     for( size_t idx_agent = 0; idx_agent < network.n_agents(); idx_agent++ )
     {
         // Get the outgoing edges
-        network.get_neighbours( idx_agent, contacted_agents );
+        auto contacted_agents = network.get_neighbours( idx_agent );
         // For each outgoing edge we check if the reverse edge already exists
         for( const auto & idx_outgoing : contacted_agents )
         {
@@ -111,7 +114,7 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
         }
     }
 
-    network.transpose(); // transpose the network, so that we have incoming edges
+    network.toggle_incoming_outgoing(); // switch direction, so that we have incoming edges
 }
 
 void Seldon::ActivityAgentModel::update_network_mean()
@@ -126,7 +129,8 @@ void Seldon::ActivityAgentModel::update_network_mean()
         contact_prob_list[idx_agent] = weights; // set to zero
     }
 
-    auto probability_helper = []( double omega, size_t m ) {
+    auto probability_helper = []( double omega, size_t m )
+    {
         double p = 0;
         for( size_t i = 1; i <= m; i++ )
             p += ( std::pow( -omega, i + 1 ) + omega ) / ( omega + 1 );
@@ -137,7 +141,8 @@ void Seldon::ActivityAgentModel::update_network_mean()
     {
         // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
         // Not normalised since this is taken care of by the reservoir sampling
-        auto weight_callback = [idx_agent, this]( size_t j ) {
+        auto weight_callback = [idx_agent, this]( size_t j )
+        {
             constexpr double tolerance = 1e-16;
             auto opinion_diff = std::abs( this->agents[idx_agent].data.opinion - this->agents[j].data.opinion );
             if( opinion_diff < tolerance )
@@ -178,12 +183,12 @@ void Seldon::ActivityAgentModel::update_network_mean()
             double prob_contact_ji = contact_prob_list[j][idx_agent];
 
             // Set the incoming agent weight, j-i in weight list
-            auto & win_ji = network.get_weight( j, idx_agent );
+            double & win_ji = network.get_weights( j )[idx_agent];
             win_ji += prob_contact_ij;
 
             // Handle the reciprocity for j->i
             // Update incoming weight i-j
-            auto & win_ij = network.get_weight( idx_agent, j );
+            double & win_ij = network.get_weights( idx_agent )[j];
 
             // The probability of reciprocating is
             win_ij += ( 1.0 - prob_contact_ji ) * reciprocity * prob_contact_ij;

@@ -38,7 +38,6 @@ class ActivityAgentModel : public Model<Agent<ActivityAgentData>>
     using AgentT = Agent<ActivityAgentData>;
 
 private:
-    double max_opinion_diff = 0;
     Network & network;
     std::vector<std::vector<Network::WeightT>> contact_prob_list; // Probability of choosing i in 1 to m rounds
     // Random number generation
@@ -55,17 +54,15 @@ private:
     void get_euler_slopes( std::vector<double> & k_buffer, Opinion_Callback opinion )
     {
         // h is the timestep
-        auto neighbour_buffer = std::vector<size_t>();
-        auto weight_buffer    = std::vector<Network::WeightT>();
-        size_t j_index        = 0;
+        size_t j_index = 0;
 
         k_buffer.resize( network.n_agents() );
 
         for( size_t idx_agent = 0; idx_agent < network.n_agents(); ++idx_agent )
         {
-            network.get_neighbours( idx_agent, neighbour_buffer ); // Get the incoming neighbours
-            network.get_weights( idx_agent, weight_buffer );       // Get incoming weights
-            k_buffer[idx_agent] = -opinion( idx_agent );
+            auto neighbour_buffer = network.get_neighbours( idx_agent ); // Get the incoming neighbours
+            auto weight_buffer    = network.get_weights( idx_agent );    // Get incoming weights
+            k_buffer[idx_agent]   = -opinion( idx_agent );
             // Loop through neighbouring agents
             for( size_t j = 0; j < neighbour_buffer.size(); j++ )
             {

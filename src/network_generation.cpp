@@ -13,7 +13,7 @@
 #include <util/misc.hpp>
 
 std::unique_ptr<Seldon::Network>
-Seldon::generate_n_connections( size_t n_agents, int n_connections, std::mt19937 & gen )
+Seldon::generate_n_connections( size_t n_agents, size_t n_connections, bool self_interaction, std::mt19937 & gen )
 {
     using WeightT = Network::WeightT;
 
@@ -34,7 +34,7 @@ Seldon::generate_n_connections( size_t n_agents, int n_connections, std::mt19937
         incoming_neighbour_weights.clear();
 
         // Get the vector of sorted adjacencies, excluding i (include i later)
-        // TODO: option for making the n_conections variable
+        // TODO: option for making the n_connections variable
         Seldon::draw_unique_k_from_n( i_agent, n_connections, n_agents, incoming_neighbour_buffer, gen );
 
         incoming_neighbour_weights.resize( incoming_neighbour_buffer.size() );
@@ -44,13 +44,15 @@ Seldon::generate_n_connections( size_t n_agents, int n_connections, std::mt19937
             outgoing_norm_weight += incoming_neighbour_weights[j];
         }
 
-        // Put the self-interaction as the last entry
-        auto self_interaction_weight = dis( gen );
-        outgoing_norm_weight += self_interaction_weight;
-
-        // outgoing_norm_weights += self_interaction_weight;
-        incoming_neighbour_buffer.push_back( i_agent ); // Add the agent itself
-        incoming_neighbour_weights.push_back( self_interaction_weight );
+        if( self_interaction )
+        {
+            // Put the self-interaction as the last entry
+            auto self_interaction_weight = dis( gen );
+            outgoing_norm_weight += self_interaction_weight;
+            // outgoing_norm_weights += self_interaction_weight;
+            incoming_neighbour_buffer.push_back( i_agent ); // Add the agent itself
+            incoming_neighbour_weights.push_back( self_interaction_weight );
+        }
 
         // ---------
         // Normalize the weights so that the row sums to 1
@@ -67,7 +69,8 @@ Seldon::generate_n_connections( size_t n_agents, int n_connections, std::mt19937
 
     } // end of loop through n_agents
 
-    return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
+    return std::make_unique<Network>(
+        std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
 }
 
 std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string & file )
@@ -146,7 +149,8 @@ std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string &
         }
     }
 
-    return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
+    return std::make_unique<Network>(
+        std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
 }
 
 // Create a fully connected network, with each weight initialized to the same user-defined
@@ -178,7 +182,8 @@ std::unique_ptr<Seldon::Network> Seldon::generate_fully_connected( size_t n_agen
 
     } // end of loop through n_agents
 
-    return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
+    return std::make_unique<Network>(
+        std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
 }
 
 // Create a fully connected network, with each incoming weight initialized to some value from a
@@ -229,5 +234,6 @@ std::unique_ptr<Seldon::Network> Seldon::generate_fully_connected( size_t n_agen
 
     } // end of loop through n_agents
 
-    return std::make_unique<Network>( std::move( neighbour_list ), std::move( weight_list ) );
+    return std::make_unique<Network>(
+        std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
 }

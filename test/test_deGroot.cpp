@@ -21,7 +21,7 @@ TEST_CASE( "Test the DeGroot Model Symmetric", "[DeGroot]" )
         { 0.2, 0.8 },
     };
 
-    auto network = Network( std::move( neighbour_list ), std::move( weight_list ) );
+    auto network = Network( std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
     auto model   = DeGrootModel( n_agents, network );
 
     model.convergence_tol = 1e-6;
