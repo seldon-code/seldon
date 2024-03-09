@@ -74,7 +74,7 @@ TEST_CASE( "Testing the network class" )
         REQUIRE_THAT( buffer_n_get, Catch::Matchers::UnorderedRangeEquals( buffer_n ) );
         REQUIRE_THAT( buffer_w_get, Catch::Matchers::UnorderedRangeEquals( buffer_w ) );
 
-        // Now we test the transpose() function
+        // Now we test the toggle_incoming_outgoing() function
 
         // First record all the old edges as tuples (i,j,w) where this edge goes from j -> i with weight w
         std::set<std::tuple<size_t, size_t, Network::WeightT>> old_edges;
@@ -93,13 +93,13 @@ TEST_CASE( "Testing the network class" )
         }
 
         auto old_direction = network->direction();
-        network->transpose();
+        network->toggle_incoming_outgoing();
         auto new_direction = network->direction();
 
         // Direction should have changed as well
-        REQUIRE( old_direction != new_direction);
+        REQUIRE( old_direction != new_direction );
 
-        // Now we go over the transposed network and try to re-identify all edges
+        // Now we go over the toggled network and try to re-identify all edges
         for( size_t i_agent = 0; i_agent < network->n_agents(); i_agent++ )
         {
             auto buffer_n = network->get_neighbours( i_agent );
