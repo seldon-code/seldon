@@ -64,10 +64,16 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
             // Not normalised since this is taken care of by the reservoir sampling
             auto weight_callback = [idx_agent, this]( size_t j )
             {
+                double homophily = this->homophily;
+
+                if( bot_present && idx_agent < n_bots )
+                {
+                    homophily = this->bot_homophily[idx_agent];
+                }
                 if( idx_agent == j ) // The agent does not contact itself
                     return 0.0;
                 return std::pow(
-                    std::abs( this->agents[idx_agent].data.opinion - this->agents[j].data.opinion ), -this->homophily );
+                    std::abs( this->agents[idx_agent].data.opinion - this->agents[j].data.opinion ), -homophily );
             };
 
             int m_temp = this->m;
@@ -143,11 +149,18 @@ void Seldon::ActivityAgentModel::update_network_mean()
         // Not normalised since this is taken care of by the reservoir sampling
         auto weight_callback = [idx_agent, this]( size_t j )
         {
+            double homophily = this->homophily;
+
+            if( bot_present && idx_agent < n_bots )
+            {
+                homophily = this->bot_homophily[idx_agent];
+            }
+
             constexpr double tolerance = 1e-16;
             auto opinion_diff = std::abs( this->agents[idx_agent].data.opinion - this->agents[j].data.opinion );
             if( opinion_diff < tolerance )
                 return 0.0;
-            return std::pow( opinion_diff, -this->homophily );
+            return std::pow( opinion_diff, -homophily );
         };
 
         double normalization = 0;

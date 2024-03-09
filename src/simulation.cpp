@@ -135,20 +135,24 @@ Seldon::Simulation::Simulation(
 
             fmt::print( "Using {} bots\n", model_activityDriven->n_bots );
 
-            auto bot_opinion  = tbl["ActivityDriven"]["bot_opinion"];
-            auto bot_m        = tbl["ActivityDriven"]["bot_m"];
-            auto bot_activity = tbl["ActivityDriven"]["bot_activity"];
+            auto bot_opinion   = tbl["ActivityDriven"]["bot_opinion"];
+            auto bot_m         = tbl["ActivityDriven"]["bot_m"];
+            auto bot_activity  = tbl["ActivityDriven"]["bot_activity"];
+            auto bot_homophily = tbl["ActivityDriven"]["bot_homophily"];
 
             for( size_t i = 0; i < model_activityDriven->n_bots; i++ )
             {
                 model_activityDriven->bot_opinion.push_back( bot_opinion[i].value_or<double>( 0.0 ) );
-                model_activityDriven->bot_m.push_back( bot_m[i].value_or<size_t>( 0 ) );
+                model_activityDriven->bot_m.push_back( bot_m[i].value_or<size_t>( size_t( model_activityDriven->m ) ) );
                 model_activityDriven->bot_activity.push_back( bot_activity[i].value_or<double>( 0.0 ) );
+                model_activityDriven->bot_homophily.push_back(
+                    bot_homophily[i].value_or<double>( double( model_activityDriven->homophily ) ) );
             }
 
             fmt::print( "Bot opinions {}\n", model_activityDriven->bot_opinion );
             fmt::print( "Bot m {}\n", model_activityDriven->bot_m );
-            fmt::print( "Bot activities {}\n", model_activityDriven->bot_activity );
+            fmt::print( "Bot activity(s) {}\n", model_activityDriven->bot_activity );
+            fmt::print( "Bot homophily(s) {}\n", model_activityDriven->bot_homophily );
         }
 
         model_activityDriven->get_agents_from_power_law();
