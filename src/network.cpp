@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <numeric>
+#include <span>
 #include <stdexcept>
 
 Seldon::Network::Network(
@@ -47,12 +48,12 @@ std::vector<std::vector<size_t>> Seldon::Network::strongly_connected_components(
 
 std::span<const size_t> Seldon::Network::get_neighbours( std::size_t agent_idx ) const
 {
-    return std::span( neighbour_list[agent_idx].cbegin(), neighbour_list[agent_idx].cend() );
+    return std::span( neighbour_list[agent_idx].data(), neighbour_list[agent_idx].size() );
 }
 
 std::span<size_t> Seldon::Network::get_neighbours( std::size_t agent_idx )
 {
-    return std::span( neighbour_list[agent_idx].begin(), neighbour_list[agent_idx].end() );
+    return std::span( neighbour_list[agent_idx].data(), neighbour_list[agent_idx].size() );
 }
 
 void Seldon::Network::set_neighbours_and_weights(
@@ -84,12 +85,12 @@ void Seldon::Network::push_back_neighbour_and_weight( size_t i, size_t j, Weight
 
 std::span<const Seldon::Network::WeightT> Seldon::Network::get_weights( std::size_t agent_idx ) const
 {
-    return std::span<const Seldon::Network::WeightT>( weight_list[agent_idx].cbegin(), weight_list[agent_idx].cend() );
+    return std::span<const Seldon::Network::WeightT>( weight_list[agent_idx].data(), weight_list[agent_idx].size() );
 }
 
 std::span<Seldon::Network::WeightT> Seldon::Network::get_weights( std::size_t agent_idx )
 {
-    return std::span<Seldon::Network::WeightT>( weight_list[agent_idx].begin(), weight_list[agent_idx].end() );
+    return std::span<Seldon::Network::WeightT>( weight_list[agent_idx].data(), weight_list[agent_idx].size() );
 }
 
 void Seldon::Network::set_weights( std::size_t agent_idx, std::span<const Seldon::Network::WeightT> weights )
