@@ -12,6 +12,16 @@
 #include <set>
 #include <stdexcept>
 
+template<typename T>
+bool check_bot_param_size( size_t n_bots, auto & arr )
+{
+    if( arr.template value<T>() )
+    {
+        return n_bots > arr.as_array()->size();
+    }
+    return false;
+}
+
 Seldon::Simulation::Simulation(
     const std::string & config_file, const std::optional<std::string> & cli_network_file,
     const std::optional<std::string> & cli_agent_file )
@@ -141,10 +151,10 @@ Seldon::Simulation::Simulation(
 
             if(
                 // clang-format off
-                   n_bots > bot_opinion.as_array()->size() 
-                || n_bots > bot_m.as_array()->size()
-                || n_bots > bot_homophily.as_array()->size() 
-                || n_bots > bot_activity.as_array()->size()
+                   check_bot_param_size<double>(n_bots, bot_opinion)
+                || check_bot_param_size<int>(n_bots, bot_m)
+                || check_bot_param_size<double>(n_bots, bot_activity)
+                || check_bot_param_size<double>(n_bots, bot_homophily)
                 // clang-format on
             )
             {
