@@ -38,7 +38,6 @@ class ActivityAgentModel : public Model<Agent<ActivityAgentData>>
     using AgentT = Agent<ActivityAgentData>;
 
 private:
-    double max_opinion_diff = 0;
     Network & network;
     std::vector<std::vector<Network::WeightT>> contact_prob_list; // Probability of choosing i in 1 to m rounds
     // Random number generation
