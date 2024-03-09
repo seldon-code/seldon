@@ -35,7 +35,7 @@ void Seldon::ActivityAgentModel::get_agents_from_power_law()
         }
     }
 
-    if( bot_present )
+    if( bot_present() )
     {
         for( size_t bot_idx = 0; bot_idx < n_bots; bot_idx++ )
         {
@@ -66,7 +66,7 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
             {
                 double homophily = this->homophily;
 
-                if( bot_present && idx_agent < n_bots )
+                if( bot_present() && idx_agent < n_bots )
                 {
                     homophily = this->bot_homophily[idx_agent];
                 }
@@ -78,7 +78,7 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
 
             int m_temp = this->m;
 
-            if( bot_present && idx_agent < n_bots )
+            if( bot_present() && idx_agent < n_bots )
             {
                 m_temp = bot_m[idx_agent];
             }
@@ -151,7 +151,7 @@ void Seldon::ActivityAgentModel::update_network_mean()
         {
             double homophily = this->homophily;
 
-            if( bot_present && idx_agent < n_bots )
+            if( bot_present() && idx_agent < n_bots )
             {
                 homophily = this->bot_homophily[idx_agent];
             }
@@ -173,7 +173,7 @@ void Seldon::ActivityAgentModel::update_network_mean()
         // Calculate the probability of i contacting j (in 1 to m rounds, assuming
         // the agent is activated
         int m_temp = m;
-        if( bot_present && idx_agent < n_bots )
+        if( bot_present() && idx_agent < n_bots )
         {
             m_temp = bot_m[idx_agent];
         }
@@ -249,7 +249,7 @@ void Seldon::ActivityAgentModel::iteration()
                / 6.0;
     }
 
-    if( bot_present )
+    if( bot_present() )
     {
         for( size_t bot_idx = 0; bot_idx < n_bots; bot_idx++ )
         {
