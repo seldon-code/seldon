@@ -98,11 +98,17 @@ public:
     double convergence_tol = 1e-12; // TODO: ??
 
     // bot @TODO: less hacky
-    bool bot_present                 = false;
-    size_t n_bots                    = 0; // The first n_bots agents are bots
-    std::vector<int> bot_m           = std::vector<int>( 0 );
-    std::vector<double> bot_activity = std::vector<double>( 0 );
-    std::vector<double> bot_opinion  = std::vector<double>( 0 );
+
+    size_t n_bots                     = 0; // The first n_bots agents are bots
+    std::vector<int> bot_m            = std::vector<int>( 0 );
+    std::vector<double> bot_activity  = std::vector<double>( 0 );
+    std::vector<double> bot_opinion   = std::vector<double>( 0 );
+    std::vector<double> bot_homophily = std::vector<double>( 0 );
+
+    [[nodiscard]] bool bot_present() const
+    {
+        return n_bots > 0;
+    }
 
     ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen );
 

@@ -12,6 +12,16 @@
 #include <set>
 #include <stdexcept>
 
+template<typename T>
+bool check_bot_param_size( size_t n_bots, auto & arr )
+{
+    if( arr.template value<T>() )
+    {
+        return n_bots > arr.as_array()->size();
+    }
+    return false;
+}
+
 Seldon::Simulation::Simulation(
     const std::string & config_file, const std::optional<std::string> & cli_network_file,
     const std::optional<std::string> & cli_agent_file )
@@ -127,28 +137,43 @@ Seldon::Simulation::Simulation(
         model_activityDriven->max_iterations = max_iterations;
 
         // bot
-        model_activityDriven->bot_present = tbl["ActivityDriven"]["bot_present"].value_or<bool>( false );
-
-        if( model_activityDriven->bot_present )
+        model_activityDriven->n_bots = tbl["ActivityDriven"]["n_bots"].value_or<size_t>( 0 );
+        if( model_activityDriven->bot_present() )
         {
-            model_activityDriven->n_bots = tbl["ActivityDriven"]["n_bots"].value_or<size_t>( 0 );
-
             fmt::print( "Using {} bots\n", model_activityDriven->n_bots );
 
-            auto bot_opinion  = tbl["ActivityDriven"]["bot_opinion"];
-            auto bot_m        = tbl["ActivityDriven"]["bot_m"];
-            auto bot_activity = tbl["ActivityDriven"]["bot_activity"];
+            auto bot_opinion   = tbl["ActivityDriven"]["bot_opinion"];
+            auto bot_m         = tbl["ActivityDriven"]["bot_m"];
+            auto bot_activity  = tbl["ActivityDriven"]["bot_activity"];
+            auto bot_homophily = tbl["ActivityDriven"]["bot_homophily"];
+
+            auto n_bots = model_activityDriven->n_bots;
+
+            if(
+                // clang-format off
+                   check_bot_param_size<double>(n_bots, bot_opinion)
+                || check_bot_param_size<int>(n_bots, bot_m)
+                || check_bot_param_size<double>(n_bots, bot_activity)
+                || check_bot_param_size<double>(n_bots, bot_homophily)
+                // clang-format on
+            )
+            {
+                throw std::runtime_error( "One of the bot parameter arrays is smaller than n_bots" );
+            }
 
             for( size_t i = 0; i < model_activityDriven->n_bots; i++ )
             {
                 model_activityDriven->bot_opinion.push_back( bot_opinion[i].value_or<double>( 0.0 ) );
-                model_activityDriven->bot_m.push_back( bot_m[i].value_or<size_t>( 0 ) );
+                model_activityDriven->bot_m.push_back( bot_m[i].value_or<size_t>( size_t( model_activityDriven->m ) ) );
                 model_activityDriven->bot_activity.push_back( bot_activity[i].value_or<double>( 0.0 ) );
+                model_activityDriven->bot_homophily.push_back(
+                    bot_homophily[i].value_or<double>( double( model_activityDriven->homophily ) ) );
             }
 
             fmt::print( "Bot opinions {}\n", model_activityDriven->bot_opinion );
             fmt::print( "Bot m {}\n", model_activityDriven->bot_m );
-            fmt::print( "Bot activities {}\n", model_activityDriven->bot_activity );
+            fmt::print( "Bot activity(s) {}\n", model_activityDriven->bot_activity );
+            fmt::print( "Bot homophily(s) {}\n", model_activityDriven->bot_homophily );
         }
 
         model_activityDriven->get_agents_from_power_law();
