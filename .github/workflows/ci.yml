@@ -16,22 +16,22 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup pixi
-      uses: prefix-dev/setup-pixi@v0.2.1
+    - name: Setup micromamba
+      uses: mamba-org/setup-micromamba@v1
       with:
-        pixi-version: v0.3.0
-
-    - name: Setup pixi environment
-      run: |
-        pixi install
-
+        micromamba-version: '1.3.1-0'
+        environment-file: environment.yml
+        init-shell: bash
+        cache-environment: true
+        post-cleanup: 'all'
+  
     - name: Compile with meson
-      shell: pixi run bash {0}
+      shell: micromamba-shell {0}
       run: |
         meson setup build
         meson compile -C build
 
     - name: Test with meson
-      shell: pixi run bash {0}
+      shell: micromamba-shell {0}
       run: |
         meson test -C build

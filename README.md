@@ -7,15 +7,7 @@
 Seldon is a performant code for performing various types of opinion dynamics simulations (under development), written primarily in `C++`. 
 
 ## Installation 
-
-We use [`pixi`](https://github.com/prefix-dev/pixi) as the package manager. 
-
-```bash
-pixi shell # to activate the env
-```
-
-If you want to use [`micromamba`](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html) as the package manager, create and activate 
-the environment.
+If you want to use [`micromamba`](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html) as the package manager, create and activate the environment.
 
 ```bash
 micromamba create -f environment.yml
