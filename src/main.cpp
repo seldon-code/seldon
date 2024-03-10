@@ -1,3 +1,4 @@
+#include "config_parser.hpp"
 #include "models/DeGroot.hpp"
 #include "simulation.hpp"
 #include <fmt/chrono.h>
@@ -42,7 +43,9 @@ int main( int argc, char * argv[] )
 
     fs::create_directories( output_dir_path ); // Create the output directory
 
-    auto simulation = Seldon::Simulation( config_file_path.string(), network_file, agent_file );
+    auto simulation_options = Seldon::Config::parse_config_file( config_file_path.string() );
+
+    auto simulation = Seldon::Simulation( simulation_options, network_file, agent_file );
 
     // Seldon::IO::network_to_dot_file( *simulation.network, ( output_dir_path / fs::path( "network.dot" ) ).string() );
     Seldon::IO::network_to_file( simulation, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );

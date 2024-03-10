@@ -10,10 +10,11 @@ sources_seldon = [
   'src/simulation.cpp',
   'src/network.cpp',
   'src/network_generation.cpp',
+  'src/config_parser.cpp',
   'src/model.cpp',
   'src/models/DeGroot.cpp',
   'src/models/ActivityDrivenModel.cpp',
-  'src/util/tomlplusplus.cpp'
+  'src/util/tomlplusplus.cpp',
 ]
 
 exe = executable('seldon', sources_seldon + 'src/main.cpp',
