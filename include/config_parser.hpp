@@ -3,6 +3,7 @@
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 #include <optional>
+#include <random>
 #include <string_view>
 #include <variant>
 #include <vector>
@@ -52,8 +53,7 @@ struct ActivityDrivenSettings
     double K                          = 3.0;
     bool mean_activities              = false;
     bool mean_weights                 = false;
-    double convergence_tol            = 1e-12;
-    size_t n_bots                     = 0;
+    size_t n_bots                     = 0; //@TODO why is this here?
     std::vector<int> bot_m            = std::vector<int>( 0 );
     std::vector<double> bot_activity  = std::vector<double>( 0 );
     std::vector<double> bot_opinion   = std::vector<double>( 0 );
@@ -71,16 +71,14 @@ struct SimulationOptions
 {
     Model model;
     std::string model_string;
-    std::optional<int> rng_seed = std::nullopt;
+    int rng_seed = std::random_device()();
     OutputSettings output_settings;
     std::variant<DeGrootSettings, ActivityDrivenSettings> model_settings;
     InitialNetworkSettings network_settings;
 };
 
 SimulationOptions parse_config_file( std::string_view config_file_path );
-// TODO
 void validate_settings( const SimulationOptions & options );
-// TODO
 void print_settings( const SimulationOptions & options );
 
 } // namespace Seldon::Config

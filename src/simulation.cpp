@@ -13,38 +13,13 @@
 #include <set>
 #include <stdexcept>
 
-// template<typename T>
-// bool check_bot_param_size( size_t n_bots, auto & arr )
-// {
-//     if( arr.template value<T>() )
-//     {
-//         return n_bots > arr.as_array()->size();
-//     }
-//     return false;
-// }
-
 Seldon::Simulation::Simulation(
     const Config::SimulationOptions & options, const std::optional<std::string> & cli_network_file,
     const std::optional<std::string> & cli_agent_file )
+        : output_settings( options.output_settings )
 {
-    int rng_seed = options.rng_seed.value_or( std::random_device()() );
-
-    //@TODO remove print
-    if( options.rng_seed.has_value() )
-    {
-        fmt::print( "WARNING: Seeding random number generator with seed {}!\n", rng_seed );
-    }
-    else
-    {
-        fmt::print( "INFO: Seeding with seed {}!\n", rng_seed );
-    }
-
     // Initialize the rng
-    gen             = std::mt19937( rng_seed );
-    output_settings = options.output_settings;
-
-    //@ TODO remove print
-    fmt::print( "Model type: {}\n", options.model_string );
+    gen = std::mt19937( options.rng_seed );
 
     // Construct the network
     std::optional<std::string> file = cli_network_file;
@@ -53,13 +28,10 @@ Seldon::Simulation::Simulation(
 
     if( file.has_value() )
     {
-        fmt::print( "Reading netwok from file {}\n", file.value() );
         network = generate_from_file( file.value() );
     }
     else
     {
-        //@TODO: this is awful improve
-        fmt::print( "Generating network\n" );
         int n_agents       = options.network_settings.n_agents;
         auto n_connections = options.network_settings.n_connections;
 
@@ -81,12 +53,6 @@ Seldon::Simulation::Simulation(
             network = generate_n_connections( n_agents, n_connections, true, gen );
         }
     }
-
-    fmt::print( "Network has {} agents\n", network->n_agents() );
-
-    // // Construct the model object
-    // // Generic model parameters
-    // std::optional<int> max_iterations = tbl["model"]["max_iterations"].value<int>();
 
     if( options.model == Config::Model::DeGroot )
     {
@@ -123,33 +89,12 @@ Seldon::Simulation::Simulation(
         model_activityDriven->bot_homophily = activitydriven_settings.bot_homophily;
         model_activityDriven->bot_activity  = activitydriven_settings.bot_activity;
 
-        //@TODO verify somewhere else
-        // if(
-        //     // clang-format off
-        //         check_bot_param_size<double>(model_activityDriven->n_bots, model_activityDriven->bot_opinion)
-        //     || check_bot_param_size<int>(model_activityDriven->n_bots, model_activityDriven->bot_m)
-        //     || check_bot_param_size<double>(model_activityDriven->n_bots, model_activityDriven->bot_activity)
-        //     || check_bot_param_size<double>(model_activityDriven->n_bots, model_activityDriven->bot_homophily)
-        //     // clang-format on
-        // )
-        // {
-        //     throw std::runtime_error( "One of the bot parameter arrays is smaller than n_bots" );
-        // }
-
-        fmt::print( "Bot opinions {}\n", model_activityDriven->bot_opinion );
-        fmt::print( "Bot m {}\n", model_activityDriven->bot_m );
-        fmt::print( "Bot activity(s) {}\n", model_activityDriven->bot_activity );
-        fmt::print( "Bot homophily(s) {}\n", model_activityDriven->bot_homophily );
-
         model_activityDriven->get_agents_from_power_law();
         model = std::move( model_activityDriven );
-
-        fmt::print( "Finished model setup\n" );
     }
 
     if( cli_agent_file.has_value() )
     {
-        fmt::print( "Reading agents from file {}\n", cli_agent_file.value() );
         model->agents_from_file( cli_agent_file.value() );
     }
 }

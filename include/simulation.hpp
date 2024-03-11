@@ -5,7 +5,6 @@
 #include "network.hpp"
 #include <memory>
 #include <optional>
-#include <random>
 #include <string>
 
 namespace Seldon
@@ -18,7 +17,6 @@ private:
     std::mt19937 gen;
 
 public:
-
     std::unique_ptr<ModelBase> model;
     std::unique_ptr<Network> network;
     Config::OutputSettings output_settings;
