@@ -1,3 +1,4 @@
+#include "config_parser.hpp"
 #include "models/DeGroot.hpp"
 #include "simulation.hpp"
 #include <fmt/chrono.h>
@@ -37,12 +38,28 @@ int main( int argc, char * argv[] )
     std::optional<std::string> output_dir_path_cli = program.present<std::string>( "-o" );
     fs::path output_dir_path                       = output_dir_path_cli.value_or( fs::path( "./output" ) );
 
+    fmt::print( "=================================================================\n" );
+
     fmt::print( "Using input file: {}\n", config_file_path.string() );
     fmt::print( "Output directory path set to: {}\n", output_dir_path.string() );
 
     fs::create_directories( output_dir_path ); // Create the output directory
 
-    auto simulation = Seldon::Simulation( config_file_path.string(), network_file, agent_file );
+    auto simulation_options = Seldon::Config::parse_config_file( config_file_path.string() );
+    Seldon::Config::validate_settings( simulation_options );
+    Seldon::Config::print_settings( simulation_options );
+
+    if( network_file.has_value() )
+    {
+        fmt::print( "Reading netwok from file {}\n", network_file.value() );
+    }
+    if( agent_file.has_value() )
+    {
+        fmt::print( "Reading agents from file {}\n", agent_file.value() );
+    }
+
+    auto simulation = Seldon::Simulation( simulation_options, network_file, agent_file );
+    fmt::print( "Finished model setup\n" );
 
     // Seldon::IO::network_to_dot_file( *simulation.network, ( output_dir_path / fs::path( "network.dot" ) ).string() );
     Seldon::IO::network_to_file( simulation, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );
@@ -52,8 +69,9 @@ int main( int argc, char * argv[] )
     const std::optional<size_t> n_output_agents  = simulation.output_settings.n_output_agents;
     const std::optional<size_t> n_output_network = simulation.output_settings.n_output_network;
 
-    fmt::print( "=================================================================\n" );
+    fmt::print( "-----------------------------------------------------------------\n" );
     fmt::print( "Starting simulation\n" );
+    fmt::print( "-----------------------------------------------------------------\n" );
 
     typedef std::chrono::milliseconds ms;
     auto t_simulation_start = std::chrono::high_resolution_clock::now();
