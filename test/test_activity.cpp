@@ -1,3 +1,4 @@
+#include "models/ActivityDrivenModel.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -27,7 +28,9 @@ TEST_CASE(
     fs::path output_dir_path = proj_root_path / fs::path( "test/output" );
 
     // Create the output directory; this is done by main
+    fs::remove_all( output_dir_path );
     fs::create_directories( output_dir_path );
+
     // This should be empty
     REQUIRE( fs::is_empty( output_dir_path ) );
 
@@ -54,6 +57,8 @@ TEST_CASE( "Test the probabilistic activity driven model for two agents", "[acti
 
     // We need an output path for Simulation, but we won't write anything out there?
     fs::path output_dir_path = proj_root_path / fs::path( "test/output" );
+
+    fs::remove_all( output_dir_path );
     fs::create_directories( output_dir_path );
 
     // Zero step
@@ -61,4 +66,24 @@ TEST_CASE( "Test the probabilistic activity driven model for two agents", "[acti
     Seldon::IO::opinions_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
 
     simulation.run( output_dir_path );
+
+    auto model_settings = std::get<Seldon::Config::ActivityDrivenSettings>( options.model_settings );
+    auto K              = model_settings.K;
+    auto alpha          = model_settings.alpha;
+
+    // Check that the parameters match our assumptions for the numerical solution
+    REQUIRE_THAT( K, WithinAbs( 2.0, 1e-16 ) );
+    REQUIRE_THAT( alpha, WithinAbs( 1.01, 1e-16 ) );
+
+    // This is the solution of x = K tanh(alpha x)
+    double analytical_x = 1.9187384098662013;
+
+    fmt::print( "analytical_x = {}\n", analytical_x );
+
+    for( size_t idx_agent = 0; idx_agent < simulation.network->n_agents(); idx_agent++ )
+    {
+        auto * agent = simulation.model->get_agent_as<ActivityAgentModel::AgentT>( idx_agent );
+        fmt::print( "{} \n", agent->data.opinion );
+        REQUIRE_THAT( agent->data.opinion, WithinAbs( analytical_x, 1e-4 ) );
+    }
 }
