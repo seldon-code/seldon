@@ -69,7 +69,7 @@ Seldon::Simulation::Simulation(
 
         if( cli_agent_file.has_value() )
         {
-            model_DeGroot->agents = Agents::generate_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
+            model_DeGroot->agents = AgentGeneration::generate_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
         }
 
         model = std::move( model_DeGroot );
@@ -104,7 +104,7 @@ Seldon::Simulation::Simulation(
         if( cli_agent_file.has_value() )
         {
             model_activityDriven->agents
-                = Agents::generate_from_file<ActivityAgentModel::AgentT>( cli_agent_file.value() );
+                = AgentGeneration::generate_from_file<ActivityAgentModel::AgentT>( cli_agent_file.value() );
         }
 
         model = std::move( model_activityDriven );

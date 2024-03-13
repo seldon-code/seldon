@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace Seldon::Agents
+namespace Seldon::AgentGeneration
 {
 
 template<typename AgentT>
@@ -47,4 +47,4 @@ std::vector<AgentT> generate_from_file( const std::string & file )
     return agents;
 }
 
-} // namespace Seldon::Agents
+} // namespace Seldon::AgentGeneration
