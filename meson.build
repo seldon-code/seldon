@@ -27,6 +27,7 @@ exe = executable('seldon', sources_seldon + 'src/main.cpp',
 tests = [
   ['Test Tarjan', 'test/test_tarjan.cpp'],
   ['Test DeGroot', 'test/test_deGroot.cpp'],
+  ['Test Activity Driven', 'test/test_activity.cpp'],
   ['Test Network', 'test/test_network.cpp'],
   ['Test Network Generation', 'test/test_network_generation.cpp'],
   ['Test Sampling', 'test/test_sampling.cpp'],
@@ -39,5 +40,5 @@ foreach t : tests
     dependencies : [dependency('fmt'), dependency('tomlplusplus'), Catch2],
     include_directories : incdir
   )
-  test(t.get(0), exe)
+  test(t.get(0), exe, workdir : meson.project_source_root())
 endforeach

@@ -4,14 +4,17 @@
 #include "models/DeGroot.hpp"
 #include "network_generation.hpp"
 #include "util/tomlplusplus.hpp"
+#include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
+#include <chrono>
 #include <cstddef>
 #include <iostream>
 #include <optional>
 #include <set>
 #include <stdexcept>
+#include <util/io.hpp>
 
 Seldon::Simulation::Simulation(
     const Config::SimulationOptions & options, const std::optional<std::string> & cli_network_file,
@@ -97,4 +100,57 @@ Seldon::Simulation::Simulation(
     {
         model->agents_from_file( cli_agent_file.value() );
     }
+}
+
+void Seldon::Simulation::run( fs::path output_dir_path )
+{
+    auto n_output_agents  = this->output_settings.n_output_agents;
+    auto n_output_network = this->output_settings.n_output_network;
+
+    fmt::print( "-----------------------------------------------------------------\n" );
+    fmt::print( "Starting simulation\n" );
+    fmt::print( "-----------------------------------------------------------------\n" );
+
+    typedef std::chrono::milliseconds ms;
+    auto t_simulation_start = std::chrono::high_resolution_clock::now();
+    while( !this->model->finished() )
+    {
+        auto t_iter_start = std::chrono::high_resolution_clock::now();
+
+        this->model->iteration();
+
+        auto t_iter_end = std::chrono::high_resolution_clock::now();
+        auto iter_time  = std::chrono::duration_cast<ms>( t_iter_end - t_iter_start );
+
+        // Print the iteration time?
+        if( this->output_settings.print_progress )
+        {
+            fmt::print(
+                "Iteration {}   iter_time = {:%Hh %Mm %Ss} \n", this->model->n_iterations,
+                std::chrono::floor<ms>( iter_time ) );
+        }
+
+        // Write out the opinion?
+        if( n_output_agents.has_value() && ( this->model->n_iterations % n_output_agents.value() == 0 ) )
+        {
+            auto filename = fmt::format( "opinions_{}.txt", this->model->n_iterations );
+            Seldon::IO::opinions_to_file( *this, ( output_dir_path / fs::path( filename ) ).string() );
+        }
+
+        // Write out the network?
+        if( n_output_network.has_value() && ( this->model->n_iterations % n_output_network.value() == 0 ) )
+        {
+            auto filename = fmt::format( "network_{}.txt", this->model->n_iterations );
+            Seldon::IO::network_to_file( *this, ( output_dir_path / fs::path( filename ) ).string() );
+        }
+    }
+
+    auto t_simulation_end = std::chrono::high_resolution_clock::now();
+    auto total_time       = std::chrono::duration_cast<ms>( t_simulation_end - t_simulation_start );
+
+    fmt::print( "-----------------------------------------------------------------\n" );
+    fmt::print(
+        "Finished after {} iterations, total time = {:%Hh %Mm %Ss}\n", this->model->n_iterations,
+        std::chrono::floor<ms>( total_time ) );
+    fmt::print( "=================================================================\n" );
 }
