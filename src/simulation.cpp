@@ -113,7 +113,7 @@ void Seldon::Simulation::run( fs::path output_dir_path )
 
     typedef std::chrono::milliseconds ms;
     auto t_simulation_start = std::chrono::high_resolution_clock::now();
-    do
+    while( !this->model->finished() )
     {
         auto t_iter_start = std::chrono::high_resolution_clock::now();
 
@@ -143,8 +143,7 @@ void Seldon::Simulation::run( fs::path output_dir_path )
             auto filename = fmt::format( "network_{}.txt", this->model->n_iterations );
             Seldon::IO::network_to_file( *this, ( output_dir_path / fs::path( filename ) ).string() );
         }
-
-    } while( !this->model->finished() );
+    }
 
     auto t_simulation_end = std::chrono::high_resolution_clock::now();
     auto total_time       = std::chrono::duration_cast<ms>( t_simulation_end - t_simulation_start );

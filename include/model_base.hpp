@@ -18,7 +18,7 @@ public:
     template<typename AgentT>
     AgentT * get_agent_as( int idx )
     {
-        return static_cast<AgentT *>( get_agent( idx ) );
+        return dynamic_cast<AgentT *>( get_agent( idx ) );
     }
 
     virtual void iteration()                                  = 0;

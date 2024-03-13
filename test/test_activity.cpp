@@ -1,3 +1,4 @@
+#include "catch2/matchers/catch_matchers.hpp"
 #include "models/ActivityDrivenModel.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -55,15 +56,8 @@ TEST_CASE( "Test the probabilistic activity driven model for two agents", "[acti
 
     auto simulation = Simulation( options, std::nullopt, std::nullopt );
 
-    // We need an output path for Simulation, but we won't write anything out there?
+    // We need an output path for Simulation, but we won't write anything out there
     fs::path output_dir_path = proj_root_path / fs::path( "test/output" );
-
-    fs::remove_all( output_dir_path );
-    fs::create_directories( output_dir_path );
-
-    // Zero step
-    auto filename = fmt::format( "opinions_{}.txt", 0 );
-    Seldon::IO::opinions_to_file( simulation, ( output_dir_path / fs::path( filename ) ).string() );
 
     simulation.run( output_dir_path );
 
@@ -86,4 +80,52 @@ TEST_CASE( "Test the probabilistic activity driven model for two agents", "[acti
         fmt::print( "{} \n", agent->data.opinion );
         REQUIRE_THAT( agent->data.opinion, WithinAbs( analytical_x, 1e-4 ) );
     }
+}
+
+TEST_CASE( "Test the probabilistic activity driven model with one bot and one agent", "[activity1Bot1Agent]" )
+{
+    using namespace Seldon;
+    using namespace Catch::Matchers;
+
+    auto proj_root_path = fs::current_path();
+    auto input_file     = proj_root_path / fs::path( "test/res/1bot_1agent_activity_prob.toml" );
+
+    auto options = Config::parse_config_file( input_file.string() );
+
+    auto simulation = Simulation( options, std::nullopt, std::nullopt );
+
+    // We need an output path for Simulation, but we won't write anything out there
+    fs::path output_dir_path = proj_root_path / fs::path( "test/output" );
+
+    // Get the bot opinion (which won't change)
+    auto * bot = simulation.model->get_agent_as<ActivityAgentModel::AgentT>( 0 );
+    auto x_bot = bot->data.opinion; // Bot opinion
+    // Get the initial agent opinion
+    auto * agent        = simulation.model->get_agent_as<ActivityAgentModel::AgentT>( 1 );
+    agent->data.opinion = 1.0;
+    auto x_0            = agent->data.opinion;
+    fmt::print( "We have set agent x_0 = {}\n", x_0 );
+
+    simulation.run( output_dir_path );
+
+    auto model_settings = std::get<Seldon::Config::ActivityDrivenSettings>( options.model_settings );
+    auto K              = model_settings.K;
+    auto alpha          = model_settings.alpha;
+    auto iterations     = model_settings.max_iterations.value();
+    auto dt             = model_settings.dt;
+    auto time_elapsed   = iterations * dt;
+
+    // Final agent and bot opinions after the simulation run
+    auto x_t     = agent->data.opinion;
+    auto x_t_bot = bot->data.opinion;
+
+    // The bot opinion should not change during the simulation
+    REQUIRE_THAT( x_t_bot, WithinAbs( x_bot, 1e-16 ) );
+
+    // Test that the agent opinion matches the analytical solution for an agent with a bot
+    // Analytical solution is:
+    // x_t = [x(0) - Ktanh(alpha*x_bot)]e^(-t) + Ktanh(alpha*x_bot)
+    auto x_t_analytical = ( x_0 - K * tanh( alpha * x_bot ) ) * exp( -time_elapsed ) + K * tanh( alpha * x_bot );
+
+    REQUIRE_THAT( x_t, WithinAbs( x_t_analytical, 1e-6 ) );
 }
