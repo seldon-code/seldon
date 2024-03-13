@@ -21,10 +21,9 @@ public:
         return dynamic_cast<AgentT *>( get_agent( idx ) );
     }
 
-    virtual void iteration()                                  = 0;
-    virtual bool finished()                                   = 0;
-    virtual void agents_from_file( const std::string & file ) = 0;
-    virtual ~ModelBase()                                      = default;
+    virtual void iteration() = 0;
+    virtual bool finished()  = 0;
+    virtual ~ModelBase()     = default;
 };
 
 } // namespace Seldon

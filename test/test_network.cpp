@@ -14,7 +14,7 @@ TEST_CASE( "Testing the network class" )
     const size_t n_agents      = 20;
     const size_t n_connections = 10;
     std::mt19937 gen( 0 );
-    auto network = generate_n_connections( n_agents, n_connections, false, gen );
+    auto network = NetworkGeneration::generate_n_connections( n_agents, n_connections, false, gen );
 
     // Does n_agents work?
     REQUIRE( network->n_agents() == n_agents );

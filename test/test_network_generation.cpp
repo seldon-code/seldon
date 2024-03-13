@@ -23,7 +23,7 @@ TEST_CASE( "Testing the network generation functions" )
         {
             WeightT weight = 0.25;
             std::vector<WeightT> weights{ weight, weight, weight }; // Weights to set to
-            auto network = generate_fully_connected( n_agents, weight );
+            auto network = NetworkGeneration::generate_fully_connected( n_agents, weight );
             // Make sure that the network has been generated correctly
             REQUIRE( network->n_agents() == n_agents ); // There should be n_agents in the new network
 

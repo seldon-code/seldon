@@ -1,4 +1,5 @@
 #include "simulation.hpp"
+#include "agent_generation.hpp"
 #include "config_parser.hpp"
 #include "models/ActivityDrivenModel.hpp"
 #include "models/DeGroot.hpp"
@@ -31,7 +32,7 @@ Seldon::Simulation::Simulation(
 
     if( file.has_value() )
     {
-        network = generate_from_file( file.value() );
+        network = NetworkGeneration::generate_from_file( file.value() );
     }
     else
     {
@@ -44,16 +45,16 @@ Seldon::Simulation::Simulation(
             auto model_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
             if( model_settings.mean_weights )
             {
-                network = generate_fully_connected( n_agents );
+                network = NetworkGeneration::generate_fully_connected( n_agents );
             }
             else
             {
-                network = generate_n_connections( n_agents, n_connections, true, gen );
+                network = NetworkGeneration::generate_n_connections( n_agents, n_connections, true, gen );
             }
         }
         else
         {
-            network = generate_n_connections( n_agents, n_connections, true, gen );
+            network = NetworkGeneration::generate_n_connections( n_agents, n_connections, true, gen );
         }
     }
 
@@ -65,7 +66,13 @@ Seldon::Simulation::Simulation(
         auto model_DeGroot             = std::make_unique<DeGrootModel>( network->n_agents(), *network );
         model_DeGroot->max_iterations  = degroot_settings.max_iterations;
         model_DeGroot->convergence_tol = degroot_settings.convergence_tol;
-        model                          = std::move( model_DeGroot );
+
+        if( cli_agent_file.has_value() )
+        {
+            model_DeGroot->agents = Agents::generate_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
+        }
+
+        model = std::move( model_DeGroot );
     }
     else if( options.model == Config::Model::ActivityDrivenModel )
     {
@@ -93,12 +100,14 @@ Seldon::Simulation::Simulation(
         model_activityDriven->bot_activity  = activitydriven_settings.bot_activity;
 
         model_activityDriven->get_agents_from_power_law();
-        model = std::move( model_activityDriven );
-    }
 
-    if( cli_agent_file.has_value() )
-    {
-        model->agents_from_file( cli_agent_file.value() );
+        if( cli_agent_file.has_value() )
+        {
+            model_activityDriven->agents
+                = Agents::generate_from_file<ActivityAgentModel::AgentT>( cli_agent_file.value() );
+        }
+
+        model = std::move( model_activityDriven );
     }
 }
 
