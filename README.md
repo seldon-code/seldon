@@ -57,3 +57,15 @@ To run the tests, go into the build directory and run the following:
 ```bash
 meson test
 ```
+
+## Contributing
+
+> All contributions are welcome!!
+
+- We follow a modified [NumPy commit guidelines](https://numpy.org/doc/stable/dev/development_workflow.html#writing-the-commit-message).
+  + Each commit is to be prefixed by the area of code it affects
+- Please run our linter and tests locally to ensure no errors exist
+- [Co-author commits](https://github.blog/2018-01-29-commit-together-with-co-authors/) generously
+
+# License
+GNU GPL v3 or later.
