@@ -52,3 +52,12 @@ A good commit should have:
 <!-- * Follow our [style guide][style]. -->
 
 <!-- [style]: https://github.com/thoughtbot/guides/tree/master/style -->
+
+### Commit template
+If you are not already using a commit template, consider doing so. The Seldon repository includes a template under `.gitmessage`.
+
+```
+git config --global commit.template .gitmessage
+```
+
+You can omit the `--global` to only use the template when committing to Seldon.
