@@ -1,6 +1,6 @@
 [simulation]
 model = "ActivityDriven"
-rng_seed = 120           # Leaving this empty will pick a random seed
+# rng_seed = 120           # Leaving this empty will pick a random seed
 
 [io]
 n_output_network = 1 # Write the network every 20 iterations
@@ -12,7 +12,7 @@ max_iterations = 1000 # If not set, max iterations is infinite
 
 [ActivityDriven]
 dt = 0.01              # Timestep for the integration of the coupled ODEs
-m = 10                 # Number of agents contacted, when the agent is active
+m = 10                  # Number of agents contacted, when the agent is active
 eps = 0.01             # Minimum activity epsilon; a_i belongs to [epsilon,1]
 gamma = 2.1            # Exponent of activity power law distribution of activities
 reciprocity = 1.0      # probability that when agent i contacts j via weighted reservoir sampling, j also sends feedback to i. So every agent can have more than m incoming connections
@@ -23,5 +23,5 @@ mean_activities = true # Use the mean value of the powerlaw distribution for the
 mean_weights = true    # Use the meanfield approximation of the network edges
 
 [network]
-number_of_agents = 100
+number_of_agents = 50
 connections_per_agent = 1
