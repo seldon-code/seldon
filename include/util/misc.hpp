@@ -1,5 +1,9 @@
 #pragma once
+#include "fmt/format.h"
+#include <fmt/ostream.h>
+#include <filesystem>
 #include <fstream>
+#include <stdexcept>
 #include <string>
 
 namespace Seldon
@@ -7,6 +11,12 @@ namespace Seldon
 
 inline std::string get_file_contents( const std::string & filename )
 {
+    auto path = std::filesystem::path( filename );
+    if( !std::filesystem::exists( path ) )
+    {
+        throw std::runtime_error( fmt::format( "Canot read from {}. File does not exist!", fmt::streamed( path ) ) );
+    }
+
     std::ifstream in( filename, std::ios::in | std::ios::binary );
     if( in )
     {
@@ -18,7 +28,7 @@ inline std::string get_file_contents( const std::string & filename )
         in.close();
         return ( contents );
     }
-    throw( std::runtime_error( "Cannot read in file." ) );
+    throw( std::runtime_error( "Cannot read file." ) );
 }
 
 } // namespace Seldon
