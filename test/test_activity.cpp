@@ -161,7 +161,8 @@ TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activity
     auto mean_activity = dist.mean();
 
     // Calculate the critical controversialness
-    auto set_opinions_and_run = [&]( bool above_critical_controversialness ) {
+    auto set_opinions_and_run = [&]( bool above_critical_controversialness )
+    {
         auto simulation            = Simulation( options, std::nullopt, std::nullopt );
         auto initial_opinion_delta = 0.1; // Set the initial opinion in the interval [-delta, delta]
 

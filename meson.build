@@ -8,7 +8,6 @@ incdir = include_directories('include')
 
 sources_seldon = [
   'src/simulation.cpp',
-  'src/network.cpp',
   'src/network_generation.cpp',
   'src/config_parser.cpp',
   'src/model.cpp',
