@@ -171,12 +171,13 @@ void ActivityAgentModel::update_network_mean()
             m_temp = bot_m[idx_agent];
         }
 
+        double activity = std::max( 1.0, agents[idx_agent].data.activity );
         for( size_t j = 0; j < network.n_agents(); j++ )
         {
             double omega = homophily_weight( idx_agent, j ) / normalization;
             // We can calculate the probability of i contacting j ( i->j )
             // Update contact prob_list (outgoing)
-            contact_prob_list[idx_agent][j] = agents[idx_agent].data.activity * probability_helper( omega, m_temp );
+            contact_prob_list[idx_agent][j] = activity * probability_helper( omega, m_temp );
         }
     }
 
