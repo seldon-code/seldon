@@ -75,6 +75,8 @@ private:
         }
     }
 
+    // The weight for contact between two agents
+    double homophily_weight( size_t idx_contacter, size_t idx_contacted );
     void update_network_probabilistic();
     void update_network_mean();
     void update_network();
