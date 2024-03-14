@@ -1,190 +1,169 @@
 #include "simulation.hpp"
+#include "agent_generation.hpp"
+#include "config_parser.hpp"
 #include "models/ActivityDrivenModel.hpp"
 #include "models/DeGroot.hpp"
 #include "network_generation.hpp"
 #include "util/tomlplusplus.hpp"
+#include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
+#include <chrono>
 #include <cstddef>
 #include <iostream>
 #include <optional>
 #include <set>
 #include <stdexcept>
-
-template<typename T>
-bool check_bot_param_size( size_t n_bots, auto & arr )
-{
-    if( arr.template value<T>() )
-    {
-        return n_bots > arr.as_array()->size();
-    }
-    return false;
-}
+#include <util/io.hpp>
 
 Seldon::Simulation::Simulation(
-    const std::string & config_file, const std::optional<std::string> & cli_network_file,
+    const Config::SimulationOptions & options, const std::optional<std::string> & cli_network_file,
     const std::optional<std::string> & cli_agent_file )
+        : output_settings( options.output_settings )
 {
-    std::set<std::string> allowed_models = { "DeGroot", "ActivityDriven" };
-
-    toml::table tbl;
-    tbl = toml::parse_file( config_file );
-
     // Initialize the rng
-    std::optional<int> rng_seed = tbl["simulation"]["rng_seed"].value<int>();
-    if( rng_seed.has_value() )
-    {
-        fmt::print( "WARNING: Seeding random number generator with seed {}!\n", rng_seed.value() );
-    }
-    else
-    {
-        rng_seed = std::random_device()();
-        fmt::print( "INFO: Seeding with seed {}!\n", rng_seed.value() );
-    }
-    gen = std::mt19937( rng_seed.value() );
-
-    // Parse output settings
-    auto n_output_network = tbl["io"]["n_output_network"].value<size_t>();
-    if( n_output_network.has_value() )
-    {
-        output_settings.n_output_network = n_output_network.value();
-    }
-
-    auto n_output_agents = tbl["io"]["n_output_agents"].value<size_t>();
-    if( n_output_agents.has_value() )
-    {
-        output_settings.n_output_agents = n_output_agents.value();
-    }
-
-    auto print_progress = tbl["io"]["print_progress"].value<bool>();
-    if( print_progress.has_value() )
-    {
-        output_settings.print_progress = print_progress.value();
-    }
-
-    // Check if the 'model' keyword exists
-    std::optional<std::string> model_opt = tbl["simulation"]["model"].value<std::string>();
-    if( !model_opt.has_value() )
-        throw std::runtime_error( fmt::format( "Configuration file needs to include 'simulation.model'!" ) );
-
-    // Check if 'model' is one of the allowed values
-    auto model_string = model_opt.value();
-    if( !allowed_models.contains( model_string ) )
-    {
-        throw std::runtime_error( fmt::format( "Unknown model type: '{}'!", model_string ) );
-    }
-
-    fmt::print( "Model type: {}\n", model_string );
+    gen = std::mt19937( options.rng_seed );
 
     // Construct the network
     std::optional<std::string> file = cli_network_file;
     if( !file.has_value() ) // Check if toml file should be superceded by cli_network_file
-        file = tbl["network"]["file"].value<std::string>();
+        file = options.network_settings.file;
 
     if( file.has_value() )
     {
-        fmt::print( "Reading netwok from file {}\n", file.value() );
-        network = generate_from_file( file.value() );
+        network = NetworkGeneration::generate_from_file( file.value() );
     }
     else
     {
-        fmt::print( "Generating network\n" );
-        n_agents          = tbl["network"]["number_of_agents"].value_or( 0 );
-        int n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
-        if( model_string == "ActivityDriven" && tbl["ActivityDriven"]["mean_weights"].value_or( false ) )
+        int n_agents       = options.network_settings.n_agents;
+        auto n_connections = options.network_settings.n_connections;
+
+        //@TODO figure this out
+        if( options.model == Config::Model::ActivityDrivenModel )
         {
-            // Generate a fully-connected network with weights set to the default 0.0
-            network = generate_fully_connected( n_agents );
+            auto model_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
+            if( model_settings.mean_weights )
+            {
+                network = NetworkGeneration::generate_fully_connected( n_agents );
+            }
+            else
+            {
+                network = NetworkGeneration::generate_n_connections( n_agents, n_connections, true, gen );
+            }
         }
         else
         {
-            network = generate_n_connections( n_agents, n_connections, true, gen );
+            network = NetworkGeneration::generate_n_connections( n_agents, n_connections, true, gen );
         }
     }
 
-    n_agents = network->n_agents();
-    fmt::print( "Network has {} agents\n", n_agents );
-
-    // Construct the model object
-    // Generic model parameters
-    std::optional<int> max_iterations = tbl["model"]["max_iterations"].value<int>();
-
-    if( model_string == "DeGroot" )
+    if( options.model == Config::Model::DeGroot )
     {
+        auto degroot_settings = std::get<Config::DeGrootSettings>( options.model_settings );
+
         // DeGroot specific parameters
-        double convergence = tbl["DeGroot"]["convergence"].value_or( 1e-6 );
+        auto model_DeGroot             = std::make_unique<DeGrootModel>( network->n_agents(), *network );
+        model_DeGroot->max_iterations  = degroot_settings.max_iterations;
+        model_DeGroot->convergence_tol = degroot_settings.convergence_tol;
 
-        auto model_DeGroot             = std::make_unique<DeGrootModel>( n_agents, *network );
-        model_DeGroot->max_iterations  = max_iterations;
-        model_DeGroot->convergence_tol = convergence;
-        model                          = std::move( model_DeGroot );
+        if( cli_agent_file.has_value() )
+        {
+            model_DeGroot->agents = AgentGeneration::generate_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
+        }
+
+        model = std::move( model_DeGroot );
     }
-    else if( model_string == "ActivityDriven" )
+    else if( options.model == Config::Model::ActivityDrivenModel )
     {
-        auto model_activityDriven             = std::make_unique<ActivityAgentModel>( n_agents, *network, gen );
-        model_activityDriven->dt              = tbl["ActivityDriven"]["dt"].value_or<double>( 0.01 );
-        model_activityDriven->m               = tbl["ActivityDriven"]["m"].value_or<size_t>( 10 );
-        model_activityDriven->eps             = tbl["ActivityDriven"]["eps"].value_or<double>( 0.01 );
-        model_activityDriven->gamma           = tbl["ActivityDriven"]["gamma"].value_or<double>( 2.1 );
-        model_activityDriven->homophily       = tbl["ActivityDriven"]["homophily"].value_or<double>( 0.5 );
-        model_activityDriven->reciprocity     = tbl["ActivityDriven"]["reciprocity"].value_or<double>( 0.5 );
-        model_activityDriven->alpha           = tbl["ActivityDriven"]["alpha"].value_or<double>( 3.0 );
-        model_activityDriven->K               = tbl["ActivityDriven"]["K"].value_or<double>( 3.0 );
-        model_activityDriven->mean_activities = tbl["ActivityDriven"]["mean_activities"].value_or<bool>( false );
-        model_activityDriven->mean_weights    = tbl["ActivityDriven"]["mean_weights"].value_or<bool>( false );
+        auto activitydriven_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
 
-        model_activityDriven->max_iterations = max_iterations;
+        auto model_activityDriven         = std::make_unique<ActivityAgentModel>( network->n_agents(), *network, gen );
+        model_activityDriven->dt          = activitydriven_settings.dt;
+        model_activityDriven->m           = activitydriven_settings.m;
+        model_activityDriven->eps         = activitydriven_settings.eps;
+        model_activityDriven->gamma       = activitydriven_settings.gamma;
+        model_activityDriven->homophily   = activitydriven_settings.homophily;
+        model_activityDriven->reciprocity = activitydriven_settings.reciprocity;
+        model_activityDriven->alpha       = activitydriven_settings.alpha;
+        model_activityDriven->K           = activitydriven_settings.K;
+        model_activityDriven->mean_activities = activitydriven_settings.mean_activities;
+        model_activityDriven->mean_weights    = activitydriven_settings.mean_weights;
+
+        model_activityDriven->max_iterations = activitydriven_settings.max_iterations;
 
         // bot
-        model_activityDriven->n_bots = tbl["ActivityDriven"]["n_bots"].value_or<size_t>( 0 );
-        if( model_activityDriven->bot_present() )
-        {
-            fmt::print( "Using {} bots\n", model_activityDriven->n_bots );
-
-            auto bot_opinion   = tbl["ActivityDriven"]["bot_opinion"];
-            auto bot_m         = tbl["ActivityDriven"]["bot_m"];
-            auto bot_activity  = tbl["ActivityDriven"]["bot_activity"];
-            auto bot_homophily = tbl["ActivityDriven"]["bot_homophily"];
-
-            auto n_bots = model_activityDriven->n_bots;
-
-            if(
-                // clang-format off
-                   check_bot_param_size<double>(n_bots, bot_opinion)
-                || check_bot_param_size<int>(n_bots, bot_m)
-                || check_bot_param_size<double>(n_bots, bot_activity)
-                || check_bot_param_size<double>(n_bots, bot_homophily)
-                // clang-format on
-            )
-            {
-                throw std::runtime_error( "One of the bot parameter arrays is smaller than n_bots" );
-            }
-
-            for( size_t i = 0; i < model_activityDriven->n_bots; i++ )
-            {
-                model_activityDriven->bot_opinion.push_back( bot_opinion[i].value_or<double>( 0.0 ) );
-                model_activityDriven->bot_m.push_back( bot_m[i].value_or<size_t>( size_t( model_activityDriven->m ) ) );
-                model_activityDriven->bot_activity.push_back( bot_activity[i].value_or<double>( 0.0 ) );
-                model_activityDriven->bot_homophily.push_back(
-                    bot_homophily[i].value_or<double>( double( model_activityDriven->homophily ) ) );
-            }
-
-            fmt::print( "Bot opinions {}\n", model_activityDriven->bot_opinion );
-            fmt::print( "Bot m {}\n", model_activityDriven->bot_m );
-            fmt::print( "Bot activity(s) {}\n", model_activityDriven->bot_activity );
-            fmt::print( "Bot homophily(s) {}\n", model_activityDriven->bot_homophily );
-        }
+        model_activityDriven->n_bots        = activitydriven_settings.n_bots;
+        model_activityDriven->bot_opinion   = activitydriven_settings.bot_opinion;
+        model_activityDriven->bot_m         = activitydriven_settings.bot_m;
+        model_activityDriven->bot_homophily = activitydriven_settings.bot_homophily;
+        model_activityDriven->bot_activity  = activitydriven_settings.bot_activity;
 
         model_activityDriven->get_agents_from_power_law();
+
+        if( cli_agent_file.has_value() )
+        {
+            model_activityDriven->agents
+                = AgentGeneration::generate_from_file<ActivityAgentModel::AgentT>( cli_agent_file.value() );
+        }
+
         model = std::move( model_activityDriven );
-
-        fmt::print( "Finished model setup\n" );
     }
+}
 
-    if( cli_agent_file.has_value() )
+void Seldon::Simulation::run( fs::path output_dir_path )
+{
+    auto n_output_agents  = this->output_settings.n_output_agents;
+    auto n_output_network = this->output_settings.n_output_network;
+
+    fmt::print( "-----------------------------------------------------------------\n" );
+    fmt::print( "Starting simulation\n" );
+    fmt::print( "-----------------------------------------------------------------\n" );
+
+    Seldon::IO::network_to_file( *this, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );
+    auto filename = fmt::format( "opinions_{}.txt", 0 );
+    Seldon::IO::opinions_to_file( *this, ( output_dir_path / fs::path( filename ) ).string() );
+
+    typedef std::chrono::milliseconds ms;
+    auto t_simulation_start = std::chrono::high_resolution_clock::now();
+    while( !this->model->finished() )
     {
-        fmt::print( "Reading agents from file {}\n", cli_agent_file.value() );
-        model->agents_from_file( cli_agent_file.value() );
+        auto t_iter_start = std::chrono::high_resolution_clock::now();
+
+        this->model->iteration();
+
+        auto t_iter_end = std::chrono::high_resolution_clock::now();
+        auto iter_time  = std::chrono::duration_cast<ms>( t_iter_end - t_iter_start );
+
+        // Print the iteration time?
+        if( this->output_settings.print_progress )
+        {
+            fmt::print(
+                "Iteration {}   iter_time = {:%Hh %Mm %Ss} \n", this->model->n_iterations,
+                std::chrono::floor<ms>( iter_time ) );
+        }
+
+        // Write out the opinion?
+        if( n_output_agents.has_value() && ( this->model->n_iterations % n_output_agents.value() == 0 ) )
+        {
+            auto filename = fmt::format( "opinions_{}.txt", this->model->n_iterations );
+            Seldon::IO::opinions_to_file( *this, ( output_dir_path / fs::path( filename ) ).string() );
+        }
+
+        // Write out the network?
+        if( n_output_network.has_value() && ( this->model->n_iterations % n_output_network.value() == 0 ) )
+        {
+            auto filename = fmt::format( "network_{}.txt", this->model->n_iterations );
+            Seldon::IO::network_to_file( *this, ( output_dir_path / fs::path( filename ) ).string() );
+        }
     }
+
+    auto t_simulation_end = std::chrono::high_resolution_clock::now();
+    auto total_time       = std::chrono::duration_cast<ms>( t_simulation_end - t_simulation_start );
+
+    fmt::print( "-----------------------------------------------------------------\n" );
+    fmt::print(
+        "Finished after {} iterations, total time = {:%Hh %Mm %Ss}\n", this->model->n_iterations,
+        std::chrono::floor<ms>( total_time ) );
+    fmt::print( "=================================================================\n" );
 }

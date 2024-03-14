@@ -1,0 +1,6 @@
+# idx_agent,n_neighbors_in,indices_neighbors_in[...],weights_in[...]
+# comment
+ 0, 2, 2, 1,  0.1, -0.2
+  1, 0
+2,  1,  1,  1.2
+

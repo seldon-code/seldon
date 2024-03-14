@@ -12,8 +12,11 @@
 #include <util/math.hpp>
 #include <util/misc.hpp>
 
-std::unique_ptr<Seldon::Network>
-Seldon::generate_n_connections( size_t n_agents, size_t n_connections, bool self_interaction, std::mt19937 & gen )
+namespace Seldon::NetworkGeneration
+{
+
+std::unique_ptr<Network>
+generate_n_connections( size_t n_agents, size_t n_connections, bool self_interaction, std::mt19937 & gen )
 {
     using WeightT = Network::WeightT;
 
@@ -35,7 +38,7 @@ Seldon::generate_n_connections( size_t n_agents, size_t n_connections, bool self
 
         // Get the vector of sorted adjacencies, excluding i (include i later)
         // TODO: option for making the n_connections variable
-        Seldon::draw_unique_k_from_n( i_agent, n_connections, n_agents, incoming_neighbour_buffer, gen );
+        draw_unique_k_from_n( i_agent, n_connections, n_agents, incoming_neighbour_buffer, gen );
 
         incoming_neighbour_weights.resize( incoming_neighbour_buffer.size() );
         for( size_t j = 0; j < incoming_neighbour_buffer.size(); ++j )
@@ -73,13 +76,13 @@ Seldon::generate_n_connections( size_t n_agents, size_t n_connections, bool self
         std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
 }
 
-std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string & file )
+std::unique_ptr<Network> generate_from_file( const std::string & file )
 {
     using WeightT = Network::WeightT;
     std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
     std::vector<std::vector<WeightT>> weight_list;   // List for the interaction weights of each connection
 
-    std::string file_contents = Seldon::get_file_contents( file );
+    std::string file_contents = get_file_contents( file );
 
     // bool finished = false;
     size_t start_of_line = 0;
@@ -155,7 +158,7 @@ std::unique_ptr<Seldon::Network> Seldon::generate_from_file( const std::string &
 
 // Create a fully connected network, with each weight initialized to the same user-defined
 // value, weight. The neighbours include the agent itself as well.
-std::unique_ptr<Seldon::Network> Seldon::generate_fully_connected( size_t n_agents, Network::WeightT weight )
+std::unique_ptr<Network> generate_fully_connected( size_t n_agents, Network::WeightT weight )
 {
     using WeightT = Network::WeightT;
 
@@ -188,7 +191,7 @@ std::unique_ptr<Seldon::Network> Seldon::generate_fully_connected( size_t n_agen
 
 // Create a fully connected network, with each incoming weight initialized to some value from a
 // distribution, normalized to 1.
-std::unique_ptr<Seldon::Network> Seldon::generate_fully_connected( size_t n_agents, std::mt19937 & gen )
+std::unique_ptr<Network> generate_fully_connected( size_t n_agents, std::mt19937 & gen )
 {
     using WeightT = Network::WeightT;
 
@@ -237,3 +240,4 @@ std::unique_ptr<Seldon::Network> Seldon::generate_fully_connected( size_t n_agen
     return std::make_unique<Network>(
         std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
 }
+} // namespace Seldon::NetworkGeneration

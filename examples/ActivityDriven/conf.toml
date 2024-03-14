@@ -4,6 +4,7 @@ model = "ActivityDriven"
 
 [io]
 n_output_network = 20 # Write the network every 20 iterations
+n_output_agents = 1 # Write the opinions of agents after every iteration
 print_progress = true # Print the iteration time ; if not set, then always print
 
 [model]

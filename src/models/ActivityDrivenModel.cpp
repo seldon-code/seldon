@@ -5,15 +5,35 @@
 #include <random>
 #include <vector>
 
-Seldon::ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen )
-        : Model<Seldon::ActivityAgentModel::AgentT>( n_agents ),
+namespace Seldon
+{
+
+ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen )
+        : Model<ActivityAgentModel::AgentT>( n_agents ),
           network( network ),
           contact_prob_list( std::vector<std::vector<Network::WeightT>>( n_agents ) ),
           gen( gen )
 {
 }
 
-void Seldon::ActivityAgentModel::get_agents_from_power_law()
+double ActivityAgentModel::homophily_weight( size_t idx_contacter, size_t idx_contacted )
+{
+    double homophily = this->homophily;
+
+    if( idx_contacted == idx_contacter )
+        return 0.0;
+
+    if( bot_present() && idx_contacter < n_bots )
+        homophily = this->bot_homophily[idx_contacter];
+
+    constexpr double tolerance = 1e-10;
+    auto opinion_diff = std::abs( this->agents[idx_contacter].data.opinion - this->agents[idx_contacted].data.opinion );
+    opinion_diff      = std::max( tolerance, opinion_diff );
+
+    return std::pow( opinion_diff, -homophily );
+}
+
+void ActivityAgentModel::get_agents_from_power_law()
 {
     std::uniform_real_distribution<> dis_opinion( -1, 1 ); // Opinion initial values
     power_law_distribution<> dist_activity( eps, gamma );
@@ -45,7 +65,7 @@ void Seldon::ActivityAgentModel::get_agents_from_power_law()
     }
 }
 
-void Seldon::ActivityAgentModel::update_network_probabilistic()
+void ActivityAgentModel::update_network_probabilistic()
 {
     network.switch_direction_flag();
 
@@ -62,18 +82,6 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
         {
             // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
             // Not normalised since this is taken care of by the reservoir sampling
-            auto weight_callback = [idx_agent, this]( size_t j ) {
-                double homophily = this->homophily;
-
-                if( bot_present() && idx_agent < n_bots )
-                {
-                    homophily = this->bot_homophily[idx_agent];
-                }
-                if( idx_agent == j ) // The agent does not contact itself
-                    return 0.0;
-                return std::pow(
-                    std::abs( this->agents[idx_agent].data.opinion - this->agents[j].data.opinion ), -homophily );
-            };
 
             int m_temp = this->m;
 
@@ -82,7 +90,9 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
                 m_temp = bot_m[idx_agent];
             }
 
-            Seldon::reservoir_sampling_A_ExpJ( m_temp, network.n_agents(), weight_callback, contacted_agents, gen );
+            reservoir_sampling_A_ExpJ(
+                m_temp, network.n_agents(), [&]( int j ) { return homophily_weight( idx_agent, j ); }, contacted_agents,
+                gen );
 
             // Fill the outgoing edges into the reciprocal edge buffer
             for( const auto & idx_outgoing : contacted_agents )
@@ -122,7 +132,7 @@ void Seldon::ActivityAgentModel::update_network_probabilistic()
     network.toggle_incoming_outgoing(); // switch direction, so that we have incoming edges
 }
 
-void Seldon::ActivityAgentModel::update_network_mean()
+void ActivityAgentModel::update_network_mean()
 {
     using WeightT = Network::WeightT;
     std::vector<WeightT> weights( network.n_agents(), 0.0 );
@@ -145,25 +155,11 @@ void Seldon::ActivityAgentModel::update_network_mean()
     {
         // Implement the weight for the probability of agent `idx_agent` contacting agent `j`
         // Not normalised since this is taken care of by the reservoir sampling
-        auto weight_callback = [idx_agent, this]( size_t j ) {
-            double homophily = this->homophily;
-
-            if( bot_present() && idx_agent < n_bots )
-            {
-                homophily = this->bot_homophily[idx_agent];
-            }
-
-            constexpr double tolerance = 1e-16;
-            auto opinion_diff = std::abs( this->agents[idx_agent].data.opinion - this->agents[j].data.opinion );
-            if( opinion_diff < tolerance )
-                return 0.0;
-            return std::pow( opinion_diff, -homophily );
-        };
 
         double normalization = 0;
         for( size_t k = 0; k < network.n_agents(); k++ )
         {
-            normalization += weight_callback( k );
+            normalization += homophily_weight( idx_agent, k );
         }
 
         // Go through all the neighbours of idx_agent
@@ -175,12 +171,13 @@ void Seldon::ActivityAgentModel::update_network_mean()
             m_temp = bot_m[idx_agent];
         }
 
+        double activity = std::max( 1.0, agents[idx_agent].data.activity );
         for( size_t j = 0; j < network.n_agents(); j++ )
         {
-            double omega = weight_callback( j ) / normalization;
+            double omega = homophily_weight( idx_agent, j ) / normalization;
             // We can calculate the probability of i contacting j ( i->j )
             // Update contact prob_list (outgoing)
-            contact_prob_list[idx_agent][j] = agents[idx_agent].data.activity * probability_helper( omega, m_temp );
+            contact_prob_list[idx_agent][j] = activity * probability_helper( omega, m_temp );
         }
     }
 
@@ -206,7 +203,7 @@ void Seldon::ActivityAgentModel::update_network_mean()
     }
 }
 
-void Seldon::ActivityAgentModel::update_network()
+void ActivityAgentModel::update_network()
 {
 
     if( !mean_weights )
@@ -219,7 +216,7 @@ void Seldon::ActivityAgentModel::update_network()
     }
 }
 
-void Seldon::ActivityAgentModel::iteration()
+void ActivityAgentModel::iteration()
 {
     Model<AgentT>::iteration();
 
@@ -254,3 +251,4 @@ void Seldon::ActivityAgentModel::iteration()
         }
     }
 }
+} // namespace Seldon
