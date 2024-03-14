@@ -36,7 +36,8 @@ inline void Agent<ActivityAgentData>::from_string( const std::string & str )
 class ActivityAgentModel : public Model<Agent<ActivityAgentData>>
 {
 public:
-    using AgentT = Agent<ActivityAgentData>;
+    using AgentT  = Agent<ActivityAgentData>;
+    using Network = Network<AgentT>;
 
 private:
     Network & network;

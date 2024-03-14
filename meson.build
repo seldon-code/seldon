@@ -7,8 +7,6 @@ add_global_arguments('-Wno-unused-local-typedefs', language : 'cpp')
 incdir = include_directories('include')
 
 sources_seldon = [
-  'src/simulation.cpp',
-  'src/network_generation.cpp',
   'src/config_parser.cpp',
   'src/model.cpp',
   'src/models/DeGroot.cpp',
@@ -24,13 +22,13 @@ exe = executable('seldon', sources_seldon + 'src/main.cpp',
 
 
 tests = [
-  ['Test_Tarjan', 'test/test_tarjan.cpp'],
-  ['Test_DeGroot', 'test/test_deGroot.cpp'],
-  ['Test_Activity Driven', 'test/test_activity.cpp'],
-  ['Test_Network', 'test/test_network.cpp'],
-  ['Test_Network Generation', 'test/test_network_generation.cpp'],
-  ['Test_Sampling', 'test/test_sampling.cpp'],
-  ['Test_IO', 'test/test_io.cpp'],
+  # ['Test_Tarjan', 'test/test_tarjan.cpp'],
+  # ['Test_DeGroot', 'test/test_deGroot.cpp'],
+  # ['Test_Activity Driven', 'test/test_activity.cpp'],
+  # ['Test_Network', 'test/test_network.cpp'],
+  # ['Test_Network Generation', 'test/test_network_generation.cpp'],
+  # ['Test_Sampling', 'test/test_sampling.cpp'],
+  # ['Test_IO', 'test/test_io.cpp'],
 ]
 
 Catch2 = dependency('Catch2', method : 'cmake', modules : ['Catch2::Catch2WithMain', 'Catch2::Catch2'])

@@ -5,8 +5,9 @@
 #include <fmt/ostream.h>
 #include <argparse/argparse.hpp>
 #include <filesystem>
+#include <models/ActivityDrivenModel.hpp>
 #include <string>
-#include <util/io.hpp>
+// #include <util/io.hpp>
 namespace fs = std::filesystem;
 
 int main( int argc, char * argv[] )
@@ -56,12 +57,21 @@ int main( int argc, char * argv[] )
         fmt::print( "Reading agents from file {}\n", agent_file.value() );
     }
 
-    auto simulation = Seldon::Simulation( simulation_options, network_file, agent_file );
+    if( simulation_options.model == Seldon::Config::Model::DeGroot )
+    {
+        auto simulation
+            = Seldon::Simulation<Seldon::DeGrootModel::AgentT>( simulation_options, network_file, agent_file );
+    }
+    else if( simulation_options.model == Seldon::Config::Model::ActivityDrivenModel )
+    {
+        auto simulation
+            = Seldon::Simulation<Seldon::ActivityAgentModel::AgentT>( simulation_options, network_file, agent_file );
+    }
     fmt::print( "Finished model setup\n" );
 
-    // Seldon::IO::network_to_dot_file( *simulation.network, ( output_dir_path / fs::path( "network.dot" ) ).string() );
-    // Perform the iterations using the model
-    simulation.run( output_dir_path );
+    // // Seldon::IO::network_to_dot_file( *simulation.network, ( output_dir_path / fs::path( "network.dot" ) ).string() );
+    // // Perform the iterations using the model
+    // simulation.run( output_dir_path );
 
     return 0;
 }

@@ -27,7 +27,7 @@ namespace Seldon
 
     Note: switch is equivalent to toggle + transpose, but much cheaper!
 */
-// template<typename AgentType>
+template<typename AgentType>
 class Network
 {
 public:
@@ -38,11 +38,15 @@ public:
     };
 
     using WeightT = double;
+    using AgentT  = AgentType;
 
     Network(
         std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list,
         EdgeDirection direction )
-            : neighbour_list( neighbour_list ), weight_list( weight_list ), _direction( direction )
+            : neighbour_list( neighbour_list ),
+              weight_list( weight_list ),
+              _direction( direction ),
+              agents( std::vector<AgentT>( neighbour_list.size() ) )
     {
     }
 
@@ -221,6 +225,7 @@ private:
     std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
     std::vector<std::vector<WeightT>> weight_list;   // List for the interaction weights of each connection
     EdgeDirection _direction;
+    std::vector<AgentT> agents; // List of agents of type AgentType
 };
 
 } // namespace Seldon
