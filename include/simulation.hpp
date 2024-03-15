@@ -80,7 +80,7 @@ public:
             }
         }
 
-        if constexpr( std::is_same<AgentType, DeGrootModel::AgentT>::value )
+        if constexpr( std::is_same_v<AgentType, DeGrootModel::AgentT> )
         {
             auto degroot_settings = std::get<Config::DeGrootSettings>( options.model_settings );
 
@@ -98,7 +98,7 @@ public:
                 network.agents = AgentGeneration::generate_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
             }
         }
-        else if constexpr( std::is_same<AgentType, ActivityAgentModel::AgentT>::value )
+        else if constexpr( std::is_same_v<AgentType, ActivityAgentModel::AgentT> )
         {
             auto activitydriven_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
 

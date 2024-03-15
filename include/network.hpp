@@ -100,7 +100,7 @@ public:
     }
 
     /*
-        Gives a view into the neighbour indices going out/coming in at agent_idx
+    Gives a view into the neighbour indices going out/coming in at agent_idx
     */
     [[nodiscard]] std::span<const size_t> get_neighbours( std::size_t agent_idx ) const
     {
