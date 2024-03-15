@@ -17,11 +17,13 @@ TEST_CASE( "Test reading in the network from a file", "[io_network]" )
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
+    using AgentT = ActivityAgentModel::AgentT;
+    using Network = Network<AgentT>;
 
     auto proj_root_path = fs::current_path();
     auto network_file   = proj_root_path / fs::path( "test/res/network.txt" );
 
-    auto network = Seldon::NetworkGeneration::generate_from_file( network_file );
+    auto network = Seldon::NetworkGeneration::generate_from_file<AgentT>( network_file );
 
     REQUIRE( network->n_agents() == 3 );
 
