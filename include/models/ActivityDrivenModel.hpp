@@ -114,7 +114,7 @@ public:
         return n_bots > 0;
     }
 
-    ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen );
+    ActivityAgentModel( Network & network, std::mt19937 & gen );
 
     void get_agents_from_power_law(); // This needs to be called after eps and gamma have been set
 

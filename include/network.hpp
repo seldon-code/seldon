@@ -39,6 +39,8 @@ public:
 
     using WeightT = double;
     using AgentT  = AgentType;
+    // @TODO: Make this private later
+    std::vector<AgentT> agents; // List of agents of type AgentType
 
     Network(
         std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list,
@@ -225,7 +227,6 @@ private:
     std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
     std::vector<std::vector<WeightT>> weight_list;   // List for the interaction weights of each connection
     EdgeDirection _direction;
-    std::vector<AgentT> agents; // List of agents of type AgentType
 };
 
 } // namespace Seldon

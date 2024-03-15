@@ -13,7 +13,7 @@ public:
     using Network          = Network<AgentT>;
     double convergence_tol = 1e-12;
 
-    DeGrootModel( int n_agents, Network & network );
+    DeGrootModel( Network & network );
 
     void iteration() override;
     bool finished() override;

@@ -8,10 +8,10 @@
 namespace Seldon
 {
 
-ActivityAgentModel::ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen )
-        : Model<ActivityAgentModel::AgentT>( n_agents ),
+ActivityAgentModel::ActivityAgentModel( Network & network, std::mt19937 & gen )
+        : Model<ActivityAgentModel::AgentT>(),
           network( network ),
-          contact_prob_list( std::vector<std::vector<Network::WeightT>>( n_agents ) ),
+          contact_prob_list( std::vector<std::vector<Network::WeightT>>( network.n_agents() ) ),
           gen( gen )
 {
 }
@@ -27,8 +27,9 @@ double ActivityAgentModel::homophily_weight( size_t idx_contacter, size_t idx_co
         homophily = this->bot_homophily[idx_contacter];
 
     constexpr double tolerance = 1e-10;
-    auto opinion_diff = std::abs( this->agents[idx_contacter].data.opinion - this->agents[idx_contacted].data.opinion );
-    opinion_diff      = std::max( tolerance, opinion_diff );
+    auto opinion_diff
+        = std::abs( network.agents[idx_contacter].data.opinion - network.agents[idx_contacted].data.opinion );
+    opinion_diff = std::max( tolerance, opinion_diff );
 
     return std::pow( opinion_diff, -homophily );
 }
@@ -41,17 +42,17 @@ void ActivityAgentModel::get_agents_from_power_law()
 
     // Initial conditions for the opinions, initialize to [-1,1]
     // The activities should be drawn from a power law distribution
-    for( size_t i = 0; i < agents.size(); i++ )
+    for( size_t i = 0; i < network.agents.size(); i++ )
     {
-        agents[i].data.opinion = dis_opinion( gen ); // Draw the opinion value
+        network.agents[i].data.opinion = dis_opinion( gen ); // Draw the opinion value
 
         if( !mean_activities )
         { // Draw from a power law distribution (1-gamma)/(1-eps^(1-gamma)) * a^(-gamma)
-            agents[i].data.activity = dist_activity( gen );
+            network.agents[i].data.activity = dist_activity( gen );
         }
         else
         {
-            agents[i].data.activity = mean_activity;
+            network.agents[i].data.activity = mean_activity;
         }
     }
 
@@ -59,8 +60,8 @@ void ActivityAgentModel::get_agents_from_power_law()
     {
         for( size_t bot_idx = 0; bot_idx < n_bots; bot_idx++ )
         {
-            agents[bot_idx].data.opinion  = bot_opinion[bot_idx];
-            agents[bot_idx].data.activity = bot_activity[bot_idx];
+            network.agents[bot_idx].data.opinion  = bot_opinion[bot_idx];
+            network.agents[bot_idx].data.activity = bot_activity[bot_idx];
         }
     }
 }
@@ -76,7 +77,7 @@ void ActivityAgentModel::update_network_probabilistic()
     for( size_t idx_agent = 0; idx_agent < network.n_agents(); idx_agent++ )
     {
         // Test if the agent is activated
-        bool activated = dis_activation( gen ) < agents[idx_agent].data.activity;
+        bool activated = dis_activation( gen ) < network.agents[idx_agent].data.activity;
 
         if( activated )
         {
@@ -172,7 +173,7 @@ void ActivityAgentModel::update_network_mean()
             m_temp = bot_m[idx_agent];
         }
 
-        double activity = std::max( 1.0, agents[idx_agent].data.activity );
+        double activity = std::max( 1.0, network.agents[idx_agent].data.activity );
         for( size_t j = 0; j < network.n_agents(); j++ )
         {
             double omega = homophily_weight( idx_agent, j ) / normalization;
@@ -225,21 +226,21 @@ void ActivityAgentModel::iteration()
 
     // Integrate the ODE using 4th order Runge-Kutta
     // k_1 =   hf(x_n,y_n)
-    get_euler_slopes( k1_buffer, [this]( size_t i ) { return this->agents[i].data.opinion; } );
+    get_euler_slopes( k1_buffer, [this]( size_t i ) { return network.agents[i].data.opinion; } );
     // k_2  =   hf(x_n+1/2h,y_n+1/2k_1)
     get_euler_slopes(
-        k2_buffer, [this]( size_t i ) { return this->agents[i].data.opinion + 0.5 * this->k1_buffer[i]; } );
+        k2_buffer, [this]( size_t i ) { return network.agents[i].data.opinion + 0.5 * this->k1_buffer[i]; } );
     // k_3  =   hf(x_n+1/2h,y_n+1/2k_2)
     get_euler_slopes(
-        k3_buffer, [this]( size_t i ) { return this->agents[i].data.opinion + 0.5 * this->k2_buffer[i]; } );
+        k3_buffer, [this]( size_t i ) { return network.agents[i].data.opinion + 0.5 * this->k2_buffer[i]; } );
     // k_4  =   hf(x_n+h,y_n+k_3)
-    get_euler_slopes( k4_buffer, [this]( size_t i ) { return this->agents[i].data.opinion + this->k3_buffer[i]; } );
+    get_euler_slopes( k4_buffer, [this]( size_t i ) { return network.agents[i].data.opinion + this->k3_buffer[i]; } );
 
     // Update the agent opinions
     for( size_t idx_agent = 0; idx_agent < network.n_agents(); ++idx_agent )
     {
         // y_(n+1) =   y_n+1/6k_1+1/3k_2+1/3k_3+1/6k_4+O(h^5)
-        agents[idx_agent].data.opinion
+        network.agents[idx_agent].data.opinion
             += ( k1_buffer[idx_agent] + 2 * k2_buffer[idx_agent] + 2 * k3_buffer[idx_agent] + k4_buffer[idx_agent] )
                / 6.0;
     }
@@ -248,7 +249,7 @@ void ActivityAgentModel::iteration()
     {
         for( size_t bot_idx = 0; bot_idx < n_bots; bot_idx++ )
         {
-            agents[bot_idx].data.opinion = bot_opinion[bot_idx];
+            network.agents[bot_idx].data.opinion = bot_opinion[bot_idx];
         }
     }
 }

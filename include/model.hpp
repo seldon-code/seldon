@@ -12,11 +12,11 @@ class Model : public ModelBase
 {
 public:
     using AgentT = AgentT_;
-    std::vector<AgentT> agents;
+    // std::vector<AgentT> agents;
 
     std::optional<int> max_iterations = std::nullopt;
-    Model( size_t n_agents ) : agents( std::vector<AgentT>( int( n_agents ), AgentT() ) ) {}
-    Model( std::vector<AgentT> && agents ) : agents( agents ) {}
+    // Model( size_t n_agents ) : agents( std::vector<AgentT>( int( n_agents ), AgentT() ) ) {}
+    // Model( std::vector<AgentT> && agents ) : agents( agents ) {}
 
     void iteration() override
     {
@@ -35,10 +35,10 @@ public:
         }
     };
 
-    AgentBase * get_agent( int idx ) override // For this to work AgentT needs to be a subclass of AgentBase
-    {
-        return &agents[idx];
-    }
+    // AgentBase * get_agent( int idx ) override // For this to work AgentT needs to be a subclass of AgentBase
+    // {
+    //     return &agents[idx];
+    // }
 };
 
 } // namespace Seldon

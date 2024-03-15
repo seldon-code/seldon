@@ -76,14 +76,13 @@ public:
             auto degroot_settings = std::get<Config::DeGrootSettings>( options.model_settings );
 
             // DeGroot specific parameters
-            auto model_DeGroot             = std::make_unique<DeGrootModel>( network->n_agents(), *network );
+            auto model_DeGroot             = std::make_unique<DeGrootModel>( *network );
             model_DeGroot->max_iterations  = degroot_settings.max_iterations;
             model_DeGroot->convergence_tol = degroot_settings.convergence_tol;
 
             if( cli_agent_file.has_value() )
             {
-                model_DeGroot->agents
-                    = AgentGeneration::generate_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
+                network->agents = AgentGeneration::generate_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
             }
 
             model = std::move( model_DeGroot );
@@ -92,11 +91,11 @@ public:
         {
             auto activitydriven_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
 
-            auto model_activityDriven   = std::make_unique<ActivityAgentModel>( network->n_agents(), *network, gen );
-            model_activityDriven->dt    = activitydriven_settings.dt;
-            model_activityDriven->m     = activitydriven_settings.m;
-            model_activityDriven->eps   = activitydriven_settings.eps;
-            model_activityDriven->gamma = activitydriven_settings.gamma;
+            auto model_activityDriven             = std::make_unique<ActivityAgentModel>( *network, gen );
+            model_activityDriven->dt              = activitydriven_settings.dt;
+            model_activityDriven->m               = activitydriven_settings.m;
+            model_activityDriven->eps             = activitydriven_settings.eps;
+            model_activityDriven->gamma           = activitydriven_settings.gamma;
             model_activityDriven->homophily       = activitydriven_settings.homophily;
             model_activityDriven->reciprocity     = activitydriven_settings.reciprocity;
             model_activityDriven->alpha           = activitydriven_settings.alpha;
@@ -117,7 +116,7 @@ public:
 
             if( cli_agent_file.has_value() )
             {
-                model_activityDriven->agents
+                network->agents
                     = AgentGeneration::generate_from_file<ActivityAgentModel::AgentT>( cli_agent_file.value() );
             }
 
