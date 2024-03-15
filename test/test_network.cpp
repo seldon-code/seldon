@@ -9,12 +9,13 @@
 TEST_CASE( "Testing the network class" )
 {
     using namespace Seldon;
+    using Network = Network<double>;
 
     // Generate some network
     const size_t n_agents      = 20;
     const size_t n_connections = 10;
     std::mt19937 gen( 0 );
-    auto network = NetworkGeneration::generate_n_connections( n_agents, n_connections, false, gen );
+    auto network = NetworkGeneration::generate_n_connections<double>( n_agents, n_connections, false, gen );
 
     // Does n_agents work?
     REQUIRE( network->n_agents() == n_agents );
@@ -23,8 +24,8 @@ TEST_CASE( "Testing the network class" )
 
     // Check that the function for setting neighbours and a single weight work
     // Agent 3
-    std::vector<size_t> neigh{ { 0, 10 } };                   // new neighbours
-    std::vector<Seldon::Network::WeightT> weight{ 0.5, 0.5 }; // new weights (const)
+    std::vector<size_t> neigh{ { 0, 10 } };           // new neighbours
+    std::vector<Network::WeightT> weight{ 0.5, 0.5 }; // new weights (const)
     network->set_neighbours_and_weights( 3, neigh, 0.5 );
     auto buffer_w_get = network->get_weights( 3 );
 
@@ -44,7 +45,7 @@ TEST_CASE( "Testing the network class" )
         n = 2;
         REQUIRE( network->get_neighbours( 3 )[0] == 2 );
 
-        Seldon::Network::WeightT & w = network->get_weights( 3 )[1];
+        Network::WeightT & w = network->get_weights( 3 )[1];
         REQUIRE( w == 0.55 );
         w = 0.9;
         REQUIRE( network->get_weights( 3 )[1] == w );
@@ -53,8 +54,8 @@ TEST_CASE( "Testing the network class" )
     SECTION( "Checking that set_neighbours_and_weights works with a vector of weights, push_back and transpose" )
     {
         // Change the connections for agent 3
-        std::vector<size_t> buffer_n{ { 0, 10, 15 } };                   // new neighbours
-        std::vector<Seldon::Network::WeightT> buffer_w{ 0.1, 0.2, 0.3 }; // new weights
+        std::vector<size_t> buffer_n{ { 0, 10, 15 } };           // new neighbours
+        std::vector<Network::WeightT> buffer_w{ 0.1, 0.2, 0.3 }; // new weights
         network->set_neighbours_and_weights( 3, buffer_n, buffer_w );
 
         // Make sure the changes worked

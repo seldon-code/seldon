@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "config_parser.hpp"
 #include "models/DeGroot.hpp"
 #include "network.hpp"
 #include <random>
@@ -9,6 +10,7 @@ TEST_CASE( "Test the DeGroot Model Symmetric", "[DeGroot]" )
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
+    using Network = Network<DeGrootModel::AgentT>;
 
     size_t n_agents     = 2;
     auto neighbour_list = std::vector<std::vector<size_t>>{

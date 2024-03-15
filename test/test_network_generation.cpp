@@ -9,6 +9,7 @@
 TEST_CASE( "Testing the network generation functions" )
 {
     using namespace Seldon;
+    using Network = Network<double>;
     using WeightT = Network::WeightT;
 
     std::vector<size_t> buffer_n_get{};  // buffer for getting neighbours
@@ -23,7 +24,7 @@ TEST_CASE( "Testing the network generation functions" )
         {
             WeightT weight = 0.25;
             std::vector<WeightT> weights{ weight, weight, weight }; // Weights to set to
-            auto network = NetworkGeneration::generate_fully_connected( n_agents, weight );
+            auto network = NetworkGeneration::generate_fully_connected<double>( n_agents, weight );
             // Make sure that the network has been generated correctly
             REQUIRE( network->n_agents() == n_agents ); // There should be n_agents in the new network
 

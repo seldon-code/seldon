@@ -7,7 +7,6 @@
 #include <filesystem>
 #include <models/ActivityDrivenModel.hpp>
 #include <string>
-// #include <util/io.hpp>
 namespace fs = std::filesystem;
 
 int main( int argc, char * argv[] )
