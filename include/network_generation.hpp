@@ -181,7 +181,6 @@ Network<AgentType> generate_from_file( const std::string & file )
         auto line     = file_contents.substr( start_of_line, end_of_line - start_of_line );
         start_of_line = end_of_line + 1;
 
-        // TODO: check if empty or comment
         if( line.empty() )
         {
             break;

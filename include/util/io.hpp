@@ -37,7 +37,6 @@ void network_to_dot_file( const Network<AgentT> & network, const std::string & f
     fs.close();
 }
 
-// @TODO: Network now contains the agents, so there is no need for simulation.
 template<typename AgentT>
 void opinions_to_file( const Network<AgentT> & network, const std::string & file_path )
 {
@@ -55,7 +54,6 @@ void opinions_to_file( const Network<AgentT> & network, const std::string & file
     fs.close();
 }
 
-// @TODO: There is no need to use simulation anymore since network should have the agents
 template<typename AgentT>
 void network_to_file( const Network<AgentT> & network, const std::string & file_path )
 {
