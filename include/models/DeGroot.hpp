@@ -10,17 +10,17 @@ class DeGrootModel : public Model<Agent<double>>
 {
 public:
     using AgentT           = Agent<double>;
-    using Network          = Network<AgentT>;
+    using NetworkT         = Network<AgentT>;
     double convergence_tol = 1e-12;
 
-    DeGrootModel( Network & network );
+    DeGrootModel( NetworkT & network );
 
     void iteration() override;
     bool finished() override;
 
 private:
     double max_opinion_diff = 0;
-    Network & network;
+    NetworkT & network;
     std::vector<AgentT> agents_current_copy;
 };
 

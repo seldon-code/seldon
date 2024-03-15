@@ -45,10 +45,10 @@ public:
     Network(
         std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list,
         EdgeDirection direction )
-            : neighbour_list( neighbour_list ),
+            : agents( std::vector<AgentT>( neighbour_list.size() ) ),
+              neighbour_list( neighbour_list ),
               weight_list( weight_list ),
-              _direction( direction ),
-              agents( std::vector<AgentT>( neighbour_list.size() ) )
+              _direction( direction )
     {
     }
 
@@ -124,7 +124,7 @@ public:
     /*
     Gives a view into the edge weights going out/coming in at agent_idx
     */
-    void set_weights( std::size_t agent_idx, std::span<const WeightT> weights )
+    void set_weights( std::size_t agent_idx, const std::span<const WeightT> weights )
     {
         if( neighbour_list[agent_idx].size() != weights.size() )
         {

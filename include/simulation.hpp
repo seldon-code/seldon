@@ -124,7 +124,7 @@ public:
             model = std::move( model_activityDriven );
         }
     }
-    void run( fs::path output_dir_path )
+    void run( const fs::path & output_dir_path )
     {
         auto n_output_agents  = this->output_settings.n_output_agents;
         auto n_output_network = this->output_settings.n_output_network;

@@ -2,7 +2,10 @@
 #include <cmath>
 #include <iterator>
 
-Seldon::DeGrootModel::DeGrootModel( Network & network )
+namespace Seldon
+{
+
+DeGrootModel::DeGrootModel( NetworkT & network )
         : Model<AgentT>(), network( network ), agents_current_copy( network.agents )
 {
     // For a strongly connected network, the number of SCCs should be 1
@@ -19,7 +22,7 @@ Seldon::DeGrootModel::DeGrootModel( Network & network )
     }
 }
 
-void Seldon::DeGrootModel::iteration()
+void DeGrootModel::iteration()
 {
     Model<AgentT>::iteration();
 
@@ -49,8 +52,10 @@ void Seldon::DeGrootModel::iteration()
     }
 }
 
-bool Seldon::DeGrootModel::finished()
+bool DeGrootModel::finished()
 {
     bool converged = max_opinion_diff < convergence_tol;
     return Model<AgentT>::finished() || converged;
 }
+
+} // namespace Seldon

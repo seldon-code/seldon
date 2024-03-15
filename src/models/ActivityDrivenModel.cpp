@@ -8,10 +8,10 @@
 namespace Seldon
 {
 
-ActivityAgentModel::ActivityAgentModel( Network & network, std::mt19937 & gen )
+ActivityAgentModel::ActivityAgentModel( NetworkT & network, std::mt19937 & gen )
         : Model<ActivityAgentModel::AgentT>(),
           network( network ),
-          contact_prob_list( std::vector<std::vector<Network::WeightT>>( network.n_agents() ) ),
+          contact_prob_list( std::vector<std::vector<NetworkT::WeightT>>( network.n_agents() ) ),
           gen( gen )
 {
 }
@@ -135,7 +135,7 @@ void ActivityAgentModel::update_network_probabilistic()
 
 void ActivityAgentModel::update_network_mean()
 {
-    using WeightT = Network::WeightT;
+    using WeightT = NetworkT::WeightT;
     std::vector<WeightT> weights( network.n_agents(), 0.0 );
 
     // Set all weights to zero in the beginning
