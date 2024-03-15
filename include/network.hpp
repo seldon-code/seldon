@@ -27,7 +27,7 @@ namespace Seldon
 
     Note: switch is equivalent to toggle + transpose, but much cheaper!
 */
-template<typename AgentType>
+template<typename AgentType, typename WeightType = double>
 class Network
 {
 public:
@@ -37,7 +37,7 @@ public:
         Outgoing
     };
 
-    using WeightT = double;
+    using WeightT = WeightType;
     using AgentT  = AgentType;
     // @TODO: Make this private later
     std::vector<AgentT> agents{}; // List of agents of type AgentType
@@ -106,6 +106,7 @@ public:
     {
         return std::span( neighbour_list[agent_idx].data(), neighbour_list[agent_idx].size() );
     }
+
     [[nodiscard]] std::span<size_t> get_neighbours( std::size_t agent_idx )
     {
         return std::span( neighbour_list[agent_idx].data(), neighbour_list[agent_idx].size() );
@@ -118,6 +119,7 @@ public:
     {
         return std::span<const WeightT>( weight_list[agent_idx].data(), weight_list[agent_idx].size() );
     }
+
     [[nodiscard]] std::span<WeightT> get_weights( std::size_t agent_idx )
     {
         return std::span<WeightT>( weight_list[agent_idx].data(), weight_list[agent_idx].size() );
@@ -145,6 +147,7 @@ public:
         weight_list[agent_idx].resize( buffer_neighbours.size() );
         std::fill( weight_list[agent_idx].begin(), weight_list[agent_idx].end(), weight );
     }
+
     /*
     Sets the neighbour indices and weights at agent_idx
     */
