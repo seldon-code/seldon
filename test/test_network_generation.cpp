@@ -26,13 +26,13 @@ TEST_CASE( "Testing the network generation functions" )
             std::vector<WeightT> weights{ weight, weight, weight }; // Weights to set to
             auto network = NetworkGeneration::generate_fully_connected<double>( n_agents, weight );
             // Make sure that the network has been generated correctly
-            REQUIRE( network->n_agents() == n_agents ); // There should be n_agents in the new network
+            REQUIRE( network.n_agents() == n_agents ); // There should be n_agents in the new network
 
             // All neighbours should be equal to neigh
             for( size_t i = 0; i < n_agents; ++i )
             {
-                auto buffer_n_get = network->get_neighbours( i );
-                auto buffer_w_get = network->get_weights( i );
+                auto buffer_n_get = network.get_neighbours( i );
+                auto buffer_w_get = network.get_weights( i );
                 REQUIRE_THAT( buffer_n_get, Catch::Matchers::UnorderedRangeEquals( neigh ) );
                 REQUIRE_THAT( buffer_w_get, Catch::Matchers::UnorderedRangeEquals( weights ) );
             }

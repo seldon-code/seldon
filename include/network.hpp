@@ -40,7 +40,9 @@ public:
     using WeightT = double;
     using AgentT  = AgentType;
     // @TODO: Make this private later
-    std::vector<AgentT> agents; // List of agents of type AgentType
+    std::vector<AgentT> agents{}; // List of agents of type AgentType
+
+    Network() = default;
 
     Network(
         std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list,

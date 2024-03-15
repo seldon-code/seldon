@@ -1,7 +1,6 @@
 #pragma once
 #include "network.hpp"
 #include <cstddef>
-#include <memory>
 #include <random>
 #include <util/math.hpp>
 #include <util/misc.hpp>
@@ -12,7 +11,7 @@ namespace Seldon::NetworkGeneration
    If self_interaction=true, a connection of the agent with itself is included, which is *not* counted in n_connections
 */
 template<typename AgentType>
-std::unique_ptr<Network<AgentType>>
+Network<AgentType>
 generate_n_connections( size_t n_agents, size_t n_connections, bool self_interaction, std::mt19937 & gen )
 {
     using NetworkT = Network<AgentType>;
@@ -70,13 +69,11 @@ generate_n_connections( size_t n_agents, size_t n_connections, bool self_interac
 
     } // end of loop through n_agents
 
-    return std::make_unique<NetworkT>(
-        std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
+    return NetworkT( std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
 }
 
 template<typename AgentType>
-std::unique_ptr<Network<AgentType>>
-generate_fully_connected( size_t n_agents, typename Network<AgentType>::WeightT weight = 0.0 )
+Network<AgentType> generate_fully_connected( size_t n_agents, typename Network<AgentType>::WeightT weight = 0.0 )
 {
     using NetworkT = Network<AgentType>;
     using WeightT  = typename NetworkT::WeightT;
@@ -104,12 +101,11 @@ generate_fully_connected( size_t n_agents, typename Network<AgentType>::WeightT 
 
     } // end of loop through n_agents
 
-    return std::make_unique<NetworkT>(
-        std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
+    return NetworkT( std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
 }
 
 template<typename AgentType>
-std::unique_ptr<Network<AgentType>> generate_fully_connected( size_t n_agents, std::mt19937 & gen )
+Network<AgentType> generate_fully_connected( size_t n_agents, std::mt19937 & gen )
 {
     using NetworkT = Network<AgentType>;
     using WeightT  = typename NetworkT::WeightT;
@@ -156,12 +152,11 @@ std::unique_ptr<Network<AgentType>> generate_fully_connected( size_t n_agents, s
 
     } // end of loop through n_agents
 
-    return std::make_unique<NetworkT>(
-        std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
+    return NetworkT( std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
 }
 
 template<typename AgentType>
-std::unique_ptr<Network<AgentType>> generate_from_file( const std::string & file )
+Network<AgentType> generate_from_file( const std::string & file )
 {
     using NetworkT = Network<AgentType>;
     using WeightT  = typename NetworkT::WeightT;
@@ -238,7 +233,6 @@ std::unique_ptr<Network<AgentType>> generate_from_file( const std::string & file
         }
     }
 
-    return std::make_unique<NetworkT>(
-        std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
+    return NetworkT( std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
 }
 } // namespace Seldon::NetworkGeneration

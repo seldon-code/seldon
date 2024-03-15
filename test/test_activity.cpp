@@ -77,9 +77,9 @@ TEST_CASE( "Test the probabilistic activity driven model for two agents", "[acti
 
     fmt::print( "analytical_x = {}\n", analytical_x );
 
-    for( size_t idx_agent = 0; idx_agent < simulation.network->n_agents(); idx_agent++ )
+    for( size_t idx_agent = 0; idx_agent < simulation.network.n_agents(); idx_agent++ )
     {
-        auto & agent = simulation.network->agents[idx_agent];
+        auto & agent = simulation.network.agents[idx_agent];
         fmt::print( "{} \n", agent.data.opinion );
         REQUIRE_THAT( agent.data.opinion, WithinAbs( analytical_x, 1e-4 ) );
     }
@@ -103,12 +103,12 @@ TEST_CASE( "Test the probabilistic activity driven model with one bot and one ag
     fs::path output_dir_path = proj_root_path / fs::path( "test/output" );
 
     // Get the bot opinion (which won't change)
-    auto bot   = simulation.network->agents[0];
+    auto bot   = simulation.network.agents[0];
     auto x_bot = bot.data.opinion; // Bot opinion
     fmt::print( "We have set the bot opinion = {}\n", x_bot );
 
     // Get the initial agent opinion
-    auto & agent = simulation.network->agents[1];
+    auto & agent = simulation.network.agents[1];
     auto x_0     = agent.data.opinion; // Agent opinion
     fmt::print( "We have set agent x_0 = {}\n", x_0 );
 
@@ -167,8 +167,7 @@ TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activity
     auto mean_activity = dist.mean();
 
     // Calculate the critical controversialness
-    auto set_opinions_and_run = [&]( bool above_critical_controversialness )
-    {
+    auto set_opinions_and_run = [&]( bool above_critical_controversialness ) {
         auto simulation            = Simulation<AgentT>( options, std::nullopt, std::nullopt );
         auto initial_opinion_delta = 0.1; // Set the initial opinion in the interval [-delta, delta]
 
@@ -177,7 +176,7 @@ TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activity
         // Check that all activities are indeed the expected mean activity and set the opinions in a small interval around 0
         for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
         {
-            auto & agent = simulation.network->agents[idx_agent];
+            auto & agent = simulation.network.agents[idx_agent];
             REQUIRE_THAT( mean_activity, WithinAbs( agent.data.activity, 1e-16 ) );
             agent.data.opinion
                 = -initial_opinion_delta + 2.0 * idx_agent / ( n_agents - 1 ) * ( initial_opinion_delta );
@@ -195,7 +194,7 @@ TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activity
         double avg_deviation = 0.0;
         for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
         {
-            auto & agent = simulation.network->agents[idx_agent];
+            auto & agent = simulation.network.agents[idx_agent];
             if( above_critical_controversialness )
                 REQUIRE( std::abs( agent.data.opinion ) > std::abs( initial_opinion_delta ) );
             else

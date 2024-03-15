@@ -25,16 +25,16 @@ TEST_CASE( "Test reading in the network from a file", "[io_network]" )
 
     auto network = Seldon::NetworkGeneration::generate_from_file<AgentT>( network_file );
 
-    REQUIRE( network->n_agents() == 3 );
+    REQUIRE( network.n_agents() == 3 );
 
     std::vector<std::vector<int>> neighbours_expected           = { { 2, 1 }, {}, { 1 } };
     std::vector<std::vector<Network::WeightT>> weights_expected = { { 0.1, -0.2 }, {}, { 1.2 } };
 
-    for( size_t i = 0; i < network->n_agents(); i++ )
+    for( size_t i = 0; i < network.n_agents(); i++ )
     {
         fmt::print( "{}", i );
-        REQUIRE_THAT( neighbours_expected[i], Catch::Matchers::UnorderedRangeEquals( network->get_neighbours( i ) ) );
-        REQUIRE_THAT( weights_expected[i], Catch::Matchers::UnorderedRangeEquals( network->get_weights( i ) ) );
+        REQUIRE_THAT( neighbours_expected[i], Catch::Matchers::UnorderedRangeEquals( network.get_neighbours( i ) ) );
+        REQUIRE_THAT( weights_expected[i], Catch::Matchers::UnorderedRangeEquals( network.get_weights( i ) ) );
     }
 }
 
