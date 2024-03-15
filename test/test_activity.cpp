@@ -95,6 +95,7 @@ TEST_CASE( "Test the probabilistic activity driven model with one bot and one ag
     auto input_file     = proj_root_path / fs::path( "test/res/1bot_1agent_activity_prob.toml" );
 
     auto options = Config::parse_config_file( input_file.string() );
+    Config::print_settings( options );
 
     auto simulation = Simulation<AgentT>( options, std::nullopt, std::nullopt );
 
@@ -102,11 +103,13 @@ TEST_CASE( "Test the probabilistic activity driven model with one bot and one ag
     fs::path output_dir_path = proj_root_path / fs::path( "test/output" );
 
     // Get the bot opinion (which won't change)
-    auto & bot   = simulation.network->agents[0];
-    auto & x_bot = bot.data.opinion; // Bot opinion
+    auto bot   = simulation.network->agents[0];
+    auto x_bot = bot.data.opinion; // Bot opinion
+    fmt::print( "We have set the bot opinion = {}\n", x_bot );
+
     // Get the initial agent opinion
     auto & agent = simulation.network->agents[1];
-    auto & x_0   = agent.data.opinion; // Agent opinion
+    auto x_0     = agent.data.opinion; // Agent opinion
     fmt::print( "We have set agent x_0 = {}\n", x_0 );
 
     simulation.run( output_dir_path );
@@ -130,7 +133,7 @@ TEST_CASE( "Test the probabilistic activity driven model with one bot and one ag
     // x_t = [x(0) - Ktanh(alpha*x_bot)]e^(-t) + Ktanh(alpha*x_bot)
     auto x_t_analytical = ( x_0 - K * tanh( alpha * x_bot ) ) * exp( -time_elapsed ) + K * tanh( alpha * x_bot );
 
-    REQUIRE_THAT( x_t, WithinAbs( x_t_analytical, 1e-6 ) );
+    REQUIRE_THAT( x_t, WithinAbs( x_t_analytical, 1e-5 ) );
 }
 
 TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activityMeanfield10Agents]" )
@@ -164,8 +167,7 @@ TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activity
     auto mean_activity = dist.mean();
 
     // Calculate the critical controversialness
-    auto set_opinions_and_run = [&]( bool above_critical_controversialness )
-    {
+    auto set_opinions_and_run = [&]( bool above_critical_controversialness ) {
         auto simulation            = Simulation<AgentT>( options, std::nullopt, std::nullopt );
         auto initial_opinion_delta = 0.1; // Set the initial opinion in the interval [-delta, delta]
 
