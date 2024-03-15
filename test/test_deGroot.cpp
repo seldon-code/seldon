@@ -36,7 +36,7 @@ TEST_CASE( "Test the DeGroot Model Symmetric", "[DeGroot]" )
         model.iteration();
     } while( !model.finished() );
 
-    INFO( fmt::format( "N_iterations = {} (with convergence_tol {})\n", model.n_iterations, model.convergence_tol ) );
+    INFO( fmt::format( "N_iterations = {} (with convergence_tol {})\n", model.n_iterations(), model.convergence_tol ) );
     for( size_t i = 0; i < n_agents; i++ )
     {
         INFO( fmt::format( "Opinion {} = {}\n", i, network.agents[i].data ) );

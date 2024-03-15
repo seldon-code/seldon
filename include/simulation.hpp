@@ -1,9 +1,9 @@
 #pragma once
 
 #include "config_parser.hpp"
-#include "model_base.hpp"
 #include "network.hpp"
 #include <fmt/chrono.h>
+#include <fmt/format.h>
 #include <agent_generation.hpp>
 #include <filesystem>
 #include <memory>
@@ -78,7 +78,8 @@ public:
             auto degroot_settings = std::get<Config::DeGrootSettings>( options.model_settings );
 
             // DeGroot specific parameters
-            model = [&]() {
+            model = [&]()
+            {
                 auto model             = std::make_unique<DeGrootModel>( network );
                 model->max_iterations  = degroot_settings.max_iterations;
                 model->convergence_tol = degroot_settings.convergence_tol;
@@ -94,7 +95,8 @@ public:
         {
             auto activitydriven_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
 
-            model = [&]() {
+            model = [&]()
+            {
                 auto model             = std::make_unique<ActivityAgentModel>( network, gen );
                 model->dt              = activitydriven_settings.dt;
                 model->m               = activitydriven_settings.m;
@@ -138,6 +140,8 @@ public:
         auto filename = fmt::format( "opinions_{}.txt", 0 );
         Seldon::IO::opinions_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
 
+        this->model->initialize_iterations();
+
         typedef std::chrono::milliseconds ms;
         auto t_simulation_start = std::chrono::high_resolution_clock::now();
         while( !this->model->finished() )
@@ -153,21 +157,21 @@ public:
             if( this->output_settings.print_progress )
             {
                 fmt::print(
-                    "Iteration {}   iter_time = {:%Hh %Mm %Ss} \n", this->model->n_iterations,
+                    "Iteration {}   iter_time = {:%Hh %Mm %Ss} \n", this->model->n_iterations(),
                     std::chrono::floor<ms>( iter_time ) );
             }
 
             // Write out the opinion?
-            if( n_output_agents.has_value() && ( this->model->n_iterations % n_output_agents.value() == 0 ) )
+            if( n_output_agents.has_value() && ( this->model->n_iterations() % n_output_agents.value() == 0 ) )
             {
-                auto filename = fmt::format( "opinions_{}.txt", this->model->n_iterations );
+                auto filename = fmt::format( "opinions_{}.txt", this->model->n_iterations() );
                 Seldon::IO::opinions_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
             }
 
             // Write out the network?
-            if( n_output_network.has_value() && ( this->model->n_iterations % n_output_network.value() == 0 ) )
+            if( n_output_network.has_value() && ( this->model->n_iterations() % n_output_network.value() == 0 ) )
             {
-                auto filename = fmt::format( "network_{}.txt", this->model->n_iterations );
+                auto filename = fmt::format( "network_{}.txt", this->model->n_iterations() );
                 Seldon::IO::network_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
             }
         }
@@ -177,7 +181,7 @@ public:
 
         fmt::print( "-----------------------------------------------------------------\n" );
         fmt::print(
-            "Finished after {} iterations, total time = {:%Hh %Mm %Ss}\n", this->model->n_iterations,
+            "Finished after {} iterations, total time = {:%Hh %Mm %Ss}\n", this->model->n_iterations(),
             std::chrono::floor<ms>( total_time ) );
         fmt::print( "=================================================================\n" );
     }

@@ -1,4 +1,5 @@
 #pragma once
+#include "agent.hpp"
 #include "model.hpp"
 #include "network.hpp"
 #include <vector>
