@@ -18,8 +18,15 @@ namespace fs = std::filesystem;
 namespace Seldon
 {
 
+class SimulationInterface
+{
+public:
+    virtual void run( const fs::path & output_dir_path ) = 0;
+    virtual ~SimulationInterface()                       = default;
+};
+
 template<typename AgentType>
-class Simulation
+class Simulation : public SimulationInterface
 {
 
 private:
@@ -127,7 +134,7 @@ public:
         }
     }
 
-    void run( const fs::path & output_dir_path )
+    void run( const fs::path & output_dir_path ) override
     {
         auto n_output_agents  = this->output_settings.n_output_agents;
         auto n_output_network = this->output_settings.n_output_network;
