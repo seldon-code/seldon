@@ -36,11 +36,12 @@ inline void Agent<ActivityAgentData>::from_string( const std::string & str )
 class ActivityAgentModel : public Model<Agent<ActivityAgentData>>
 {
 public:
-    using AgentT = Agent<ActivityAgentData>;
+    using AgentT   = Agent<ActivityAgentData>;
+    using NetworkT = Network<AgentT>;
 
 private:
-    Network & network;
-    std::vector<std::vector<Network::WeightT>> contact_prob_list; // Probability of choosing i in 1 to m rounds
+    NetworkT & network;
+    std::vector<std::vector<NetworkT::WeightT>> contact_prob_list; // Probability of choosing i in 1 to m rounds
     // Random number generation
     std::mt19937 & gen; // reference to simulation Mersenne-Twister engine
     std::set<std::pair<size_t, size_t>> reciprocal_edge_buffer{};
@@ -113,7 +114,7 @@ public:
         return n_bots > 0;
     }
 
-    ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen );
+    ActivityAgentModel( NetworkT & network, std::mt19937 & gen );
 
     void get_agents_from_power_law(); // This needs to be called after eps and gamma have been set
 

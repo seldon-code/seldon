@@ -1,5 +1,4 @@
 #pragma once
-#include "agent_base.hpp"
 #include <fmt/format.h>
 namespace Seldon
 {
@@ -8,17 +7,18 @@ namespace Seldon
 (which contains an opinion and perhaps some other things),
 it needs to implement to_string and from_string*/
 template<typename T>
-class Agent : public AgentBase
+class Agent
 {
 public:
     using data_t = T;
     data_t data;
     Agent() = default;
     Agent( data_t data ) : data( data ) {}
+    virtual ~Agent() = default;
 
     void from_string( const std::string & str );
 
-    std::string to_string() const override
+    virtual std::string to_string() const
     {
         return fmt::format( "{:.16f}", data );
     }
