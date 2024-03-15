@@ -18,6 +18,7 @@ TEST_CASE(
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
+    using AgentT = ActivityAgentModel::AgentT;
 
     auto proj_root_path = fs::current_path();
 
@@ -25,7 +26,7 @@ TEST_CASE(
 
     auto options = Config::parse_config_file( input_file.string() );
 
-    auto simulation = Simulation( options, std::nullopt, std::nullopt );
+    auto simulation = Simulation<AgentT>( options, std::nullopt, std::nullopt );
 
     fs::path output_dir_path = proj_root_path / fs::path( "test/output" );
 
@@ -49,13 +50,14 @@ TEST_CASE( "Test the probabilistic activity driven model for two agents", "[acti
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
+    using AgentT = ActivityAgentModel::AgentT;
 
     auto proj_root_path = fs::current_path();
     auto input_file     = proj_root_path / fs::path( "test/res/2_agents_activity_prob.toml" );
 
     auto options = Config::parse_config_file( input_file.string() );
 
-    auto simulation = Simulation( options, std::nullopt, std::nullopt );
+    auto simulation = Simulation<AgentT>( options, std::nullopt, std::nullopt );
 
     // We need an output path for Simulation, but we won't write anything out there
     fs::path output_dir_path = proj_root_path / fs::path( "test/output" );
@@ -77,9 +79,9 @@ TEST_CASE( "Test the probabilistic activity driven model for two agents", "[acti
 
     for( size_t idx_agent = 0; idx_agent < simulation.network->n_agents(); idx_agent++ )
     {
-        auto * agent = simulation.model->get_agent_as<ActivityAgentModel::AgentT>( idx_agent );
-        fmt::print( "{} \n", agent->data.opinion );
-        REQUIRE_THAT( agent->data.opinion, WithinAbs( analytical_x, 1e-4 ) );
+        auto & agent = simulation.network->agents[idx_agent];
+        fmt::print( "{} \n", agent.data.opinion );
+        REQUIRE_THAT( agent.data.opinion, WithinAbs( analytical_x, 1e-4 ) );
     }
 }
 
@@ -87,24 +89,24 @@ TEST_CASE( "Test the probabilistic activity driven model with one bot and one ag
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
+    using AgentT = ActivityAgentModel::AgentT;
 
     auto proj_root_path = fs::current_path();
     auto input_file     = proj_root_path / fs::path( "test/res/1bot_1agent_activity_prob.toml" );
 
     auto options = Config::parse_config_file( input_file.string() );
 
-    auto simulation = Simulation( options, std::nullopt, std::nullopt );
+    auto simulation = Simulation<AgentT>( options, std::nullopt, std::nullopt );
 
     // We need an output path for Simulation, but we won't write anything out there
     fs::path output_dir_path = proj_root_path / fs::path( "test/output" );
 
     // Get the bot opinion (which won't change)
-    auto * bot = simulation.model->get_agent_as<ActivityAgentModel::AgentT>( 0 );
-    auto x_bot = bot->data.opinion; // Bot opinion
+    auto & bot   = simulation.network->agents[0];
+    auto & x_bot = bot.data.opinion; // Bot opinion
     // Get the initial agent opinion
-    auto * agent        = simulation.model->get_agent_as<ActivityAgentModel::AgentT>( 1 );
-    agent->data.opinion = 1.0;
-    auto x_0            = agent->data.opinion;
+    auto & agent = simulation.network->agents[1];
+    auto & x_0   = agent.data.opinion; // Agent opinion
     fmt::print( "We have set agent x_0 = {}\n", x_0 );
 
     simulation.run( output_dir_path );
@@ -117,8 +119,8 @@ TEST_CASE( "Test the probabilistic activity driven model with one bot and one ag
     auto time_elapsed   = iterations * dt;
 
     // Final agent and bot opinions after the simulation run
-    auto x_t     = agent->data.opinion;
-    auto x_t_bot = bot->data.opinion;
+    auto x_t     = agent.data.opinion;
+    auto x_t_bot = bot.data.opinion;
 
     // The bot opinion should not change during the simulation
     REQUIRE_THAT( x_t_bot, WithinAbs( x_bot, 1e-16 ) );
@@ -135,6 +137,7 @@ TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activity
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
+    using AgentT = ActivityAgentModel::AgentT;
 
     auto proj_root_path = fs::current_path();
     auto input_file     = proj_root_path / fs::path( "test/res/10_agents_meanfield_activity.toml" );
@@ -163,7 +166,7 @@ TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activity
     // Calculate the critical controversialness
     auto set_opinions_and_run = [&]( bool above_critical_controversialness )
     {
-        auto simulation            = Simulation( options, std::nullopt, std::nullopt );
+        auto simulation            = Simulation<AgentT>( options, std::nullopt, std::nullopt );
         auto initial_opinion_delta = 0.1; // Set the initial opinion in the interval [-delta, delta]
 
         fmt::print( "Set alpha to {}\n", model_settings.alpha );
@@ -171,9 +174,9 @@ TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activity
         // Check that all activities are indeed the expected mean activity and set the opinions in a small interval around 0
         for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
         {
-            auto * agent = simulation.model->get_agent_as<ActivityAgentModel::AgentT>( idx_agent );
-            REQUIRE_THAT( mean_activity, WithinAbs( agent->data.activity, 1e-16 ) );
-            agent->data.opinion
+            auto & agent = simulation.network->agents[idx_agent];
+            REQUIRE_THAT( mean_activity, WithinAbs( agent.data.activity, 1e-16 ) );
+            agent.data.opinion
                 = -initial_opinion_delta + 2.0 * idx_agent / ( n_agents - 1 ) * ( initial_opinion_delta );
         }
 
@@ -189,13 +192,13 @@ TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activity
         double avg_deviation = 0.0;
         for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
         {
-            auto * agent = simulation.model->get_agent_as<ActivityAgentModel::AgentT>( idx_agent );
+            auto & agent = simulation.network->agents[idx_agent];
             if( above_critical_controversialness )
-                REQUIRE( std::abs( agent->data.opinion ) > std::abs( initial_opinion_delta ) );
+                REQUIRE( std::abs( agent.data.opinion ) > std::abs( initial_opinion_delta ) );
             else
-                REQUIRE( std::abs( agent->data.opinion ) < std::abs( initial_opinion_delta ) );
+                REQUIRE( std::abs( agent.data.opinion ) < std::abs( initial_opinion_delta ) );
 
-            avg_deviation += std::abs( agent->data.opinion );
+            avg_deviation += std::abs( agent.data.opinion );
         }
 
         fmt::print( "Average deviation of agents = {}\n", avg_deviation / n_agents );

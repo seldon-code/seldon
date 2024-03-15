@@ -17,7 +17,7 @@ TEST_CASE( "Test reading in the network from a file", "[io_network]" )
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
-    using AgentT = ActivityAgentModel::AgentT;
+    using AgentT  = ActivityAgentModel::AgentT;
     using Network = Network<AgentT>;
 
     auto proj_root_path = fs::current_path();

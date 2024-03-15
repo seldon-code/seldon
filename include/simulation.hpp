@@ -3,6 +3,7 @@
 #include "config_parser.hpp"
 #include "model_base.hpp"
 #include "network.hpp"
+#include <fmt/chrono.h>
 #include <agent_generation.hpp>
 #include <filesystem>
 #include <memory>
@@ -132,9 +133,9 @@ public:
         fmt::print( "Starting simulation\n" );
         fmt::print( "-----------------------------------------------------------------\n" );
 
-        Seldon::IO::network_to_file( *this, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );
+        Seldon::IO::network_to_file( *network, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );
         auto filename = fmt::format( "opinions_{}.txt", 0 );
-        Seldon::IO::opinions_to_file( *this, ( output_dir_path / fs::path( filename ) ).string() );
+        Seldon::IO::opinions_to_file( *network, ( output_dir_path / fs::path( filename ) ).string() );
 
         typedef std::chrono::milliseconds ms;
         auto t_simulation_start = std::chrono::high_resolution_clock::now();
@@ -159,14 +160,14 @@ public:
             if( n_output_agents.has_value() && ( this->model->n_iterations % n_output_agents.value() == 0 ) )
             {
                 auto filename = fmt::format( "opinions_{}.txt", this->model->n_iterations );
-                Seldon::IO::opinions_to_file( *this, ( output_dir_path / fs::path( filename ) ).string() );
+                Seldon::IO::opinions_to_file( *network, ( output_dir_path / fs::path( filename ) ).string() );
             }
 
             // Write out the network?
             if( n_output_network.has_value() && ( this->model->n_iterations % n_output_network.value() == 0 ) )
             {
                 auto filename = fmt::format( "network_{}.txt", this->model->n_iterations );
-                Seldon::IO::network_to_file( *this, ( output_dir_path / fs::path( filename ) ).string() );
+                Seldon::IO::network_to_file( *network, ( output_dir_path / fs::path( filename ) ).string() );
             }
         }
 
