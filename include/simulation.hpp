@@ -98,13 +98,13 @@ public:
                 network.agents = AgentGeneration::generate_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
             }
         }
-        else if constexpr( std::is_same_v<AgentType, ActivityAgentModel::AgentT> )
+        else if constexpr( std::is_same_v<AgentType, ActivityDrivenModel::AgentT> )
         {
             auto activitydriven_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
 
             model = [&]()
             {
-                auto model             = std::make_unique<ActivityAgentModel>( network, gen );
+                auto model             = std::make_unique<ActivityDrivenModel>( network, gen );
                 model->dt              = activitydriven_settings.dt;
                 model->m               = activitydriven_settings.m;
                 model->eps             = activitydriven_settings.eps;
@@ -129,7 +129,7 @@ public:
             if( cli_agent_file.has_value() )
             {
                 network.agents
-                    = AgentGeneration::generate_from_file<ActivityAgentModel::AgentT>( cli_agent_file.value() );
+                    = AgentGeneration::generate_from_file<ActivityDrivenModel::AgentT>( cli_agent_file.value() );
             }
         }
     }

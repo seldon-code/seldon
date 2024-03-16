@@ -18,7 +18,7 @@ TEST_CASE(
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
-    using AgentT = ActivityAgentModel::AgentT;
+    using AgentT = ActivityDrivenModel::AgentT;
 
     auto proj_root_path = fs::current_path();
 
@@ -50,7 +50,7 @@ TEST_CASE( "Test the probabilistic activity driven model for two agents", "[acti
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
-    using AgentT = ActivityAgentModel::AgentT;
+    using AgentT = ActivityDrivenModel::AgentT;
 
     auto proj_root_path = fs::current_path();
     auto input_file     = proj_root_path / fs::path( "test/res/2_agents_activity_prob.toml" );
@@ -89,7 +89,7 @@ TEST_CASE( "Test the probabilistic activity driven model with one bot and one ag
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
-    using AgentT = ActivityAgentModel::AgentT;
+    using AgentT = ActivityDrivenModel::AgentT;
 
     auto proj_root_path = fs::current_path();
     auto input_file     = proj_root_path / fs::path( "test/res/1bot_1agent_activity_prob.toml" );
@@ -140,7 +140,7 @@ TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activity
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
-    using AgentT = ActivityAgentModel::AgentT;
+    using AgentT = ActivityDrivenModel::AgentT;
 
     auto proj_root_path = fs::current_path();
     auto input_file     = proj_root_path / fs::path( "test/res/10_agents_meanfield_activity.toml" );

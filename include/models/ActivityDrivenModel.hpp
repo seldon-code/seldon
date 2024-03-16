@@ -33,7 +33,7 @@ inline void Agent<ActivityAgentData>::from_string( const std::string & str )
     data.activity  = std::stod( str.substr( pos_comma + 1, str.size() ) );
 };
 
-class ActivityAgentModel : public Model<Agent<ActivityAgentData>>
+class ActivityDrivenModel : public Model<Agent<ActivityAgentData>>
 {
 public:
     using AgentT   = Agent<ActivityAgentData>;
@@ -114,7 +114,7 @@ public:
         return n_bots > 0;
     }
 
-    ActivityAgentModel( NetworkT & network, std::mt19937 & gen );
+    ActivityDrivenModel( NetworkT & network, std::mt19937 & gen );
 
     void get_agents_from_power_law(); // This needs to be called after eps and gamma have been set
 

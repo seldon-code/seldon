@@ -8,15 +8,15 @@
 namespace Seldon
 {
 
-ActivityAgentModel::ActivityAgentModel( NetworkT & network, std::mt19937 & gen )
-        : Model<ActivityAgentModel::AgentT>(),
+ActivityDrivenModel::ActivityDrivenModel( NetworkT & network, std::mt19937 & gen )
+        : Model<ActivityDrivenModel::AgentT>(),
           network( network ),
           contact_prob_list( std::vector<std::vector<NetworkT::WeightT>>( network.n_agents() ) ),
           gen( gen )
 {
 }
 
-double ActivityAgentModel::homophily_weight( size_t idx_contacter, size_t idx_contacted )
+double ActivityDrivenModel::homophily_weight( size_t idx_contacter, size_t idx_contacted )
 {
     double homophily = this->homophily;
 
@@ -34,7 +34,7 @@ double ActivityAgentModel::homophily_weight( size_t idx_contacter, size_t idx_co
     return std::pow( opinion_diff, -homophily );
 }
 
-void ActivityAgentModel::get_agents_from_power_law()
+void ActivityDrivenModel::get_agents_from_power_law()
 {
     std::uniform_real_distribution<> dis_opinion( -1, 1 ); // Opinion initial values
     power_law_distribution<> dist_activity( eps, gamma );
@@ -66,7 +66,7 @@ void ActivityAgentModel::get_agents_from_power_law()
     }
 }
 
-void ActivityAgentModel::update_network_probabilistic()
+void ActivityDrivenModel::update_network_probabilistic()
 {
     network.switch_direction_flag();
 
@@ -133,7 +133,7 @@ void ActivityAgentModel::update_network_probabilistic()
     network.toggle_incoming_outgoing(); // switch direction, so that we have incoming edges
 }
 
-void ActivityAgentModel::update_network_mean()
+void ActivityDrivenModel::update_network_mean()
 {
     using WeightT = NetworkT::WeightT;
     std::vector<WeightT> weights( network.n_agents(), 0.0 );
@@ -205,7 +205,7 @@ void ActivityAgentModel::update_network_mean()
     }
 }
 
-void ActivityAgentModel::update_network()
+void ActivityDrivenModel::update_network()
 {
 
     if( !mean_weights )
@@ -218,7 +218,7 @@ void ActivityAgentModel::update_network()
     }
 }
 
-void ActivityAgentModel::iteration()
+void ActivityDrivenModel::iteration()
 {
     Model<AgentT>::iteration();
 

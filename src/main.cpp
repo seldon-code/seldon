@@ -66,7 +66,7 @@ int main( int argc, char * argv[] )
     }
     else if( simulation_options.model == Seldon::Config::Model::ActivityDrivenModel )
     {
-        simulation = std::make_unique<Seldon::Simulation<Seldon::ActivityAgentModel::AgentT>>(
+        simulation = std::make_unique<Seldon::Simulation<Seldon::ActivityDrivenModel::AgentT>>(
             simulation_options, network_file, agent_file );
     }
 
