@@ -85,8 +85,7 @@ public:
             auto degroot_settings = std::get<Config::DeGrootSettings>( options.model_settings );
 
             // DeGroot specific parameters
-            model = [&]()
-            {
+            model = [&]() {
                 auto model             = std::make_unique<DeGrootModel>( network );
                 model->max_iterations  = degroot_settings.max_iterations;
                 model->convergence_tol = degroot_settings.convergence_tol;
@@ -102,8 +101,7 @@ public:
         {
             auto activitydriven_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
 
-            model = [&]()
-            {
+            model = [&]() {
                 auto model             = std::make_unique<ActivityDrivenModel>( network, gen );
                 model->dt              = activitydriven_settings.dt;
                 model->m               = activitydriven_settings.m;

@@ -38,6 +38,8 @@ void ActivityDrivenModel::get_agents_from_power_law()
 {
     std::uniform_real_distribution<> dis_opinion( -1, 1 ); // Opinion initial values
     power_law_distribution<> dist_activity( eps, gamma );
+    truncated_normal_distribution<> dist_reluctance( reluctance_mean, reluctance_sigma, reluctance_eps );
+
     auto mean_activity = dist_activity.mean();
 
     // Initial conditions for the opinions, initialize to [-1,1]
@@ -53,6 +55,14 @@ void ActivityDrivenModel::get_agents_from_power_law()
         else
         {
             network.agents[i].data.activity = mean_activity;
+        }
+
+        if( use_reluctances )
+        {
+            network.agents[i].data.reluctance = dist_reluctance( gen );
+            auto a                            = network.agents[i].data.activity;
+            network.agents[i].data.activity += covariance_factor * network.agents[i].data.reluctance;
+            network.agents[i].data.reluctance += covariance_factor * a;
         }
     }
 
@@ -145,8 +155,7 @@ void ActivityDrivenModel::update_network_mean()
         contact_prob_list[idx_agent] = weights; // set to zero
     }
 
-    auto probability_helper = []( double omega, size_t m )
-    {
+    auto probability_helper = []( double omega, size_t m ) {
         double p = 0;
         for( size_t i = 1; i <= m; i++ )
             p += ( std::pow( -omega, i + 1 ) + omega ) / ( omega + 1 );

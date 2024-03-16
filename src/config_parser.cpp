@@ -76,24 +76,21 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
         // bot
         model_settings.n_bots = tbl["ActivityDriven"]["n_bots"].value_or<size_t>( 0 );
 
-        auto push_back_bot_array = [&]( auto toml_node, auto & options_array, auto default_value )
-        {
+        auto push_back_bot_array = [&]( auto toml_node, auto & options_array, auto default_value ) {
             if( toml_node.is_array() )
             {
                 toml::array * toml_arr = toml_node.as_array();
 
-                toml_arr->for_each(
-                    [&]( auto && elem )
+                toml_arr->for_each( [&]( auto && elem ) {
+                    if( elem.is_integer() )
                     {
-                        if( elem.is_integer() )
-                        {
-                            options_array.push_back( elem.as_integer()->get() );
-                        }
-                        else if( elem.is_floating_point() )
-                        {
-                            options_array.push_back( elem.as_floating_point()->get() );
-                        }
-                    } );
+                        options_array.push_back( elem.as_integer()->get() );
+                    }
+                    else if( elem.is_floating_point() )
+                    {
+                        options_array.push_back( elem.as_floating_point()->get() );
+                    }
+                } );
             }
             else
             {

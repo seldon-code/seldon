@@ -118,6 +118,12 @@ public:
 
     double convergence_tol = 1e-12; // TODO: ??
 
+    bool use_reluctances     = false;
+    double reluctance_mean   = 1.0;
+    double reluctance_sigma  = 0.25;
+    double reluctance_eps    = 0.01;
+    double covariance_factor = 0.0;
+
     // bot @TODO: less hacky
 
     size_t n_bots                     = 0; // The first n_bots agents are bots

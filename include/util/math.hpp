@@ -162,7 +162,7 @@ public:
     template<typename Generator>
     ScalarT operator()( Generator & gen )
     {
-        for( int i = 0; i < max_tries; i++ )
+        for( size_t i = 0; i < max_tries; i++ )
         {
             auto sample = normal_dist( gen );
             if( sample > eps )
