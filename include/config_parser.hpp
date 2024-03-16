@@ -58,6 +58,11 @@ struct ActivityDrivenSettings
     std::vector<double> bot_activity  = std::vector<double>( 0 );
     std::vector<double> bot_opinion   = std::vector<double>( 0 );
     std::vector<double> bot_homophily = std::vector<double>( 0 );
+    bool use_reluctances              = false;
+    double reluctance_mean            = 1.0;
+    double reluctance_sigma           = 0.25;
+    double reluctance_eps             = 0.01;
+    double covariance_factor          = 0.0;
 };
 
 struct InitialNetworkSettings

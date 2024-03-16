@@ -85,7 +85,8 @@ public:
             auto degroot_settings = std::get<Config::DeGrootSettings>( options.model_settings );
 
             // DeGroot specific parameters
-            model = [&]() {
+            model = [&]()
+            {
                 auto model             = std::make_unique<DeGrootModel>( network );
                 model->max_iterations  = degroot_settings.max_iterations;
                 model->convergence_tol = degroot_settings.convergence_tol;
@@ -101,7 +102,8 @@ public:
         {
             auto activitydriven_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
 
-            model = [&]() {
+            model = [&]()
+            {
                 auto model             = std::make_unique<ActivityDrivenModel>( network, gen );
                 model->dt              = activitydriven_settings.dt;
                 model->m               = activitydriven_settings.m;
@@ -114,6 +116,12 @@ public:
                 model->mean_activities = activitydriven_settings.mean_activities;
                 model->mean_weights    = activitydriven_settings.mean_weights;
                 model->max_iterations  = activitydriven_settings.max_iterations;
+                // Reluctance
+                model->use_reluctances   = activitydriven_settings.use_reluctances;
+                model->reluctance_mean   = activitydriven_settings.reluctance_mean;
+                model->reluctance_sigma  = activitydriven_settings.reluctance_sigma;
+                model->reluctance_eps    = activitydriven_settings.reluctance_eps;
+                model->covariance_factor = activitydriven_settings.covariance_factor;
                 // bot
                 model->n_bots        = activitydriven_settings.n_bots;
                 model->bot_opinion   = activitydriven_settings.bot_opinion;

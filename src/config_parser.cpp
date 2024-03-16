@@ -70,27 +70,36 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
         model_settings.K               = tbl["ActivityDriven"]["K"].value_or<double>( 3.0 );
         model_settings.mean_activities = tbl["ActivityDriven"]["mean_activities"].value_or<bool>( false );
         model_settings.mean_weights    = tbl["ActivityDriven"]["mean_weights"].value_or<bool>( false );
+        // Reluctances
+        model_settings.use_reluctances   = tbl["ActivityDriven"]["reluctances"].value_or<bool>( false );
+        model_settings.reluctance_mean   = tbl["ActivityDriven"]["reluctance_mean"].value_or<double>( 1.0 );
+        model_settings.reluctance_sigma  = tbl["ActivityDriven"]["reluctance_sigma"].value_or<double>( 0.25 );
+        model_settings.reluctance_eps    = tbl["ActivityDriven"]["reluctance_eps"].value_or<double>( 0.01 );
+        model_settings.covariance_factor = tbl["ActivityDriven"]["covariance_factor"].value_or<double>( 0.0 );
 
         model_settings.max_iterations = tbl["model"]["max_iterations"].value<int>();
 
         // bot
         model_settings.n_bots = tbl["ActivityDriven"]["n_bots"].value_or<size_t>( 0 );
 
-        auto push_back_bot_array = [&]( auto toml_node, auto & options_array, auto default_value ) {
+        auto push_back_bot_array = [&]( auto toml_node, auto & options_array, auto default_value )
+        {
             if( toml_node.is_array() )
             {
                 toml::array * toml_arr = toml_node.as_array();
 
-                toml_arr->for_each( [&]( auto && elem ) {
-                    if( elem.is_integer() )
+                toml_arr->for_each(
+                    [&]( auto && elem )
                     {
-                        options_array.push_back( elem.as_integer()->get() );
-                    }
-                    else if( elem.is_floating_point() )
-                    {
-                        options_array.push_back( elem.as_floating_point()->get() );
-                    }
-                } );
+                        if( elem.is_integer() )
+                        {
+                            options_array.push_back( elem.as_integer()->get() );
+                        }
+                        else if( elem.is_floating_point() )
+                        {
+                            options_array.push_back( elem.as_floating_point()->get() );
+                        }
+                    } );
             }
             else
             {
@@ -155,7 +164,12 @@ void validate_settings( const SimulationOptions & options )
         check( name_and_var( model_settings.alpha ), geq_zero );
         // check( name_and_var( model_settings.homophily ), geq_zero );
         check( name_and_var( model_settings.reciprocity ), geq_zero );
-
+        // Reluctance options
+        check( name_and_var( model_settings.reluctance_mean ), g_zero );
+        check( name_and_var( model_settings.reluctance_sigma ), g_zero );
+        check( name_and_var( model_settings.reluctance_eps ), g_zero );
+        check( name_and_var( model_settings.covariance_factor ), geq_zero );
+        // Bot options
         size_t n_bots             = model_settings.n_bots;
         auto check_bot_size       = [&]( auto x ) { return x.size() >= n_bots; };
         const std::string bot_msg = "Length needs to be >= n_bots";
@@ -176,7 +190,7 @@ void print_settings( const SimulationOptions & options )
     fmt::print( "INFO: Seeding with seed {}\n", options.rng_seed );
     fmt::print( "Model type: {}\n", options.model_string );
     fmt::print( "Network has {} agents\n", options.network_settings.n_agents );
-
+    // @TODO: Optionally print *all* settings to the console, including defaults that were set
     if( options.model == Model::ActivityDrivenModel )
     {
         auto model_settings = std::get<ActivityDrivenSettings>( options.model_settings );
