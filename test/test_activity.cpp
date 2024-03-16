@@ -85,7 +85,9 @@ TEST_CASE( "Test the probabilistic activity driven model for two agents", "[acti
     }
 }
 
-TEST_CASE( "Test the probabilistic activity driven model with one bot and one agent", "[activity1Bot1Agent]" )
+TEST_CASE(
+    "Test the probabilistic activity driven model with one bot and one (reluctant) agent",
+    "[activity1Bot1AgentReluctance]" )
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
@@ -122,8 +124,11 @@ TEST_CASE( "Test the probabilistic activity driven model with one bot and one ag
     auto time_elapsed   = iterations * dt;
 
     // Final agent and bot opinions after the simulation run
-    auto x_t     = agent.data.opinion;
-    auto x_t_bot = bot.data.opinion;
+    auto x_t        = agent.data.opinion;
+    auto x_t_bot    = bot.data.opinion;
+    auto reluctance = agent.data.reluctance;
+
+    fmt::print( "Agent reluctance is = {}\n", reluctance );
 
     // The bot opinion should not change during the simulation
     REQUIRE_THAT( x_t_bot, WithinAbs( x_bot, 1e-16 ) );
@@ -131,7 +136,8 @@ TEST_CASE( "Test the probabilistic activity driven model with one bot and one ag
     // Test that the agent opinion matches the analytical solution for an agent with a bot
     // Analytical solution is:
     // x_t = [x(0) - Ktanh(alpha*x_bot)]e^(-t) + Ktanh(alpha*x_bot)
-    auto x_t_analytical = ( x_0 - K * tanh( alpha * x_bot ) ) * exp( -time_elapsed ) + K * tanh( alpha * x_bot );
+    auto x_t_analytical = ( x_0 - K / reluctance * tanh( alpha * x_bot ) ) * exp( -time_elapsed )
+                          + K / reluctance * tanh( alpha * x_bot );
 
     REQUIRE_THAT( x_t, WithinAbs( x_t_analytical, 1e-5 ) );
 }
