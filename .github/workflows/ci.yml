@@ -34,4 +34,4 @@ jobs:
     - name: Test with meson
       shell: micromamba-shell {0}
       run: |
-        meson test -C build
+        meson test -C build --verbose
