@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <random>
 #include <set>
-#include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -15,22 +15,38 @@ namespace Seldon
 
 struct ActivityAgentData
 {
-    double opinion  = 0; // x_i
-    double activity = 0; // a_i
+    double opinion    = 0;   // x_i
+    double activity   = 0;   // a_i
+    double reluctance = 1.0; // m_i
 };
 
 template<>
 inline std::string Agent<ActivityAgentData>::to_string() const
 {
-    return fmt::format( "{}, {}", data.opinion, data.activity );
+    return fmt::format( "{}, {}, {}", data.opinion, data.activity, data.reluctance );
 };
 
 template<>
 inline void Agent<ActivityAgentData>::from_string( const std::string & str )
 {
-    auto pos_comma = str.find_first_of( ',' );
-    data.opinion   = std::stod( str.substr( 0, pos_comma ) );
-    data.activity  = std::stod( str.substr( pos_comma + 1, str.size() ) );
+    auto pos_comma      = str.find_first_of( ',' );
+    auto pos_next_comma = str.find( ',', pos_comma + 1 );
+
+    data.opinion = std::stod( str.substr( 0, pos_comma ) );
+
+    if( pos_next_comma == std::string::npos )
+    {
+        data.activity = std::stod( str.substr( pos_comma + 1, str.size() ) );
+    }
+    else
+    {
+        data.activity = std::stod( str.substr( pos_comma + 1, pos_next_comma ) );
+    }
+
+    if( pos_next_comma != std::string::npos )
+    {
+        data.reluctance = std::stod( str.substr( pos_next_comma + 1, str.size() ) );
+    }
 };
 
 class ActivityDrivenModel : public Model<Agent<ActivityAgentData>>
@@ -69,7 +85,8 @@ private:
             for( size_t j = 0; j < neighbour_buffer.size(); j++ )
             {
                 j_index = neighbour_buffer[j];
-                k_buffer[idx_agent] += K * weight_buffer[j] * std::tanh( alpha * opinion( j_index ) );
+                k_buffer[idx_agent] += 1.0 / network.agents[idx_agent].data.reluctance * K * weight_buffer[j]
+                                       * std::tanh( alpha * opinion( j_index ) );
             }
             // Multiply by the timestep
             k_buffer[idx_agent] *= dt;
@@ -119,9 +136,6 @@ public:
     void get_agents_from_power_law(); // This needs to be called after eps and gamma have been set
 
     void iteration() override;
-
-    // bool finished() overteration() override;
-    // bool finished() override;
 };
 
 } // namespace Seldon
