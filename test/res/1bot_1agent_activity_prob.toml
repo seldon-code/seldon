@@ -24,7 +24,7 @@ mean_weights = false    # Use the meanfield approximation of the network edges
 
 reluctances = true 			# Assigns a "reluctance" (m_i) to each agent. By default; false and every agent has a reluctance of 1
 reluctance_mean   = 1.5 	# Mean of distribution before drawing from a truncated normal distribution (default set to 1.0)
-reluctance_sigma  = 2.5 	# Width of normal distribution (before truncating)
+reluctance_sigma  = 0.1 	# Width of normal distribution (before truncating)
 reluctance_eps    = 0.01 	# Minimum such that the normal distribution is truncated at this value
 covariance_factor = 0.25 	# Determines whether activities and reluctances will be correlated. If set to 0.0 (default) then they will not be correlated.
 
