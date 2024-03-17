@@ -138,7 +138,7 @@ public:
     {
         auto n_output_agents  = this->output_settings.n_output_agents;
         auto n_output_network = this->output_settings.n_output_network;
-        auto print_iter_start = this->output_settings.start_print_iteration;
+        auto print_iter_start = this->output_settings.start_output;
         auto print_initial    = this->output_settings.print_initial;
 
         fmt::print( "-----------------------------------------------------------------\n" );

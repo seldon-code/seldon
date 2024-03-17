@@ -42,7 +42,7 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
     options.output_settings.print_initial
         = tbl["io"]["print_initial"].value_or<bool>( bool( options.output_settings.print_initial ) );
     // @TODO: default value should not be hard-coded here
-    options.output_settings.start_print_iteration = tbl["io"]["start_print_iteration"].value_or<int>( 1 );
+    options.output_settings.start_output = tbl["io"]["start_output"].value_or<int>( 1 );
 
     // Check if the 'model' keyword exists
     std::optional<std::string> model_string = tbl["simulation"]["model"].value<std::string>();
@@ -151,8 +151,8 @@ void validate_settings( const SimulationOptions & options )
     auto g_zero   = []( auto x ) { return x > 0; };
     auto geq_zero = []( auto x ) { return x >= 0; };
 
-    // @TODO: Check that start_print_iteration is less than the max_iterations?
-    check( name_and_var( options.output_settings.start_print_iteration ), g_zero );
+    // @TODO: Check that start_output is less than the max_iterations?
+    check( name_and_var( options.output_settings.start_output ), g_zero );
 
     if( options.model == Model::ActivityDrivenModel )
     {
