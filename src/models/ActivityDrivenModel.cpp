@@ -60,9 +60,6 @@ void ActivityDrivenModel::get_agents_from_power_law()
         if( use_reluctances )
         {
             network.agents[i].data.reluctance = dist_reluctance( gen );
-            auto a                            = network.agents[i].data.activity;
-            network.agents[i].data.activity += covariance_factor * network.agents[i].data.reluctance;
-            network.agents[i].data.reluctance += covariance_factor * a;
         }
     }
 

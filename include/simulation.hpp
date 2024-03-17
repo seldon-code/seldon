@@ -117,11 +117,10 @@ public:
                 model->mean_weights    = activitydriven_settings.mean_weights;
                 model->max_iterations  = activitydriven_settings.max_iterations;
                 // Reluctance
-                model->use_reluctances   = activitydriven_settings.use_reluctances;
-                model->reluctance_mean   = activitydriven_settings.reluctance_mean;
-                model->reluctance_sigma  = activitydriven_settings.reluctance_sigma;
-                model->reluctance_eps    = activitydriven_settings.reluctance_eps;
-                model->covariance_factor = activitydriven_settings.covariance_factor;
+                model->use_reluctances  = activitydriven_settings.use_reluctances;
+                model->reluctance_mean  = activitydriven_settings.reluctance_mean;
+                model->reluctance_sigma = activitydriven_settings.reluctance_sigma;
+                model->reluctance_eps   = activitydriven_settings.reluctance_eps;
                 // bot
                 model->n_bots        = activitydriven_settings.n_bots;
                 model->bot_opinion   = activitydriven_settings.bot_opinion;

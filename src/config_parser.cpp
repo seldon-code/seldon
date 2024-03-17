@@ -71,11 +71,10 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
         model_settings.mean_activities = tbl["ActivityDriven"]["mean_activities"].value_or<bool>( false );
         model_settings.mean_weights    = tbl["ActivityDriven"]["mean_weights"].value_or<bool>( false );
         // Reluctances
-        model_settings.use_reluctances   = tbl["ActivityDriven"]["reluctances"].value_or<bool>( false );
-        model_settings.reluctance_mean   = tbl["ActivityDriven"]["reluctance_mean"].value_or<double>( 1.0 );
-        model_settings.reluctance_sigma  = tbl["ActivityDriven"]["reluctance_sigma"].value_or<double>( 0.25 );
-        model_settings.reluctance_eps    = tbl["ActivityDriven"]["reluctance_eps"].value_or<double>( 0.01 );
-        model_settings.covariance_factor = tbl["ActivityDriven"]["covariance_factor"].value_or<double>( 0.0 );
+        model_settings.use_reluctances  = tbl["ActivityDriven"]["reluctances"].value_or<bool>( false );
+        model_settings.reluctance_mean  = tbl["ActivityDriven"]["reluctance_mean"].value_or<double>( 1.0 );
+        model_settings.reluctance_sigma = tbl["ActivityDriven"]["reluctance_sigma"].value_or<double>( 0.25 );
+        model_settings.reluctance_eps   = tbl["ActivityDriven"]["reluctance_eps"].value_or<double>( 0.01 );
 
         model_settings.max_iterations = tbl["model"]["max_iterations"].value<int>();
 
