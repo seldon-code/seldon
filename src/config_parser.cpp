@@ -39,6 +39,8 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
     options.output_settings.n_output_agents  = tbl["io"]["n_output_agents"].value<size_t>();
     options.output_settings.print_progress
         = tbl["io"]["print_progress"].value_or<bool>( bool( options.output_settings.print_progress ) );
+    options.output_settings.print_initial
+        = tbl["io"]["print_initial"].value_or<bool>( bool( options.output_settings.print_initial ) );
     // @TODO: default value should not be hard-coded here
     options.output_settings.start_print_iteration = tbl["io"]["start_print_iteration"].value_or<int>( 1 );
 
