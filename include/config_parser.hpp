@@ -32,6 +32,7 @@ struct OutputSettings
     std::optional<size_t> n_output_agents  = std::nullopt;
     std::optional<size_t> n_output_network = std::nullopt;
     bool print_progress                    = true; // Print the iteration time, by default always prints
+    int start_print_iteration = 1; // Start printing opinion and/or network files from this iteration number
 };
 
 struct DeGrootSettings

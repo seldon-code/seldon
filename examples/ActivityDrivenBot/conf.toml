@@ -6,6 +6,7 @@ rng_seed = 120           # Leaving this empty will pick a random seed
 n_output_network = 1  # Write the network every 20 iterations
 n_output_agents = 1 # Write the opinions of agents after every iteration
 print_progress = true # Print the iteration time; if not set, then always print
+start_print_iteration = 1 # Start printing opinions and/or network files from this iteration. If not set, this is 1.
 
 [model]
 max_iterations = 1000 # If not set, max iterations is infinite
