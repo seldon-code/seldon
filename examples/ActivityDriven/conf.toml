@@ -6,6 +6,8 @@ model = "ActivityDriven"
 n_output_network = 20 # Write the network every 20 iterations
 n_output_agents = 1 # Write the opinions of agents after every iteration
 print_progress = true # Print the iteration time ; if not set, then always print
+print_initial = true # Print the initial opinions and network file from step 0. If not set, this is true by default.
+start_output = 2 # Start writing out opinions and/or network files from this iteration. If not set, this is 1.
 
 [model]
 max_iterations = 500 # If not set, max iterations is infinite

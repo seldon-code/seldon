@@ -138,15 +138,19 @@ public:
     {
         auto n_output_agents  = this->output_settings.n_output_agents;
         auto n_output_network = this->output_settings.n_output_network;
+        auto print_iter_start = this->output_settings.start_output;
+        auto print_initial    = this->output_settings.print_initial;
 
         fmt::print( "-----------------------------------------------------------------\n" );
         fmt::print( "Starting simulation\n" );
         fmt::print( "-----------------------------------------------------------------\n" );
 
-        Seldon::IO::network_to_file( network, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );
-        auto filename = fmt::format( "opinions_{}.txt", 0 );
-        Seldon::IO::opinions_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
-
+        if( print_initial )
+        {
+            Seldon::IO::network_to_file( network, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );
+            auto filename = fmt::format( "opinions_{}.txt", 0 );
+            Seldon::IO::opinions_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
+        }
         this->model->initialize_iterations();
 
         typedef std::chrono::milliseconds ms;
@@ -169,14 +173,16 @@ public:
             }
 
             // Write out the opinion?
-            if( n_output_agents.has_value() && ( this->model->n_iterations() % n_output_agents.value() == 0 ) )
+            if( n_output_agents.has_value() && ( this->model->n_iterations() >= print_iter_start )
+                && ( this->model->n_iterations() % n_output_agents.value() == 0 ) )
             {
                 auto filename = fmt::format( "opinions_{}.txt", this->model->n_iterations() );
                 Seldon::IO::opinions_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
             }
 
             // Write out the network?
-            if( n_output_network.has_value() && ( this->model->n_iterations() % n_output_network.value() == 0 ) )
+            if( n_output_network.has_value() && ( this->model->n_iterations() >= print_iter_start )
+                && ( this->model->n_iterations() % n_output_network.value() == 0 ) )
             {
                 auto filename = fmt::format( "network_{}.txt", this->model->n_iterations() );
                 Seldon::IO::network_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
