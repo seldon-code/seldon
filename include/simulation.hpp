@@ -4,7 +4,6 @@
 #include "network.hpp"
 #include <fmt/chrono.h>
 #include <fmt/format.h>
-#include <agent_generation.hpp>
 #include <filesystem>
 #include <memory>
 #include <models/ActivityDrivenModel.hpp>
@@ -95,7 +94,7 @@ public:
 
             if( cli_agent_file.has_value() )
             {
-                network.agents = AgentGeneration::generate_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
+                network.agents = agents_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
             }
         }
         else if constexpr( std::is_same_v<AgentType, ActivityDrivenModel::AgentT> )
@@ -133,8 +132,7 @@ public:
 
             if( cli_agent_file.has_value() )
             {
-                network.agents
-                    = AgentGeneration::generate_from_file<ActivityDrivenModel::AgentT>( cli_agent_file.value() );
+                network.agents = agents_from_file<ActivityDrivenModel::AgentT>( cli_agent_file.value() );
             }
         }
     }
@@ -154,7 +152,7 @@ public:
         {
             Seldon::IO::network_to_file( network, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );
             auto filename = fmt::format( "opinions_{}.txt", 0 );
-            Seldon::IO::opinions_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
+            Seldon::agents_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
         }
         this->model->initialize_iterations();
 
@@ -182,7 +180,7 @@ public:
                 && ( this->model->n_iterations() % n_output_agents.value() == 0 ) )
             {
                 auto filename = fmt::format( "opinions_{}.txt", this->model->n_iterations() );
-                Seldon::IO::opinions_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
+                Seldon::agents_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
             }
 
             // Write out the network?

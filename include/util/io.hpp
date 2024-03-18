@@ -1,5 +1,4 @@
 #pragma once
-#include "agent_io.hpp"
 #include "fstream"
 #include "network.hpp"
 #include <fmt/core.h>
@@ -35,32 +34,6 @@ void network_to_dot_file( const Network<AgentT> & network, const std::string & f
         fs << row;
     }
     fmt::print( fs, "}}\n" );
-    fs.close();
-}
-
-template<typename AgentT>
-void opinions_to_file( const Network<AgentT> & network, const std::string & file_path )
-{
-    std::fstream fs;
-    fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );
-
-    size_t n_agents = network.n_agents();
-
-    auto column_names = agent_to_string_column_names<AgentT>();
-
-    std::string header = "# idx_agent";
-    for( auto col : column_names )
-    {
-        header += ", " + col;
-    }
-    header += "\n";
-
-    fmt::print( fs, "{}", header );
-    for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
-    {
-        std::string row = fmt::format( "{:>5}, {:>25}\n", idx_agent, agent_to_string( network.agents[idx_agent] ) );
-        fs << row;
-    }
     fs.close();
 }
 
