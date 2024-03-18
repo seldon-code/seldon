@@ -3,6 +3,7 @@
 #include "agent_io.hpp"
 #include "model.hpp"
 #include "network.hpp"
+#include <optional>
 #include <vector>
 
 namespace Seldon
@@ -54,7 +55,7 @@ public:
     bool finished() override;
 
 private:
-    double max_opinion_diff = 0;
+    std::optional<double> max_opinion_diff = std::nullopt;
     NetworkT & network;
     std::vector<AgentT> agents_current_copy;
 };

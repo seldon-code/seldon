@@ -10,6 +10,7 @@ DeGrootModel::DeGrootModel( NetworkT & network )
 {
     // For a strongly connected network, the number of SCCs should be 1
     // Print a warning if this is not true
+
     auto n_components = network.strongly_connected_components().size();
     if( n_components != 1 )
     {
@@ -47,14 +48,20 @@ void DeGrootModel::iteration()
     for( std::size_t i = 0; i < network.agents.size(); i++ )
     {
         max_opinion_diff = std::max(
-            max_opinion_diff, std::abs( network.agents[i].data.opinion - agents_current_copy[i].data.opinion ) );
+            max_opinion_diff.value(),
+            std::abs( network.agents[i].data.opinion - agents_current_copy[i].data.opinion ) );
         network.agents[i] = agents_current_copy[i];
     }
 }
 
 bool DeGrootModel::finished()
 {
-    bool converged = max_opinion_diff < convergence_tol;
+
+    bool converged = false;
+
+    if( max_opinion_diff.has_value() )
+        converged = max_opinion_diff.value() < convergence_tol;
+
     return Model<AgentT>::finished() || converged;
 }
 
