@@ -4,6 +4,7 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
+#include <fmt/std.h>
 #include <cstddef>
 #include <optional>
 #include <stdexcept>
@@ -86,24 +87,21 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
         // bot
         model_settings.n_bots = tbl["ActivityDriven"]["n_bots"].value_or<size_t>( 0 );
 
-        auto push_back_bot_array = [&]( auto toml_node, auto & options_array, auto default_value )
-        {
+        auto push_back_bot_array = [&]( auto toml_node, auto & options_array, auto default_value ) {
             if( toml_node.is_array() )
             {
                 toml::array * toml_arr = toml_node.as_array();
 
-                toml_arr->for_each(
-                    [&]( auto && elem )
+                toml_arr->for_each( [&]( auto && elem ) {
+                    if( elem.is_integer() )
                     {
-                        if( elem.is_integer() )
-                        {
-                            options_array.push_back( elem.as_integer()->get() );
-                        }
-                        else if( elem.is_floating_point() )
-                        {
-                            options_array.push_back( elem.as_floating_point()->get() );
-                        }
-                    } );
+                        options_array.push_back( elem.as_integer()->get() );
+                    }
+                    else if( elem.is_floating_point() )
+                    {
+                        options_array.push_back( elem.as_floating_point()->get() );
+                    }
+                } );
             }
             else
             {
@@ -194,22 +192,62 @@ void validate_settings( const SimulationOptions & options )
 
 void print_settings( const SimulationOptions & options )
 {
-    fmt::print( "INFO: Seeding with seed {}\n", options.rng_seed );
-    fmt::print( "Model type: {}\n", options.model_string );
-    fmt::print( "Network has {} agents\n", options.network_settings.n_agents );
+    fmt::print( "Random seed: {}\n", options.rng_seed );
+
+    fmt::print( "[Model]\n" );
+    fmt::print( "    type {}\n", options.model_string );
+
     // @TODO: Optionally print *all* settings to the console, including defaults that were set
     if( options.model == Model::ActivityDrivenModel )
     {
         auto model_settings = std::get<ActivityDrivenSettings>( options.model_settings );
+
+        fmt::print( "    max_iterations {}\n", model_settings.max_iterations );
+        fmt::print( "    dt {} \n", model_settings.dt );
+        fmt::print( "    m {} \n", model_settings.m );
+        fmt::print( "    eps {} \n", model_settings.eps );
+        fmt::print( "    gamma {} \n", model_settings.gamma );
+        fmt::print( "    alpha {} \n", model_settings.alpha );
+        fmt::print( "    homophily {} \n", model_settings.homophily );
+        fmt::print( "    reciprocity {} \n", model_settings.reciprocity );
+        fmt::print( "    K {} \n", model_settings.K );
+        fmt::print( "    mean_activities {} \n", model_settings.mean_activities );
+        fmt::print( "    mean_weights {} \n", model_settings.mean_weights );
+        fmt::print( "    n_bots           {}\n", model_settings.n_bots );
         if( model_settings.n_bots > 0 )
         {
-            fmt::print( "n_bots           {}\n", model_settings.n_bots );
-            fmt::print( "Bot opinions     {}\n", model_settings.bot_opinion );
-            fmt::print( "Bot m            {}\n", model_settings.bot_m );
-            fmt::print( "Bot activity(s)  {}\n", model_settings.bot_activity );
-            fmt::print( "Bot homophily(s) {}\n", model_settings.bot_homophily );
+            fmt::print( "    Bot opinions     {}\n", model_settings.bot_opinion );
+            fmt::print( "    Bot m            {}\n", model_settings.bot_m );
+            fmt::print( "    Bot activity(s)  {}\n", model_settings.bot_activity );
+            fmt::print( "    Bot homophily(s) {}\n", model_settings.bot_homophily );
+        }
+
+        fmt::print( "    use_reluctances {}\n", model_settings.use_reluctances );
+        if( model_settings.use_reluctances )
+        {
+            fmt::print( "    reluctance_mean {}\n", model_settings.reluctance_mean );
+            fmt::print( "    reluctance_sigma {}\n", model_settings.reluctance_sigma );
+            fmt::print( "    reluctance_eps {}\n", model_settings.reluctance_eps );
+            fmt::print( "    covariance_factor {}\n", model_settings.covariance_factor );
         }
     }
+    else if( options.model == Model::DeGroot )
+    {
+        auto model_settings = std::get<DeGrootSettings>( options.model_settings );
+        fmt::print( "    max_iterations {}\n", model_settings.max_iterations );
+        fmt::print( "    convergence_tol {}\n", model_settings.convergence_tol );
+    }
+
+    fmt::print( "[Network]\n" );
+    fmt::print( "    n_agents {}\n", options.network_settings.n_agents );
+    fmt::print( "    n_connections {}\n", options.network_settings.n_connections );
+
+    fmt::print( "[Output]\n" );
+    fmt::print( "    n_output_agents  {}\n", options.output_settings.n_output_agents );
+    fmt::print( "    n_output_network {}\n", options.output_settings.n_output_network );
+    fmt::print( "    print_progress {}\n", options.output_settings.print_progress );
+    fmt::print( "    output_initial {}\n", options.output_settings.output_initial );
+    fmt::print( "    start_output {}\n", options.output_settings.start_output );
 }
 
 } // namespace Seldon::Config
