@@ -138,4 +138,38 @@ public:
     }
 };
 
+/**
+ * @brief Truncated normal distribution
+ * A continuous random distribution on the range [eps, infty)
+ * with p(x) ~ e^(-(x-mean)^2/(2 sigma^2))
+ */
+template<typename ScalarT = double>
+class truncated_normal_distribution
+{
+private:
+    ScalarT mean{};
+    ScalarT sigma{};
+    ScalarT eps{};
+    std::normal_distribution<ScalarT> normal_dist{};
+    size_t max_tries = 5000;
+
+public:
+    truncated_normal_distribution( ScalarT mean, ScalarT sigma, ScalarT eps )
+            : mean( mean ), sigma( sigma ), eps( eps ), normal_dist( std::normal_distribution<ScalarT>( mean, sigma ) )
+    {
+    }
+
+    template<typename Generator>
+    ScalarT operator()( Generator & gen )
+    {
+        for( size_t i = 0; i < max_tries; i++ )
+        {
+            auto sample = normal_dist( gen );
+            if( sample > eps )
+                return sample;
+        }
+        return eps;
+    }
+};
+
 } // namespace Seldon

@@ -18,7 +18,7 @@ TEST_CASE(
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
-    using AgentT = ActivityAgentModel::AgentT;
+    using AgentT = ActivityDrivenModel::AgentT;
 
     auto proj_root_path = fs::current_path();
 
@@ -50,7 +50,7 @@ TEST_CASE( "Test the probabilistic activity driven model for two agents", "[acti
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
-    using AgentT = ActivityAgentModel::AgentT;
+    using AgentT = ActivityDrivenModel::AgentT;
 
     auto proj_root_path = fs::current_path();
     auto input_file     = proj_root_path / fs::path( "test/res/2_agents_activity_prob.toml" );
@@ -85,11 +85,13 @@ TEST_CASE( "Test the probabilistic activity driven model for two agents", "[acti
     }
 }
 
-TEST_CASE( "Test the probabilistic activity driven model with one bot and one agent", "[activity1Bot1Agent]" )
+TEST_CASE(
+    "Test the probabilistic activity driven model with one bot and one (reluctant) agent",
+    "[activity1Bot1AgentReluctance]" )
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
-    using AgentT = ActivityAgentModel::AgentT;
+    using AgentT = ActivityDrivenModel::AgentT;
 
     auto proj_root_path = fs::current_path();
     auto input_file     = proj_root_path / fs::path( "test/res/1bot_1agent_activity_prob.toml" );
@@ -122,8 +124,11 @@ TEST_CASE( "Test the probabilistic activity driven model with one bot and one ag
     auto time_elapsed   = iterations * dt;
 
     // Final agent and bot opinions after the simulation run
-    auto x_t     = agent.data.opinion;
-    auto x_t_bot = bot.data.opinion;
+    auto x_t        = agent.data.opinion;
+    auto x_t_bot    = bot.data.opinion;
+    auto reluctance = agent.data.reluctance;
+
+    fmt::print( "Agent reluctance is = {}\n", reluctance );
 
     // The bot opinion should not change during the simulation
     REQUIRE_THAT( x_t_bot, WithinAbs( x_bot, 1e-16 ) );
@@ -131,7 +136,8 @@ TEST_CASE( "Test the probabilistic activity driven model with one bot and one ag
     // Test that the agent opinion matches the analytical solution for an agent with a bot
     // Analytical solution is:
     // x_t = [x(0) - Ktanh(alpha*x_bot)]e^(-t) + Ktanh(alpha*x_bot)
-    auto x_t_analytical = ( x_0 - K * tanh( alpha * x_bot ) ) * exp( -time_elapsed ) + K * tanh( alpha * x_bot );
+    auto x_t_analytical = ( x_0 - K / reluctance * tanh( alpha * x_bot ) ) * exp( -time_elapsed )
+                          + K / reluctance * tanh( alpha * x_bot );
 
     REQUIRE_THAT( x_t, WithinAbs( x_t_analytical, 1e-5 ) );
 }
@@ -140,7 +146,7 @@ TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activity
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
-    using AgentT = ActivityAgentModel::AgentT;
+    using AgentT = ActivityDrivenModel::AgentT;
 
     auto proj_root_path = fs::current_path();
     auto input_file     = proj_root_path / fs::path( "test/res/10_agents_meanfield_activity.toml" );
@@ -185,7 +191,7 @@ TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activity
 
         // We need an output path for Simulation, but we won't write anything out there
         fs::path output_dir_path = proj_root_path / fs::path( "test/output_meanfield_test" );
-        fs::create_directories( output_dir_path );
+        // fs::create_directories( output_dir_path );
 
         // run that mofo
         simulation.run( output_dir_path );

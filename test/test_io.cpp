@@ -17,7 +17,7 @@ TEST_CASE( "Test reading in the network from a file", "[io_network]" )
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
-    using AgentT  = ActivityAgentModel::AgentT;
+    using AgentT  = ActivityDrivenModel::AgentT;
     using Network = Network<AgentT>;
 
     auto proj_root_path = fs::current_path();
@@ -46,10 +46,11 @@ TEST_CASE( "Test reading in the agents from a file", "[io_agents]" )
     auto proj_root_path = fs::current_path();
     auto network_file   = proj_root_path / fs::path( "test/res/opinions.txt" );
 
-    auto agents = Seldon::AgentGeneration::generate_from_file<ActivityAgentModel::AgentT>( network_file );
+    auto agents = Seldon::AgentGeneration::generate_from_file<ActivityDrivenModel::AgentT>( network_file );
 
-    std::vector<double> opinions_expected   = { 2.1127107987061544, 0.8088982488089491, -0.8802809369462433 };
-    std::vector<double> activities_expected = { 0.044554683389757696, 0.015813166022685163, 0.015863953902810535 };
+    std::vector<double> opinions_expected    = { 2.1127107987061544, 0.8088982488089491, -0.8802809369462433 };
+    std::vector<double> activities_expected  = { 0.044554683389757696, 0.015813166022685163, 0.015863953902810535 };
+    std::vector<double> reluctances_expected = { 1.0, 1.0, 2.3 };
 
     REQUIRE( agents.size() == 3 );
 
@@ -58,5 +59,6 @@ TEST_CASE( "Test reading in the agents from a file", "[io_agents]" )
         fmt::print( "{}", i );
         REQUIRE_THAT( agents[i].data.opinion, Catch::Matchers::WithinAbs( opinions_expected[i], 1e-16 ) );
         REQUIRE_THAT( agents[i].data.activity, Catch::Matchers::WithinAbs( activities_expected[i], 1e-16 ) );
+        REQUIRE_THAT( agents[i].data.reluctance, Catch::Matchers::WithinAbs( reluctances_expected[i], 1e-16 ) );
     }
 }

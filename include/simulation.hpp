@@ -98,13 +98,13 @@ public:
                 network.agents = AgentGeneration::generate_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
             }
         }
-        else if constexpr( std::is_same_v<AgentType, ActivityAgentModel::AgentT> )
+        else if constexpr( std::is_same_v<AgentType, ActivityDrivenModel::AgentT> )
         {
             auto activitydriven_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
 
             model = [&]()
             {
-                auto model             = std::make_unique<ActivityAgentModel>( network, gen );
+                auto model             = std::make_unique<ActivityDrivenModel>( network, gen );
                 model->dt              = activitydriven_settings.dt;
                 model->m               = activitydriven_settings.m;
                 model->eps             = activitydriven_settings.eps;
@@ -116,6 +116,11 @@ public:
                 model->mean_activities = activitydriven_settings.mean_activities;
                 model->mean_weights    = activitydriven_settings.mean_weights;
                 model->max_iterations  = activitydriven_settings.max_iterations;
+                // Reluctance
+                model->use_reluctances  = activitydriven_settings.use_reluctances;
+                model->reluctance_mean  = activitydriven_settings.reluctance_mean;
+                model->reluctance_sigma = activitydriven_settings.reluctance_sigma;
+                model->reluctance_eps   = activitydriven_settings.reluctance_eps;
                 // bot
                 model->n_bots        = activitydriven_settings.n_bots;
                 model->bot_opinion   = activitydriven_settings.bot_opinion;
@@ -129,7 +134,7 @@ public:
             if( cli_agent_file.has_value() )
             {
                 network.agents
-                    = AgentGeneration::generate_from_file<ActivityAgentModel::AgentT>( cli_agent_file.value() );
+                    = AgentGeneration::generate_from_file<ActivityDrivenModel::AgentT>( cli_agent_file.value() );
             }
         }
     }
