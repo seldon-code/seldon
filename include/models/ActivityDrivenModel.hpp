@@ -21,22 +21,24 @@ struct ActivityAgentData
     double reluctance = 1.0; // m_i
 };
 
+using ActivityAgent = Agent<ActivityAgentData>;
+
 template<>
-inline std::string agent_to_string<Agent<ActivityAgentData>>( const Agent<ActivityAgentData> & agent )
+inline std::string agent_to_string<ActivityAgent>( const ActivityAgent & agent )
 {
     return fmt::format( "{}, {}, {}", agent.data.opinion, agent.data.activity, agent.data.reluctance );
 }
 
 template<>
-inline std::string opinion_to_string<Agent<ActivityAgentData>>( const Agent<ActivityAgentData> & agent )
+inline std::string opinion_to_string<ActivityAgent>( const ActivityAgent & agent )
 {
     return fmt::format( "{}", agent.data.opinion );
 }
 
 template<>
-inline Agent<ActivityAgentData> agent_from_string<Agent<ActivityAgentData>>( const std::string & str )
+inline ActivityAgent agent_from_string<ActivityAgent>( const std::string & str )
 {
-    Agent<ActivityAgentData> res{};
+    ActivityAgent res{};
 
     auto pos_comma      = str.find_first_of( ',' );
     auto pos_next_comma = str.find( ',', pos_comma + 1 );
@@ -59,6 +61,12 @@ inline Agent<ActivityAgentData> agent_from_string<Agent<ActivityAgentData>>( con
 
     return res;
 };
+
+template<>
+inline std::vector<std::string> agent_to_string_column_names<ActivityAgent>()
+{
+    return { "opinion", "activity", "reluctance" };
+}
 
 class ActivityDrivenModel : public Model<Agent<ActivityAgentData>>
 {
