@@ -26,10 +26,12 @@ inline std::string opinion_to_string<Agent<DeGrootAgentData>>( const Agent<DeGro
 }
 
 template<>
-inline void Agent<DeGrootAgentData>::from_string( const std::string & str )
+inline Agent<DeGrootAgentData> agent_from_string<Agent<DeGrootAgentData>>( const std::string & str )
 {
-    data.opinion = std::stod( str );
-};
+    Agent<DeGrootAgentData> res{};
+    res.data.opinion = std::stod( str );
+    return res;
+}
 
 class DeGrootModel : public Model<Agent<DeGrootAgentData>>
 {

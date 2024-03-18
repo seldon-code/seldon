@@ -1,4 +1,5 @@
 #pragma once
+#include "agent_writer.hpp"
 #include "util/misc.hpp"
 #include <cstddef>
 #include <vector>
@@ -36,12 +37,11 @@ std::vector<AgentT> generate_from_file( const std::string & file )
             continue;
         }
 
-        agents.push_back( AgentT() );
-
         // First column is the index of the agent
         auto end_of_first_column = line.find( ',', 0 );
         auto opinion_substring   = line.substr( end_of_first_column + 1, end_of_line );
-        agents.back().from_string( opinion_substring );
+
+        agents.push_back( agent_from_string<AgentT>( opinion_substring ) );
     }
 
     return agents;

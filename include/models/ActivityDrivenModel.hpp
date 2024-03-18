@@ -34,26 +34,30 @@ inline std::string opinion_to_string<Agent<ActivityAgentData>>( const Agent<Acti
 }
 
 template<>
-inline void Agent<ActivityAgentData>::from_string( const std::string & str )
+inline Agent<ActivityAgentData> agent_from_string<Agent<ActivityAgentData>>( const std::string & str )
 {
+    Agent<ActivityAgentData> res{};
+
     auto pos_comma      = str.find_first_of( ',' );
     auto pos_next_comma = str.find( ',', pos_comma + 1 );
 
-    data.opinion = std::stod( str.substr( 0, pos_comma ) );
+    res.data.opinion = std::stod( str.substr( 0, pos_comma ) );
 
     if( pos_next_comma == std::string::npos )
     {
-        data.activity = std::stod( str.substr( pos_comma + 1, str.size() ) );
+        res.data.activity = std::stod( str.substr( pos_comma + 1, str.size() ) );
     }
     else
     {
-        data.activity = std::stod( str.substr( pos_comma + 1, pos_next_comma ) );
+        res.data.activity = std::stod( str.substr( pos_comma + 1, pos_next_comma ) );
     }
 
     if( pos_next_comma != std::string::npos )
     {
-        data.reluctance = std::stod( str.substr( pos_next_comma + 1, str.size() ) );
+        res.data.reluctance = std::stod( str.substr( pos_next_comma + 1, str.size() ) );
     }
+
+    return res;
 };
 
 class ActivityDrivenModel : public Model<Agent<ActivityAgentData>>
