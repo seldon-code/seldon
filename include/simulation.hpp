@@ -143,14 +143,14 @@ public:
     {
         auto n_output_agents  = this->output_settings.n_output_agents;
         auto n_output_network = this->output_settings.n_output_network;
-        auto print_iter_start = this->output_settings.start_output;
-        auto print_initial    = this->output_settings.print_initial;
+        auto start_output     = this->output_settings.start_output;
+        auto output_initial   = this->output_settings.output_initial;
 
         fmt::print( "-----------------------------------------------------------------\n" );
         fmt::print( "Starting simulation\n" );
         fmt::print( "-----------------------------------------------------------------\n" );
 
-        if( print_initial )
+        if( output_initial )
         {
             Seldon::IO::network_to_file( network, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );
             auto filename = fmt::format( "opinions_{}.txt", 0 );
@@ -178,7 +178,7 @@ public:
             }
 
             // Write out the opinion?
-            if( n_output_agents.has_value() && ( this->model->n_iterations() >= print_iter_start )
+            if( n_output_agents.has_value() && ( this->model->n_iterations() >= start_output )
                 && ( this->model->n_iterations() % n_output_agents.value() == 0 ) )
             {
                 auto filename = fmt::format( "opinions_{}.txt", this->model->n_iterations() );
@@ -186,7 +186,7 @@ public:
             }
 
             // Write out the network?
-            if( n_output_network.has_value() && ( this->model->n_iterations() >= print_iter_start )
+            if( n_output_network.has_value() && ( this->model->n_iterations() >= start_output )
                 && ( this->model->n_iterations() % n_output_network.value() == 0 ) )
             {
                 auto filename = fmt::format( "network_{}.txt", this->model->n_iterations() );

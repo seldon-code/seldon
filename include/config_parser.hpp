@@ -2,6 +2,7 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
+#include <cstddef>
 #include <optional>
 #include <random>
 #include <string_view>
@@ -32,8 +33,8 @@ struct OutputSettings
     std::optional<size_t> n_output_agents  = std::nullopt;
     std::optional<size_t> n_output_network = std::nullopt;
     bool print_progress                    = true; // Print the iteration time, by default always prints
-    bool print_initial                     = true; // Output initial opinions and network, by default always outputs.
-    int start_output = 1; // Start printing opinion and/or network files from this iteration number
+    bool output_initial                    = true; // Output initial opinions and network, by default always outputs.
+    size_t start_output = 1; // Start printing opinion and/or network files from this iteration number
 };
 
 struct DeGrootSettings
