@@ -1,7 +1,6 @@
 #pragma once
 #include "fstream"
 #include "network.hpp"
-#include "simulation.hpp"
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
@@ -12,7 +11,8 @@ namespace Seldon
 namespace IO
 {
 
-inline void network_to_dot_file( const Network & network, const std::string & file_path )
+template<typename AgentT>
+void network_to_dot_file( const Network<AgentT> & network, const std::string & file_path )
 {
     std::fstream fs;
     fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );
@@ -37,30 +37,29 @@ inline void network_to_dot_file( const Network & network, const std::string & fi
     fs.close();
 }
 
-inline void opinions_to_file( Simulation & simulation, const std::string & file_path )
+template<typename AgentT>
+void opinions_to_file( const Network<AgentT> & network, const std::string & file_path )
 {
     std::fstream fs;
     fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );
 
-    auto & network  = simulation.network;
-    auto & model    = simulation.model;
-    size_t n_agents = network->n_agents();
+    size_t n_agents = network.n_agents();
 
     fmt::print( fs, "# idx_agent, opinion[...]\n" );
     for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
     {
-        std::string row = fmt::format( "{:>5}, {:>25}\n", idx_agent, model->get_agent( idx_agent )->to_string() );
+        std::string row = fmt::format( "{:>5}, {:>25}\n", idx_agent, network.agents[idx_agent].to_string() );
         fs << row;
     }
     fs.close();
 }
 
-inline void network_to_file( Simulation & simulation, const std::string & file_path )
+template<typename AgentT>
+void network_to_file( const Network<AgentT> & network, const std::string & file_path )
 {
     std::fstream fs;
     fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );
 
-    auto & network  = *simulation.network;
     size_t n_agents = network.n_agents();
 
     fmt::print( fs, "# idx_agent, n_neighbours_in, indices_neighbours_in[...], weights_in[...]\n" );

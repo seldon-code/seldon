@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <random>
 #include <set>
-#include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -15,32 +15,49 @@ namespace Seldon
 
 struct ActivityAgentData
 {
-    double opinion  = 0; // x_i
-    double activity = 0; // a_i
+    double opinion    = 0;   // x_i
+    double activity   = 0;   // a_i
+    double reluctance = 1.0; // m_i
 };
 
 template<>
 inline std::string Agent<ActivityAgentData>::to_string() const
 {
-    return fmt::format( "{}, {}", data.opinion, data.activity );
+    return fmt::format( "{}, {}, {}", data.opinion, data.activity, data.reluctance );
 };
 
 template<>
 inline void Agent<ActivityAgentData>::from_string( const std::string & str )
 {
-    auto pos_comma = str.find_first_of( ',' );
-    data.opinion   = std::stod( str.substr( 0, pos_comma ) );
-    data.activity  = std::stod( str.substr( pos_comma + 1, str.size() ) );
+    auto pos_comma      = str.find_first_of( ',' );
+    auto pos_next_comma = str.find( ',', pos_comma + 1 );
+
+    data.opinion = std::stod( str.substr( 0, pos_comma ) );
+
+    if( pos_next_comma == std::string::npos )
+    {
+        data.activity = std::stod( str.substr( pos_comma + 1, str.size() ) );
+    }
+    else
+    {
+        data.activity = std::stod( str.substr( pos_comma + 1, pos_next_comma ) );
+    }
+
+    if( pos_next_comma != std::string::npos )
+    {
+        data.reluctance = std::stod( str.substr( pos_next_comma + 1, str.size() ) );
+    }
 };
 
-class ActivityAgentModel : public Model<Agent<ActivityAgentData>>
+class ActivityDrivenModel : public Model<Agent<ActivityAgentData>>
 {
 public:
-    using AgentT = Agent<ActivityAgentData>;
+    using AgentT   = Agent<ActivityAgentData>;
+    using NetworkT = Network<AgentT>;
 
 private:
-    Network & network;
-    std::vector<std::vector<Network::WeightT>> contact_prob_list; // Probability of choosing i in 1 to m rounds
+    NetworkT & network;
+    std::vector<std::vector<NetworkT::WeightT>> contact_prob_list; // Probability of choosing i in 1 to m rounds
     // Random number generation
     std::mt19937 & gen; // reference to simulation Mersenne-Twister engine
     std::set<std::pair<size_t, size_t>> reciprocal_edge_buffer{};
@@ -68,7 +85,8 @@ private:
             for( size_t j = 0; j < neighbour_buffer.size(); j++ )
             {
                 j_index = neighbour_buffer[j];
-                k_buffer[idx_agent] += K * weight_buffer[j] * std::tanh( alpha * opinion( j_index ) );
+                k_buffer[idx_agent] += 1.0 / network.agents[idx_agent].data.reluctance * K * weight_buffer[j]
+                                       * std::tanh( alpha * opinion( j_index ) );
             }
             // Multiply by the timestep
             k_buffer[idx_agent] *= dt;
@@ -100,6 +118,12 @@ public:
 
     double convergence_tol = 1e-12; // TODO: ??
 
+    bool use_reluctances     = false;
+    double reluctance_mean   = 1.0;
+    double reluctance_sigma  = 0.25;
+    double reluctance_eps    = 0.01;
+    double covariance_factor = 0.0;
+
     // bot @TODO: less hacky
 
     size_t n_bots                     = 0; // The first n_bots agents are bots
@@ -113,14 +137,11 @@ public:
         return n_bots > 0;
     }
 
-    ActivityAgentModel( int n_agents, Network & network, std::mt19937 & gen );
+    ActivityDrivenModel( NetworkT & network, std::mt19937 & gen );
 
     void get_agents_from_power_law(); // This needs to be called after eps and gamma have been set
 
     void iteration() override;
-
-    // bool finished() overteration() override;
-    // bool finished() override;
 };
 
 } // namespace Seldon

@@ -32,6 +32,8 @@ struct OutputSettings
     std::optional<size_t> n_output_agents  = std::nullopt;
     std::optional<size_t> n_output_network = std::nullopt;
     bool print_progress                    = true; // Print the iteration time, by default always prints
+    bool print_initial                     = true; // Output initial opinions and network, by default always outputs.
+    int start_output = 1; // Start printing opinion and/or network files from this iteration number
 };
 
 struct DeGrootSettings
@@ -58,6 +60,11 @@ struct ActivityDrivenSettings
     std::vector<double> bot_activity  = std::vector<double>( 0 );
     std::vector<double> bot_opinion   = std::vector<double>( 0 );
     std::vector<double> bot_homophily = std::vector<double>( 0 );
+    bool use_reluctances              = false;
+    double reluctance_mean            = 1.0;
+    double reluctance_sigma           = 0.25;
+    double reluctance_eps             = 0.01;
+    double covariance_factor          = 0.0;
 };
 
 struct InitialNetworkSettings

@@ -26,7 +26,7 @@ std::vector<AgentT> generate_from_file( const std::string & file )
         // Get the current line as a substring
         auto line     = file_contents.substr( start_of_line, end_of_line - start_of_line );
         start_of_line = end_of_line + 1;
-        // TODO: check if empty or comment
+
         if( line.empty() )
         {
             break;
