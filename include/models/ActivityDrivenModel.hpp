@@ -1,6 +1,7 @@
 #pragma once
 
 #include "agent.hpp"
+#include "agent_writer.hpp"
 #include "model.hpp"
 #include "network.hpp"
 #include <cstddef>
@@ -21,10 +22,16 @@ struct ActivityAgentData
 };
 
 template<>
-inline std::string Agent<ActivityAgentData>::to_string() const
+inline std::string agent_to_string<Agent<ActivityAgentData>>( const Agent<ActivityAgentData> & agent )
 {
-    return fmt::format( "{}, {}, {}", data.opinion, data.activity, data.reluctance );
-};
+    return fmt::format( "{}, {}, {}", agent.data.opinion, agent.data.activity, agent.data.reluctance );
+}
+
+template<>
+inline std::string opinion_to_string<Agent<ActivityAgentData>>( const Agent<ActivityAgentData> & agent )
+{
+    return fmt::format( "{}", agent.data.opinion );
+}
 
 template<>
 inline void Agent<ActivityAgentData>::from_string( const std::string & str )

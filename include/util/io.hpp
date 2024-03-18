@@ -1,4 +1,5 @@
 #pragma once
+#include "agent_writer.hpp"
 #include "fstream"
 #include "network.hpp"
 #include <fmt/core.h>
@@ -48,7 +49,7 @@ void opinions_to_file( const Network<AgentT> & network, const std::string & file
     fmt::print( fs, "# idx_agent, opinion[...]\n" );
     for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
     {
-        std::string row = fmt::format( "{:>5}, {:>25}\n", idx_agent, network.agents[idx_agent].to_string() );
+        std::string row = fmt::format( "{:>5}, {:>25}\n", idx_agent, agent_to_string( network.agents[idx_agent] ) );
         fs << row;
     }
     fs.close();

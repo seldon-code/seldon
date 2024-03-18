@@ -17,11 +17,6 @@ public:
     virtual ~Agent() = default;
 
     void from_string( const std::string & str );
-
-    virtual std::string to_string() const
-    {
-        return fmt::format( "{:.16f}", data );
-    }
 };
 
 template<>
