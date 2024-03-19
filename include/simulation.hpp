@@ -83,7 +83,6 @@ public:
 
         if constexpr( std::is_same_v<AgentType, DeGrootModel::AgentT> )
         {
-            fmt::print( "I am a simple agent\n" );
             if( options.model == Config::Model::DeGroot )
             {
                 auto degroot_settings = std::get<Config::DeGrootSettings>( options.model_settings );
@@ -104,7 +103,6 @@ public:
             }
             else if( options.model == Config::Model::DeffuantModel )
             {
-                fmt::print( "I am inside the Deffuant model loop.\n" );
                 auto deffuant_settings = std::get<Config::DeffuantSettings>( options.model_settings );
 
                 // Deffuant model specific parameters
