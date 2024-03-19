@@ -2,7 +2,7 @@ project('seldon', 'cpp',
   version : '0.1',
   default_options : ['warning_level=3', 'cpp_std=c++20', 'optimization=3'])
 
-add_global_arguments('-Wno-unused-local-typedefs', language : 'cpp')
+add_global_arguments(['-Wno-unused-local-typedefs', '-Wno-array-bounds'], language : 'cpp')
 
 incdir = include_directories('include')
 

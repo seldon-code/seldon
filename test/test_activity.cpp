@@ -3,14 +3,13 @@
 #include "util/math.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
-
 #include <config_parser.hpp>
 #include <filesystem>
+#include <network_io.hpp>
 #include <optional>
 #include <simulation.hpp>
-namespace fs = std::filesystem;
 
-#include <util/io.hpp>
+namespace fs = std::filesystem;
 
 TEST_CASE(
     "Test that you can produce output for the probabilistic acitivity driven model, from a conf file",
