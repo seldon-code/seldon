@@ -12,25 +12,25 @@ namespace Seldon
 {
 
 template<typename AgentT>
-std::string agent_to_string( const AgentT & agent )
+[[nodiscard]] std::string agent_to_string( const AgentT & agent [[maybe_unused]] )
 {
     return "";
 }
 
 template<typename AgentT>
-std::string opinion_to_string( const AgentT & agent )
+[[nodiscard]] std::string opinion_to_string( const AgentT & agent [[maybe_unused]] )
 {
     return fmt::format( "{}", agent.data.opinion );
 }
 
 template<typename AgentT>
-AgentT agent_from_string( const std::string & str )
+[[nodiscard]] AgentT agent_from_string( const std::string & str [[maybe_unused]] )
 {
     return AgentT{};
 }
 
 template<typename AgentT>
-std::vector<std::string> agent_to_string_column_names()
+[[nodiscard]] std::vector<std::string> agent_to_string_column_names()
 {
     return { "agent_data[...]" };
 }
