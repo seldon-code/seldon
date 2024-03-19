@@ -8,7 +8,6 @@ incdir = include_directories('include')
 
 sources_seldon = [
   'src/config_parser.cpp',
-  'src/model.cpp',
   'src/models/DeGroot.cpp',
   'src/models/ActivityDrivenModel.cpp',
   'src/util/tomlplusplus.cpp',
