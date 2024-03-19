@@ -13,16 +13,16 @@
 #include <simulation.hpp>
 namespace fs = std::filesystem;
 
+using namespace Seldon;
+using namespace Catch::Matchers;
+using AgentT  = ActivityDrivenModel::AgentT;
+using Network = Network<AgentT>;
+
+auto proj_root_path = fs::current_path();
+
 TEST_CASE( "Test reading in the network from a file", "[io_network]" )
 {
-    using namespace Seldon;
-    using namespace Catch::Matchers;
-    using AgentT  = ActivityDrivenModel::AgentT;
-    using Network = Network<AgentT>;
-
-    auto proj_root_path = fs::current_path();
     auto network_file   = proj_root_path / fs::path( "test/res/network.txt" );
-
     auto network = Seldon::NetworkGeneration::generate_from_file<AgentT>( network_file );
 
     REQUIRE( network.n_agents() == 3 );
@@ -40,12 +40,7 @@ TEST_CASE( "Test reading in the network from a file", "[io_network]" )
 
 TEST_CASE( "Test reading in the agents from a file", "[io_agents]" )
 {
-    using namespace Seldon;
-    using namespace Catch::Matchers;
-
-    auto proj_root_path = fs::current_path();
     auto network_file   = proj_root_path / fs::path( "test/res/opinions.txt" );
-
     auto agents = Seldon::AgentGeneration::generate_from_file<ActivityDrivenModel::AgentT>( network_file );
 
     std::vector<double> opinions_expected    = { 2.1127107987061544, 0.8088982488089491, -0.8802809369462433 };
