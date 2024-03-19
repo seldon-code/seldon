@@ -1,3 +1,5 @@
+#pragma once
+
 #include "agent.hpp"
 #include "agent_io.hpp"
 

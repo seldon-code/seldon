@@ -8,8 +8,6 @@
 #include <string>
 namespace Seldon
 {
-namespace IO
-{
 
 template<typename AgentT>
 void network_to_dot_file( const Network<AgentT> & network, const std::string & file_path )
@@ -94,5 +92,4 @@ void network_to_file( const Network<AgentT> & network, const std::string & file_
     fs.close();
 }
 
-} // namespace IO
 } // namespace Seldon

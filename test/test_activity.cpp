@@ -10,7 +10,7 @@
 #include <simulation.hpp>
 namespace fs = std::filesystem;
 
-#include <util/io.hpp>
+#include <network_io.hpp>
 
 TEST_CASE(
     "Test that you can produce output for the probabilistic acitivity driven model, from a conf file",
