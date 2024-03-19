@@ -24,7 +24,8 @@ namespace Seldon::Config
 enum class Model
 {
     DeGroot,
-    ActivityDrivenModel
+    ActivityDrivenModel,
+    DeffuantModel
 };
 
 struct OutputSettings
@@ -41,6 +42,14 @@ struct DeGrootSettings
 {
     std::optional<int> max_iterations = std::nullopt;
     double convergence_tol;
+};
+
+struct DeffuantSettings
+{
+    std::optional<int> max_iterations = std::nullopt;
+    double homophily_threshold
+        = 0.2;       // d in the paper; agents interact if difference in opinion is less than this value
+    double mu = 0.5; // convergence parameter; similar to social interaction strength K (0,0.5]
 };
 
 struct ActivityDrivenSettings
@@ -81,7 +90,7 @@ struct SimulationOptions
     std::string model_string;
     int rng_seed = std::random_device()();
     OutputSettings output_settings;
-    std::variant<DeGrootSettings, ActivityDrivenSettings> model_settings;
+    std::variant<DeGrootSettings, ActivityDrivenSettings, DeffuantSettings> model_settings;
     InitialNetworkSettings network_settings;
 };
 

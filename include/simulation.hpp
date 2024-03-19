@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config_parser.hpp"
+#include "fmt/core.h"
 #include "network.hpp"
 #include <fmt/chrono.h>
 #include <fmt/format.h>
@@ -8,6 +9,7 @@
 #include <memory>
 #include <models/ActivityDrivenModel.hpp>
 #include <models/DeGroot.hpp>
+#include <models/DeffuantModel.hpp>
 #include <network_generation.hpp>
 #include <network_io.hpp>
 #include <optional>
@@ -81,20 +83,44 @@ public:
 
         if constexpr( std::is_same_v<AgentType, DeGrootModel::AgentT> )
         {
-            auto degroot_settings = std::get<Config::DeGrootSettings>( options.model_settings );
-
-            // DeGroot specific parameters
-            model = [&]()
+            fmt::print( "I am a simple agent\n" );
+            if( options.model == Config::Model::DeGroot )
             {
-                auto model             = std::make_unique<DeGrootModel>( network );
-                model->max_iterations  = degroot_settings.max_iterations;
-                model->convergence_tol = degroot_settings.convergence_tol;
-                return model;
-            }();
+                auto degroot_settings = std::get<Config::DeGrootSettings>( options.model_settings );
 
-            if( cli_agent_file.has_value() )
+                // DeGroot specific parameters
+                model = [&]()
+                {
+                    auto model             = std::make_unique<DeGrootModel>( network );
+                    model->max_iterations  = degroot_settings.max_iterations;
+                    model->convergence_tol = degroot_settings.convergence_tol;
+                    return model;
+                }();
+
+                if( cli_agent_file.has_value() )
+                {
+                    network.agents = agents_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
+                }
+            }
+            else if( options.model == Config::Model::DeffuantModel )
             {
-                network.agents = agents_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
+                fmt::print( "I am inside the Deffuant model loop.\n" );
+                auto deffuant_settings = std::get<Config::DeffuantSettings>( options.model_settings );
+
+                // Deffuant model specific parameters
+                model = [&]()
+                {
+                    auto model                 = std::make_unique<DeffuantModel>( network, gen );
+                    model->max_iterations      = deffuant_settings.max_iterations;
+                    model->homophily_threshold = deffuant_settings.homophily_threshold;
+                    model->mu                  = deffuant_settings.mu;
+                    return model;
+                }();
+
+                if( cli_agent_file.has_value() )
+                {
+                    network.agents = agents_from_file<DeffuantModel::AgentT>( cli_agent_file.value() );
+                }
             }
         }
         else if constexpr( std::is_same_v<AgentType, ActivityDrivenModel::AgentT> )

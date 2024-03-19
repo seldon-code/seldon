@@ -10,6 +10,7 @@ sources_seldon = [
   'src/config_parser.cpp',
   'src/models/DeGroot.cpp',
   'src/models/ActivityDrivenModel.cpp',
+  'src/models/DeffuantModel.cpp',
   'src/util/tomlplusplus.cpp',
 ]
 
