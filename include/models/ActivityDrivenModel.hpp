@@ -67,26 +67,26 @@ public:
     // Model-specific parameters
     double dt = 0.01; // Timestep for the integration of the coupled ODEs
     // Various free parameters
-    int m            = 10;   // Number of agents contacted, when the agent is active
-    double eps       = 0.01; // Minimum activity epsilon; a_i belongs to [epsilon,1]
-    double gamma     = 2.1;  // Exponent of activity power law distribution of activities
-    double alpha     = 3.0;  // Controversialness of the issue, must be greater than 0.
-    double homophily = 0.5;  // aka beta. if zero, agents pick their interaction partners at random
+    int m{};            // Number of agents contacted, when the agent is active
+    double eps{};       // Minimum activity epsilon; a_i belongs to [epsilon,1]
+    double gamma{};     // Exponent of activity power law distribution of activities
+    double alpha{};     // Controversialness of the issue, must be greater than 0.
+    double homophily{}; // aka beta. if zero, agents pick their interaction partners at random
     // Reciprocity aka r. probability that when agent i contacts j via weighted reservoir sampling
     // j also sends feedback to i. So every agent can have more than m incoming connections
-    double reciprocity = 0.5;
-    double K           = 3.0; // Social interaction strength; K>0
+    double reciprocity{};
+    double K{}; // Social interaction strength; K>0
 
     bool mean_activities = false;
     bool mean_weights    = false;
 
     double convergence_tol = 1e-12; // TODO: ??
 
-    bool use_reluctances     = false;
-    double reluctance_mean   = 1.0;
-    double reluctance_sigma  = 0.25;
-    double reluctance_eps    = 0.01;
-    double covariance_factor = 0.0;
+    bool use_reluctances = false;
+    double reluctance_mean{};
+    double reluctance_sigma{};
+    double reluctance_eps{};
+    double covariance_factor{};
 
     // bot @TODO: less hacky
 
