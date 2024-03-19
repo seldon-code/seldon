@@ -19,6 +19,48 @@ public:
     using AgentT   = ActivityAgent;
     using NetworkT = Network<AgentT>;
 
+    ActivityDrivenModel( NetworkT & network, std::mt19937 & gen );
+
+    void get_agents_from_power_law(); // This needs to be called after eps and gamma have been set
+
+    void iteration() override;
+
+    // Model-specific parameters
+    double dt = 0.01; // Timestep for the integration of the coupled ODEs
+    // Various free parameters
+    int m{};            // Number of agents contacted, when the agent is active
+    double eps{};       // Minimum activity epsilon; a_i belongs to [epsilon,1]
+    double gamma{};     // Exponent of activity power law distribution of activities
+    double alpha{};     // Controversialness of the issue, must be greater than 0.
+    double homophily{}; // aka beta. if zero, agents pick their interaction partners at random
+    // Reciprocity aka r. probability that when agent i contacts j via weighted reservoir sampling
+    // j also sends feedback to i. So every agent can have more than m incoming connections
+    double reciprocity{};
+    double K{}; // Social interaction strength; K>0
+
+    bool mean_activities = false;
+    bool mean_weights    = false;
+
+    double convergence_tol = 1e-12; // TODO: ??
+
+    bool use_reluctances = false;
+    double reluctance_mean{};
+    double reluctance_sigma{};
+    double reluctance_eps{};
+    double covariance_factor{};
+
+    // bot @TODO: less hacky
+    size_t n_bots                     = 0; // The first n_bots agents are bots
+    std::vector<int> bot_m            = std::vector<int>( 0 );
+    std::vector<double> bot_activity  = std::vector<double>( 0 );
+    std::vector<double> bot_opinion   = std::vector<double>( 0 );
+    std::vector<double> bot_homophily = std::vector<double>( 0 );
+
+    [[nodiscard]] bool bot_present() const
+    {
+        return n_bots > 0;
+    }
+
 private:
     NetworkT & network;
     std::vector<std::vector<NetworkT::WeightT>> contact_prob_list; // Probability of choosing i in 1 to m rounds
@@ -62,50 +104,6 @@ private:
     void update_network_probabilistic();
     void update_network_mean();
     void update_network();
-
-public:
-    // Model-specific parameters
-    double dt = 0.01; // Timestep for the integration of the coupled ODEs
-    // Various free parameters
-    int m{};            // Number of agents contacted, when the agent is active
-    double eps{};       // Minimum activity epsilon; a_i belongs to [epsilon,1]
-    double gamma{};     // Exponent of activity power law distribution of activities
-    double alpha{};     // Controversialness of the issue, must be greater than 0.
-    double homophily{}; // aka beta. if zero, agents pick their interaction partners at random
-    // Reciprocity aka r. probability that when agent i contacts j via weighted reservoir sampling
-    // j also sends feedback to i. So every agent can have more than m incoming connections
-    double reciprocity{};
-    double K{}; // Social interaction strength; K>0
-
-    bool mean_activities = false;
-    bool mean_weights    = false;
-
-    double convergence_tol = 1e-12; // TODO: ??
-
-    bool use_reluctances = false;
-    double reluctance_mean{};
-    double reluctance_sigma{};
-    double reluctance_eps{};
-    double covariance_factor{};
-
-    // bot @TODO: less hacky
-
-    size_t n_bots                     = 0; // The first n_bots agents are bots
-    std::vector<int> bot_m            = std::vector<int>( 0 );
-    std::vector<double> bot_activity  = std::vector<double>( 0 );
-    std::vector<double> bot_opinion   = std::vector<double>( 0 );
-    std::vector<double> bot_homophily = std::vector<double>( 0 );
-
-    [[nodiscard]] bool bot_present() const
-    {
-        return n_bots > 0;
-    }
-
-    ActivityDrivenModel( NetworkT & network, std::mt19937 & gen );
-
-    void get_agents_from_power_law(); // This needs to be called after eps and gamma have been set
-
-    void iteration() override;
 };
 
 } // namespace Seldon
