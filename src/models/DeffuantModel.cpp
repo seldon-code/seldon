@@ -12,6 +12,10 @@ namespace Seldon
 DeffuantModel::DeffuantModel( NetworkT & network, std::mt19937 & gen )
         : Model<DeffuantModel::AgentT>(), network( network ), gen( gen )
 {
+    for( size_t i = 0; i < network.agents.size(); i++ )
+    {
+        network.agents[i].data.opinion = double( i ) / double( network.agents.size() );
+    }
 }
 
 void DeffuantModel::iteration()
@@ -34,6 +38,7 @@ void DeffuantModel::iteration()
 
         // Update rule
         auto opinion_diff = agent1.data.opinion - agent2.data.opinion;
+
         // Only if less than homophily_threshold
         if( std::abs( opinion_diff ) < homophily_threshold )
         {

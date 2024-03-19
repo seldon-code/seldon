@@ -25,6 +25,7 @@ tests = [
   ['Test_Tarjan', 'test/test_tarjan.cpp'],
   ['Test_DeGroot', 'test/test_deGroot.cpp'],
   ['Test_Activity_Driven', 'test/test_activity.cpp'],
+  ['Test_Deffuant', 'test/test_deffuant.cpp'],
   ['Test_Network', 'test/test_network.cpp'],
   ['Test_Network_Generation', 'test/test_network_generation.cpp'],
   ['Test_Sampling', 'test/test_sampling.cpp'],
