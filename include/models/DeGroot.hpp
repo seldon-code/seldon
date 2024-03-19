@@ -1,16 +1,17 @@
 #pragma once
-#include "agent.hpp"
+#include "agents/simple_agent.hpp"
 #include "model.hpp"
 #include "network.hpp"
+#include <optional>
 #include <vector>
 
 namespace Seldon
 {
 
-class DeGrootModel : public Model<Agent<double>>
+class DeGrootModel : public Model<SimpleAgent>
 {
 public:
-    using AgentT           = Agent<double>;
+    using AgentT           = SimpleAgent;
     using NetworkT         = Network<AgentT>;
     double convergence_tol = 1e-12;
 
@@ -20,7 +21,7 @@ public:
     bool finished() override;
 
 private:
-    double max_opinion_diff = 0;
+    std::optional<double> max_opinion_diff = std::nullopt;
     NetworkT & network;
     std::vector<AgentT> agents_current_copy;
 };

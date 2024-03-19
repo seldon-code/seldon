@@ -15,19 +15,6 @@ public:
     Agent() = default;
     Agent( data_t data ) : data( data ) {}
     virtual ~Agent() = default;
-
-    void from_string( const std::string & str );
-
-    virtual std::string to_string() const
-    {
-        return fmt::format( "{:.16f}", data );
-    }
 };
-
-template<>
-inline void Agent<double>::from_string( const std::string & str )
-{
-    data = std::stod( str );
-}
 
 } // namespace Seldon
