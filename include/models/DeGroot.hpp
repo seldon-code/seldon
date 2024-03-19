@@ -1,6 +1,5 @@
 #pragma once
-#include "agent.hpp"
-#include "agent_io.hpp"
+#include "agents/simple_agent.hpp"
 #include "model.hpp"
 #include "network.hpp"
 #include <optional>
@@ -9,43 +8,10 @@
 namespace Seldon
 {
 
-struct DeGrootAgentData
-{
-    double opinion = 0; // x_i
-};
-
-using AgentDeGroot = Agent<DeGrootAgentData>;
-
-template<>
-inline std::string agent_to_string<AgentDeGroot>( const AgentDeGroot & agent )
-{
-    return fmt::format( "{}", agent.data.opinion );
-}
-
-template<>
-inline std::string opinion_to_string<AgentDeGroot>( const AgentDeGroot & agent )
-{
-    return agent_to_string( agent );
-}
-
-template<>
-inline AgentDeGroot agent_from_string<AgentDeGroot>( const std::string & str )
-{
-    AgentDeGroot res{};
-    res.data.opinion = std::stod( str );
-    return res;
-}
-
-template<>
-inline std::vector<std::string> agent_to_string_column_names<AgentDeGroot>()
-{
-    return { "opinion" };
-}
-
-class DeGrootModel : public Model<Agent<DeGrootAgentData>>
+class DeGrootModel : public Model<SimpleAgent>
 {
 public:
-    using AgentT           = Agent<DeGrootAgentData>;
+    using AgentT           = SimpleAgent;
     using NetworkT         = Network<AgentT>;
     double convergence_tol = 1e-12;
 
