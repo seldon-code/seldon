@@ -39,7 +39,7 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
 
     auto set_if_specified = [&]( auto & opt, const auto & toml_opt )
     {
-        using T    = std::remove_reference<decltype( opt )>::type;
+        using T    = typename std::remove_reference<decltype( opt )>::type;
         auto t_opt = toml_opt.template value<T>();
         if( t_opt.has_value() )
             opt = t_opt.value();
