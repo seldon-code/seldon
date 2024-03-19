@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 namespace Seldon::Config
 {
@@ -36,15 +37,20 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
 
     options.rng_seed = tbl["simulation"]["rng_seed"].value_or( int( options.rng_seed ) );
 
+    auto set_if_specified = [&]( auto & opt, const auto & toml_opt )
+    {
+        using T    = std::remove_reference<decltype( opt )>::type;
+        auto t_opt = toml_opt.template value<T>();
+        if( t_opt.has_value() )
+            opt = t_opt.value();
+    };
+
     // Parse output settings
     options.output_settings.n_output_network = tbl["io"]["n_output_network"].value<size_t>();
     options.output_settings.n_output_agents  = tbl["io"]["n_output_agents"].value<size_t>();
-    options.output_settings.print_progress
-        = tbl["io"]["print_progress"].value_or<bool>( bool( options.output_settings.print_progress ) );
-    options.output_settings.output_initial
-        = tbl["io"]["output_initial"].value_or<bool>( bool( options.output_settings.output_initial ) );
-    // @TODO: default value should not be hard-coded here
-    options.output_settings.start_output = tbl["io"]["start_output"].value_or<size_t>( 1 );
+    set_if_specified( options.output_settings.print_progress, tbl["io"]["print_progress"] );
+    set_if_specified( options.output_settings.output_initial, tbl["io"]["output_initial"] );
+    set_if_specified( options.output_settings.start_output, tbl["io"]["start_output"] );
 
     // Check if the 'model' keyword exists
     std::optional<std::string> model_string = tbl["simulation"]["model"].value<std::string>();
@@ -65,27 +71,27 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
     {
         auto model_settings = ActivityDrivenSettings();
 
-        //@TODO: the following should not hardcode the defaults, take from the settings class
-        model_settings.dt              = tbl["ActivityDriven"]["dt"].value_or<double>( 0.01 );
-        model_settings.m               = tbl["ActivityDriven"]["m"].value_or<size_t>( 10 );
-        model_settings.eps             = tbl["ActivityDriven"]["eps"].value_or<double>( 0.01 );
-        model_settings.gamma           = tbl["ActivityDriven"]["gamma"].value_or<double>( 2.1 );
-        model_settings.homophily       = tbl["ActivityDriven"]["homophily"].value_or<double>( 0.5 );
-        model_settings.reciprocity     = tbl["ActivityDriven"]["reciprocity"].value_or<double>( 0.5 );
-        model_settings.alpha           = tbl["ActivityDriven"]["alpha"].value_or<double>( 3.0 );
-        model_settings.K               = tbl["ActivityDriven"]["K"].value_or<double>( 3.0 );
-        model_settings.mean_activities = tbl["ActivityDriven"]["mean_activities"].value_or<bool>( false );
-        model_settings.mean_weights    = tbl["ActivityDriven"]["mean_weights"].value_or<bool>( false );
+        set_if_specified( model_settings.dt, tbl["ActivityDriven"]["dt"] );
+        set_if_specified( model_settings.m, tbl["ActivityDriven"]["m"] );
+        set_if_specified( model_settings.eps, tbl["ActivityDriven"]["eps"] );
+        set_if_specified( model_settings.gamma, tbl["ActivityDriven"]["gamma"] );
+        set_if_specified( model_settings.homophily, tbl["ActivityDriven"]["homophily"] );
+        set_if_specified( model_settings.reciprocity, tbl["ActivityDriven"]["reciprocity"] );
+        set_if_specified( model_settings.alpha, tbl["ActivityDriven"]["alpha"] );
+        set_if_specified( model_settings.K, tbl["ActivityDriven"]["K"] );
+        // Mean activity model options
+        set_if_specified( model_settings.mean_activities, tbl["ActivityDriven"]["mean_activities"] );
+        set_if_specified( model_settings.mean_weights, tbl["ActivityDriven"]["mean_weights"] );
         // Reluctances
-        model_settings.use_reluctances  = tbl["ActivityDriven"]["reluctances"].value_or<bool>( false );
-        model_settings.reluctance_mean  = tbl["ActivityDriven"]["reluctance_mean"].value_or<double>( 1.0 );
-        model_settings.reluctance_sigma = tbl["ActivityDriven"]["reluctance_sigma"].value_or<double>( 0.25 );
-        model_settings.reluctance_eps   = tbl["ActivityDriven"]["reluctance_eps"].value_or<double>( 0.01 );
+        set_if_specified( model_settings.use_reluctances, tbl["ActivityDriven"]["reluctances"] );
+        set_if_specified( model_settings.reluctance_mean, tbl["ActivityDriven"]["reluctance_mean"] );
+        set_if_specified( model_settings.reluctance_sigma, tbl["ActivityDriven"]["reluctance_sigma"] );
+        set_if_specified( model_settings.reluctance_eps, tbl["ActivityDriven"]["reluctance_eps"] );
 
         model_settings.max_iterations = tbl["model"]["max_iterations"].value<int>();
 
         // bot
-        model_settings.n_bots = tbl["ActivityDriven"]["n_bots"].value_or<size_t>( 0 );
+        set_if_specified( model_settings.n_bots, tbl["ActivityDriven"]["n_bots"] );
 
         auto push_back_bot_array = [&]( auto toml_node, auto & options_array, auto default_value )
         {
@@ -126,9 +132,9 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
     }
 
     // Parse settings for the generation of the initial network
-    options.network_settings               = InitialNetworkSettings();
-    options.network_settings.n_agents      = tbl["network"]["number_of_agents"].value_or( 0 );
-    options.network_settings.n_connections = tbl["network"]["connections_per_agent"].value_or( 0 );
+    options.network_settings = InitialNetworkSettings();
+    set_if_specified( options.network_settings.n_agents, tbl["network"]["number_of_agents"] );
+    set_if_specified( options.network_settings.n_connections, tbl["network"]["connections_per_agent"] );
 
     return options;
 }
