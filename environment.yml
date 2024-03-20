@@ -19,3 +19,4 @@ dependencies:
   - clang-format
   - tomlplusplus
   - catch2
+  - benchmark

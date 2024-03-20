@@ -39,3 +39,16 @@ foreach t : tests
   )
   test(t.get(0), exe, workdir : meson.project_source_root())
 endforeach
+
+benchmarks = [
+  ['Benchmark_ActivityDriven_Model','benchmark/benchmark_activity.cpp'],
+  ['Benchmark_deGroot_Model','benchmark/benchmark_deGroot.cpp'],
+]
+
+foreach b : benchmarks
+  exe = executable(b.get(0), sources_seldon + b.get(1),
+    dependencies : [dependency('fmt'), dependency('tomlplusplus'),Catch2,dependency('benchmark')],
+    include_directories : incdir
+  )
+  benchmark(b.get(0), exe, workdir : meson.project_source_root())
+endforeach
