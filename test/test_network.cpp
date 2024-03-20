@@ -120,4 +120,55 @@ TEST_CASE( "Testing the network class" )
 
         REQUIRE( old_edges.empty() );
     }
+
+    SECTION( "Test remove double counting" )
+    {
+        // clang-format off
+        std::vector<std::vector<size_t>> neighbour_list =  { 
+                { 2, 1, 1, 0 }, 
+                { 2, 0, 1, 2}, 
+                { 1, 1, 0, 2, 1 },
+                {},
+                {3,1}
+            };
+  
+        std::vector<std::vector<double>> weight_list =  { 
+                { -1, 1, 2, 0 }, 
+                { -1, 1, 2, -1 }, 
+                { -1, 1, 2, 3, 1 },
+                {},
+                {1, 1}
+            };
+
+        std::vector<std::vector<size_t>> neighbour_no_double_counting =  { 
+            { 0, 1, 2 }, 
+            { 0, 1, 2}, 
+            { 0, 1, 2},
+            {},
+            {1,3}
+        };
+
+        std::vector<std::vector<double>> weights_no_double_counting =  { 
+            { 0, 3, -1 }, 
+            { 1, 2, -2}, 
+            { 2, 1, 3},
+            {},
+            {1,1}
+        };
+        // clang-format on
+
+        auto network = Seldon::Network<double>(
+            std::move( neighbour_list ), std::move( weight_list ), Seldon::Network<double>::EdgeDirection::Incoming );
+
+        network.remove_double_counting();
+
+        for( size_t i_agent = 0; i_agent < network.n_agents(); i_agent++ )
+        {
+            auto weights    = network.get_weights( i_agent );
+            auto neighbours = network.get_neighbours( i_agent );
+            fmt::print( "i_agent {}\n", i_agent );
+            REQUIRE_THAT( neighbours, Catch::Matchers::RangeEquals( neighbour_no_double_counting[i_agent] ) );
+            REQUIRE_THAT( weights, Catch::Matchers::RangeEquals( weights_no_double_counting[i_agent] ) );
+        }
+    }
 }
