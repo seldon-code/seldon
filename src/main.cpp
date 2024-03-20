@@ -50,7 +50,7 @@ int main( int argc, char * argv[] )
 
     if( network_file.has_value() )
     {
-        fmt::print( "Reading netwok from file {}\n", network_file.value() );
+        fmt::print( "Reading network from file {}\n", network_file.value() );
     }
     if( agent_file.has_value() )
     {

@@ -8,8 +8,6 @@
 #include <string>
 namespace Seldon
 {
-namespace IO
-{
 
 template<typename AgentT>
 void network_to_dot_file( const Network<AgentT> & network, const std::string & file_path )
@@ -34,23 +32,6 @@ void network_to_dot_file( const Network<AgentT> & network, const std::string & f
         fs << row;
     }
     fmt::print( fs, "}}\n" );
-    fs.close();
-}
-
-template<typename AgentT>
-void opinions_to_file( const Network<AgentT> & network, const std::string & file_path )
-{
-    std::fstream fs;
-    fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );
-
-    size_t n_agents = network.n_agents();
-
-    fmt::print( fs, "# idx_agent, opinion[...]\n" );
-    for( size_t idx_agent = 0; idx_agent < n_agents; idx_agent++ )
-    {
-        std::string row = fmt::format( "{:>5}, {:>25}\n", idx_agent, network.agents[idx_agent].to_string() );
-        fs << row;
-    }
     fs.close();
 }
 
@@ -111,5 +92,4 @@ void network_to_file( const Network<AgentT> & network, const std::string & file_
     fs.close();
 }
 
-} // namespace IO
 } // namespace Seldon

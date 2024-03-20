@@ -5,7 +5,7 @@ model = "ActivityDriven"
 [io]
 # n_output_network = 1 # Write the network every 20 iterations
 # n_output_agents = 1
-print_progress = false # Print the iteration time ; if not set, then always print
+print_progress = false # Print the iteration time ; if not set, then does not print
 
 [model]
 max_iterations = 1000 # If not set, max iterations is infinite

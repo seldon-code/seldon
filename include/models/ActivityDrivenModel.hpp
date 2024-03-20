@@ -1,6 +1,6 @@
 #pragma once
 
-#include "agent.hpp"
+#include "agents/activity_agent.hpp"
 #include "model.hpp"
 #include "network.hpp"
 #include <cstddef>
@@ -13,46 +13,10 @@
 namespace Seldon
 {
 
-struct ActivityAgentData
-{
-    double opinion    = 0;   // x_i
-    double activity   = 0;   // a_i
-    double reluctance = 1.0; // m_i
-};
-
-template<>
-inline std::string Agent<ActivityAgentData>::to_string() const
-{
-    return fmt::format( "{}, {}, {}", data.opinion, data.activity, data.reluctance );
-};
-
-template<>
-inline void Agent<ActivityAgentData>::from_string( const std::string & str )
-{
-    auto pos_comma      = str.find_first_of( ',' );
-    auto pos_next_comma = str.find( ',', pos_comma + 1 );
-
-    data.opinion = std::stod( str.substr( 0, pos_comma ) );
-
-    if( pos_next_comma == std::string::npos )
-    {
-        data.activity = std::stod( str.substr( pos_comma + 1, str.size() ) );
-    }
-    else
-    {
-        data.activity = std::stod( str.substr( pos_comma + 1, pos_next_comma ) );
-    }
-
-    if( pos_next_comma != std::string::npos )
-    {
-        data.reluctance = std::stod( str.substr( pos_next_comma + 1, str.size() ) );
-    }
-};
-
-class ActivityDrivenModel : public Model<Agent<ActivityAgentData>>
+class ActivityDrivenModel : public Model<ActivityAgent>
 {
 public:
-    using AgentT   = Agent<ActivityAgentData>;
+    using AgentT   = ActivityAgent;
     using NetworkT = Network<AgentT>;
 
 private:

@@ -41,7 +41,7 @@ TEST_CASE( "Test reading in the network from a file", "[io_network]" )
 TEST_CASE( "Test reading in the agents from a file", "[io_agents]" )
 {
     auto network_file   = proj_root_path / fs::path( "test/res/opinions.txt" );
-    auto agents = Seldon::AgentGeneration::generate_from_file<ActivityDrivenModel::AgentT>( network_file );
+    auto agents = Seldon::agents_from_file<ActivityDrivenModel::AgentT>( network_file );
 
     std::vector<double> opinions_expected    = { 2.1127107987061544, 0.8088982488089491, -0.8802809369462433 };
     std::vector<double> activities_expected  = { 0.044554683389757696, 0.015813166022685163, 0.015863953902810535 };
