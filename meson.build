@@ -30,6 +30,7 @@ tests = [
   ['Test_Network_Generation', 'test/test_network_generation.cpp'],
   ['Test_Sampling', 'test/test_sampling.cpp'],
   ['Test_IO', 'test/test_io.cpp'],
+  ['Test_Util', 'test/test_util.cpp'],
 ]
 
 Catch2 = dependency('Catch2', method : 'cmake', modules : ['Catch2::Catch2WithMain', 'Catch2::Catch2'])

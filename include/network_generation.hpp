@@ -197,6 +197,7 @@ Network<AgentType> generate_from_file( const std::string & file )
         neighbour_list.emplace_back( 0 );
         weight_list.emplace_back( 0 );
 
+        //@TODO: refactor with util/parse_comma_separated_list
         size_t start_of_column = 0;
         bool finished_row      = false;
         size_t idx_column      = 0;
@@ -237,8 +238,7 @@ Network<AgentType> generate_from_file( const std::string & file )
     return NetworkT( std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
 }
 
-/* Constructs a new network on a square lattice of edge length n_edge (with PBCs)
- */
+/* Constructs a new network on a square lattice of edge length n_edge (with PBCs)*/
 template<typename AgentType>
 Network<AgentType> generate_square_lattice( size_t n_edge, typename Network<AgentType>::WeightT weight = 0.0 )
 {
