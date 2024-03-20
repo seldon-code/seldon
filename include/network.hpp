@@ -44,6 +44,13 @@ public:
 
     Network() = default;
 
+    Network( size_t n_agents )
+            : agents( std::vector<AgentT>( n_agents ) ),
+              neighbour_list( std::vector<std::vector<size_t>>( n_agents, std::vector<size_t>{} ) ),
+              weight_list( std::vector<std::vector<WeightT>>( n_agents, std::vector<WeightT>{} ) )
+    {
+    }
+
     Network(
         std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list,
         EdgeDirection direction )
@@ -59,7 +66,7 @@ public:
     */
     [[nodiscard]] std::size_t n_agents() const
     {
-        return neighbour_list.size();
+        return agents.size();
     }
 
     /*
@@ -284,14 +291,17 @@ public:
     */
     void clear()
     {
-        neighbour_list.clear();
-        weight_list.clear();
+        for( auto & w : weight_list )
+            w.clear();
+
+        for( auto & n : neighbour_list )
+            n.clear();
     }
 
 private:
-    std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
-    std::vector<std::vector<WeightT>> weight_list;   // List for the interaction weights of each connection
-    EdgeDirection _direction;
+    std::vector<std::vector<size_t>> neighbour_list{}; // Neighbour list for the connections
+    std::vector<std::vector<WeightT>> weight_list{};   // List for the interaction weights of each connection
+    EdgeDirection _direction{};
 };
 
 } // namespace Seldon
