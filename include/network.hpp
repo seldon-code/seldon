@@ -258,9 +258,9 @@ public:
             std::iota( sorting_indices.begin(), sorting_indices.end(), 0 );
 
             // Then, we figure out how to sort the neighbour indices list
-            std::sort( sorting_indices.begin(), sorting_indices.end(), [&]( auto i1, auto i2 ) {
-                return neighbours[i1] < neighbours[i2];
-            } );
+            std::sort(
+                sorting_indices.begin(), sorting_indices.end(),
+                [&]( auto i1, auto i2 ) { return neighbours[i1] < neighbours[i2]; } );
 
             std::optional<size_t> last_neighbour_index = std::nullopt;
             for( size_t i = 0; i < n_neighbours; i++ )
