@@ -77,6 +77,7 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
         model_settings.max_iterations = tbl["model"]["max_iterations"].value<int>();
         set_if_specified( model_settings.homophily_threshold, tbl[options.model_string]["homophily_threshold"] );
         set_if_specified( model_settings.mu, tbl[options.model_string]["mu"] );
+        set_if_specified( model_settings.use_network, tbl[options.model_string]["use_network"] );
         options.model_settings = model_settings;
     }
     else if( options.model == Model::ActivityDrivenModel )
@@ -270,6 +271,7 @@ void print_settings( const SimulationOptions & options )
         fmt::print( "    max_iterations {}\n", model_settings.max_iterations );
         fmt::print( "    homophily_threshold {}\n", model_settings.homophily_threshold );
         fmt::print( "    mu {}\n", model_settings.mu );
+        fmt::print( "    use_network {}\n", model_settings.use_network );
     }
 
     fmt::print( "[Network]\n" );

@@ -23,7 +23,7 @@ public:
     double mu                  = 0.5;   // convergence parameter
     bool use_network           = false; // for the basic Deffuant model
 
-    DeffuantModel( NetworkT & network, std::mt19937 & gen );
+    DeffuantModel( NetworkT & network, std::mt19937 & gen, bool use_network );
 
     void iteration() override;
     // bool finished() override;

@@ -108,7 +108,7 @@ public:
                 // Deffuant model specific parameters
                 model = [&]()
                 {
-                    auto model                 = std::make_unique<DeffuantModel>( network, gen );
+                    auto model = std::make_unique<DeffuantModel>( network, gen, deffuant_settings.use_network );
                     model->max_iterations      = deffuant_settings.max_iterations;
                     model->homophily_threshold = deffuant_settings.homophily_threshold;
                     model->mu                  = deffuant_settings.mu;

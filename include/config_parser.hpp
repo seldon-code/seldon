@@ -48,8 +48,9 @@ struct DeffuantSettings
 {
     std::optional<int> max_iterations = std::nullopt;
     double homophily_threshold
-        = 0.2;       // d in the paper; agents interact if difference in opinion is less than this value
-    double mu = 0.5; // convergence parameter; similar to social interaction strength K (0,0.5]
+        = 0.2;              // d in the paper; agents interact if difference in opinion is less than this value
+    double mu        = 0.5; // convergence parameter; similar to social interaction strength K (0,0.5]
+    bool use_network = false;
 };
 
 struct ActivityDrivenSettings

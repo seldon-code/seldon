@@ -15,6 +15,7 @@ max_iterations = 1000 # If not set, max iterations is infinite
 [Deffuant]
 homophily_threshold = 0.2 # d in the paper; agents interact if difference in opinion is less than this value 
 mu = 0.5 # convergence parameter; similar to social interaction strength K (0,0.5] 
+use_network = false # If true, will use a square lattice Will throw if sqrt(n_agents) is not an integer
 
 [network]
 number_of_agents = 1000

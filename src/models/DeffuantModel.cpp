@@ -1,17 +1,31 @@
 #include "models/DeffuantModel.hpp"
 #include "network.hpp"
+#include "network_generation.hpp"
 #include "util/math.hpp"
+#include <cmath>
 #include <cstddef>
 #include <optional>
 #include <random>
+#include <stdexcept>
 #include <vector>
 
 namespace Seldon
 {
 
-DeffuantModel::DeffuantModel( NetworkT & network, std::mt19937 & gen )
-        : Model<DeffuantModel::AgentT>(), network( network ), gen( gen )
+DeffuantModel::DeffuantModel( NetworkT & network, std::mt19937 & gen, bool use_network )
+        : Model<DeffuantModel::AgentT>(), use_network( use_network ), network( network ), gen( gen )
 {
+    // Generate the network as a square lattice if use_network is true
+    if( use_network )
+    {
+        size_t n_edge = std::sqrt( network.n_agents() );
+        if( n_edge * n_edge != network.n_agents() )
+        {
+            throw std::runtime_error( "Number of agents is not a square number." );
+        }
+        network = NetworkGeneration::generate_square_lattice<AgentT>( n_edge );
+    }
+
     for( size_t i = 0; i < network.agents.size(); i++ )
     {
         network.agents[i].data.opinion = double( i ) / double( network.agents.size() );
