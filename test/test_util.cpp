@@ -1,4 +1,5 @@
 #include "catch2/matchers/catch_matchers.hpp"
+#include "util/math.hpp"
 #include "util/misc.hpp"
 
 #include <catch2/catch_test_macros.hpp>
@@ -15,8 +16,7 @@ TEST_CASE( "Test parse_comma_separated_list", "[util_parse_list]" )
     std::vector<double> dbl_vec_expected = { -2.0, 13.0 };
     std::vector<int> int_vec_expected    = { 12, 10 };
 
-    auto callback = [&]( int idx_list, std::string & substr )
-    {
+    auto callback = [&]( int idx_list, std::string & substr ) {
         if( idx_list == 0 || idx_list == 3 )
         {
             int_vec.push_back( std::stoi( substr ) );
@@ -31,4 +31,14 @@ TEST_CASE( "Test parse_comma_separated_list", "[util_parse_list]" )
 
     REQUIRE_THAT( dbl_vec, Catch::Matchers::RangeEquals( dbl_vec_expected ) );
     REQUIRE_THAT( int_vec, Catch::Matchers::RangeEquals( int_vec_expected ) );
+}
+
+TEST_CASE( "Test Hamming distance", "[util_hamming_dist]" )
+{
+    std::vector<int> v1 = { 1, 1, 1, 0, 1 };
+    std::vector<int> v2 = { 0, 1, 1, 0, 0 };
+
+    auto dist = Seldon::hamming_distance( std::span( v1 ), std::span( v2 ) );
+
+    REQUIRE( dist == 2 );
 }

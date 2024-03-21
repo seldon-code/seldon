@@ -4,6 +4,8 @@
 #include <optional>
 #include <queue>
 #include <random>
+#include <span>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -173,5 +175,22 @@ public:
         return eps;
     }
 };
+
+template<typename T>
+int hamming_distance( std::span<T> v1, std::span<T> v2 )
+{
+    if( v1.size() != v2.size() )
+    {
+        throw std::runtime_error( "v1 and v2 need to have the same size" );
+    }
+
+    int distance = 0;
+    for( size_t i = 0; i < v2.size(); i++ )
+    {
+        if( v1[i] != v2[i] )
+            distance++;
+    }
+    return distance;
+}
 
 } // namespace Seldon

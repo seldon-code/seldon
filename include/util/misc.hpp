@@ -33,7 +33,7 @@ inline std::string get_file_contents( const std::string & filename )
 
 /*
 Executes `callback` for each substring in a comma separated list.
-If the input is "a_d, b, 1", it would call the callback function like 
+If the input is "a_d, b, 1", it would call the callback function like
 so:
     callback(0, "a d")
     callback(1, " b")
