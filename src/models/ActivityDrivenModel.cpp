@@ -1,5 +1,6 @@
 #include "models/ActivityDrivenModel.hpp"
 #include "network.hpp"
+#include "network_generation.hpp"
 #include "util/math.hpp"
 #include <cstddef>
 #include <random>
@@ -14,6 +15,13 @@ ActivityDrivenModel::ActivityDrivenModel( NetworkT & network, std::mt19937 & gen
           contact_prob_list( std::vector<std::vector<NetworkT::WeightT>>( network.n_agents() ) ),
           gen( gen )
 {
+
+    if( mean_weights )
+    {
+        auto agents_copy = network.agents;
+        network          = NetworkGeneration::generate_fully_connected<AgentT>( network.n_agents() );
+        network.agents   = agents_copy;
+    }
 }
 
 double ActivityDrivenModel::homophily_weight( size_t idx_contacter, size_t idx_contacted )

@@ -39,14 +39,9 @@ public:
 
     Config::OutputSettings output_settings;
 
-    Simulation(
-        const Config::SimulationOptions & options, const std::optional<std::string> & cli_network_file,
-        const std::optional<std::string> & cli_agent_file )
-            : output_settings( options.output_settings )
+    void
+    create_network( const Config::SimulationOptions & options, const std::optional<std::string> & cli_network_file )
     {
-        // Initialize the rng
-        gen = std::mt19937( options.rng_seed );
-
         // Construct the network
         std::optional<std::string> file = cli_network_file;
         if( !file.has_value() ) // Check if toml file should be superceded by cli_network_file
@@ -60,27 +55,12 @@ public:
         {
             int n_agents       = options.network_settings.n_agents;
             auto n_connections = options.network_settings.n_connections;
-
-            //@TODO figure this out
-            if( options.model == Config::Model::ActivityDrivenModel )
-            {
-                auto model_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
-                if( model_settings.mean_weights )
-                {
-                    network = NetworkGeneration::generate_fully_connected<AgentType>( n_agents );
-                }
-                else
-                {
-                    network
-                        = NetworkGeneration::generate_n_connections<AgentType>( n_agents, n_connections, true, gen );
-                }
-            }
-            else
-            {
-                network = NetworkGeneration::generate_n_connections<AgentType>( n_agents, n_connections, true, gen );
-            }
+            network = NetworkGeneration::generate_n_connections<AgentType>( n_agents, n_connections, true, gen );
         }
+    }
 
+    void create_model( const Config::SimulationOptions & options, const std::optional<std::string> & cli_agent_file )
+    {
         if constexpr( std::is_same_v<AgentType, DeGrootModel::AgentT> )
         {
             if( options.model == Config::Model::DeGroot )
@@ -144,13 +124,23 @@ public:
                 model->reluctance_mean  = activitydriven_settings.reluctance_mean;
                 model->reluctance_sigma = activitydriven_settings.reluctance_sigma;
                 model->reluctance_eps   = activitydriven_settings.reluctance_eps;
-                // bot
+                // Bot
                 model->n_bots        = activitydriven_settings.n_bots;
                 model->bot_opinion   = activitydriven_settings.bot_opinion;
                 model->bot_m         = activitydriven_settings.bot_m;
                 model->bot_homophily = activitydriven_settings.bot_homophily;
                 model->bot_activity  = activitydriven_settings.bot_activity;
                 model->get_agents_from_power_law();
+
+                // TODO: this is stupid and should be done in the constructor, but right now it cant since we set mean
+                // weights only later
+                if( model->mean_weights )
+                {
+                    auto agents_copy = network.agents;
+                    network          = NetworkGeneration::generate_fully_connected<AgentType>( network.n_agents() );
+                    network.agents   = agents_copy;
+                }
+
                 return model;
             }();
 
@@ -159,6 +149,20 @@ public:
                 network.agents = agents_from_file<ActivityDrivenModel::AgentT>( cli_agent_file.value() );
             }
         }
+    }
+
+    // void create_agents( const std::optional<std::string> & cli_agent_file ) {}
+
+    Simulation(
+        const Config::SimulationOptions & options, const std::optional<std::string> & cli_network_file,
+        const std::optional<std::string> & cli_agent_file )
+            : output_settings( options.output_settings )
+    {
+        // Initialize the rng
+        gen = std::mt19937( options.rng_seed );
+
+        create_network( options, cli_network_file );
+        create_model( options, cli_agent_file );
     }
 
     void run( const fs::path & output_dir_path ) override
@@ -225,6 +229,6 @@ public:
             std::chrono::floor<ms>( total_time ) );
         fmt::print( "=================================================================\n" );
     }
-};
+}; // namespace Seldon
 
 } // namespace Seldon

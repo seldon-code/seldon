@@ -51,6 +51,13 @@ public:
     {
     }
 
+    Network( std::vector<AgentT> agents )
+            : agents( agents ),
+              neighbour_list( std::vector<std::vector<size_t>>( agents.size(), std::vector<size_t>{} ) ),
+              weight_list( std::vector<std::vector<WeightT>>( agents.size(), std::vector<WeightT>{} ) )
+    {
+    }
+
     Network(
         std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list,
         EdgeDirection direction )
