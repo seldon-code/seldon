@@ -1,6 +1,8 @@
 #pragma once
 
 #include "agents/activity_agent.hpp"
+#include "config_parser.hpp"
+
 #include "model.hpp"
 #include "network.hpp"
 #include <cstddef>
@@ -19,11 +21,16 @@ public:
     using AgentT   = ActivityAgent;
     using NetworkT = Network<AgentT>;
 
-    ActivityDrivenModel( NetworkT & network, std::mt19937 & gen );
-
-    void get_agents_from_power_law(); // This needs to be called after eps and gamma have been set
+    ActivityDrivenModel( const Config::ActivityDrivenSettings & settings, NetworkT & network, std::mt19937 & gen );
 
     void iteration() override;
+
+private:
+    NetworkT & network;
+    std::vector<std::vector<NetworkT::WeightT>> contact_prob_list; // Probability of choosing i in 1 to m rounds
+    // Random number generation
+    std::mt19937 & gen; // reference to simulation Mersenne-Twister engine
+    std::set<std::pair<size_t, size_t>> reciprocal_edge_buffer{};
 
     // Model-specific parameters
     double dt = 0.01; // Timestep for the integration of the coupled ODEs
@@ -41,38 +48,30 @@ public:
     bool mean_activities = false;
     bool mean_weights    = false;
 
-    double convergence_tol = 1e-12; // TODO: ??
-
     bool use_reluctances = false;
     double reluctance_mean{};
     double reluctance_sigma{};
     double reluctance_eps{};
     double covariance_factor{};
 
-    // bot @TODO: less hacky
     size_t n_bots                     = 0; // The first n_bots agents are bots
     std::vector<int> bot_m            = std::vector<int>( 0 );
     std::vector<double> bot_activity  = std::vector<double>( 0 );
     std::vector<double> bot_opinion   = std::vector<double>( 0 );
     std::vector<double> bot_homophily = std::vector<double>( 0 );
 
-    [[nodiscard]] bool bot_present() const
-    {
-        return n_bots > 0;
-    }
-
-private:
-    NetworkT & network;
-    std::vector<std::vector<NetworkT::WeightT>> contact_prob_list; // Probability of choosing i in 1 to m rounds
-    // Random number generation
-    std::mt19937 & gen; // reference to simulation Mersenne-Twister engine
-    std::set<std::pair<size_t, size_t>> reciprocal_edge_buffer{};
-
     // Buffers for RK4 integration
     std::vector<double> k1_buffer{};
     std::vector<double> k2_buffer{};
     std::vector<double> k3_buffer{};
     std::vector<double> k4_buffer{};
+
+    void get_agents_from_power_law();
+
+    [[nodiscard]] bool bot_present() const
+    {
+        return n_bots > 0;
+    }
 
     template<typename Opinion_Callback>
     void get_euler_slopes( std::vector<double> & k_buffer, Opinion_Callback opinion )

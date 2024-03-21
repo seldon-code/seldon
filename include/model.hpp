@@ -15,6 +15,9 @@ public:
 
     std::optional<size_t> max_iterations = std::nullopt;
 
+    Model() = default;
+    Model( std::optional<size_t> max_iterations ) : max_iterations( max_iterations ){};
+
     virtual void initialize_iterations()
     {
         _n_iterations = 0;

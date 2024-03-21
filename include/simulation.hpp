@@ -107,40 +107,7 @@ public:
 
             model = [&]()
             {
-                auto model             = std::make_unique<ActivityDrivenModel>( network, gen );
-                model->dt              = activitydriven_settings.dt;
-                model->m               = activitydriven_settings.m;
-                model->eps             = activitydriven_settings.eps;
-                model->gamma           = activitydriven_settings.gamma;
-                model->homophily       = activitydriven_settings.homophily;
-                model->reciprocity     = activitydriven_settings.reciprocity;
-                model->alpha           = activitydriven_settings.alpha;
-                model->K               = activitydriven_settings.K;
-                model->mean_activities = activitydriven_settings.mean_activities;
-                model->mean_weights    = activitydriven_settings.mean_weights;
-                model->max_iterations  = activitydriven_settings.max_iterations;
-                // Reluctance
-                model->use_reluctances  = activitydriven_settings.use_reluctances;
-                model->reluctance_mean  = activitydriven_settings.reluctance_mean;
-                model->reluctance_sigma = activitydriven_settings.reluctance_sigma;
-                model->reluctance_eps   = activitydriven_settings.reluctance_eps;
-                // Bot
-                model->n_bots        = activitydriven_settings.n_bots;
-                model->bot_opinion   = activitydriven_settings.bot_opinion;
-                model->bot_m         = activitydriven_settings.bot_m;
-                model->bot_homophily = activitydriven_settings.bot_homophily;
-                model->bot_activity  = activitydriven_settings.bot_activity;
-                model->get_agents_from_power_law();
-
-                // TODO: this is stupid and should be done in the constructor, but right now it cant since we set mean
-                // weights only later
-                if( model->mean_weights )
-                {
-                    auto agents_copy = network.agents;
-                    network          = NetworkGeneration::generate_fully_connected<AgentType>( network.n_agents() );
-                    network.agents   = agents_copy;
-                }
-
+                auto model = std::make_unique<ActivityDrivenModel>( activitydriven_settings, network, gen );
                 return model;
             }();
 
