@@ -16,7 +16,8 @@ TEST_CASE( "Test parse_comma_separated_list", "[util_parse_list]" )
     std::vector<double> dbl_vec_expected = { -2.0, 13.0 };
     std::vector<int> int_vec_expected    = { 12, 10 };
 
-    auto callback = [&]( int idx_list, std::string & substr ) {
+    auto callback = [&]( int idx_list, std::string & substr )
+    {
         if( idx_list == 0 || idx_list == 3 )
         {
             int_vec.push_back( std::stoi( substr ) );

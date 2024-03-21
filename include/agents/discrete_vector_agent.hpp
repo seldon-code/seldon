@@ -42,9 +42,8 @@ inline DiscreteVectorAgent agent_from_string<DiscreteVectorAgent>( const std::st
 {
     DiscreteVectorAgent res{};
 
-    auto callback = [&]( int idx_list [[maybe_unused]], const auto & substring ) {
-        res.data.opinion.push_back( std::stoi( substring ) );
-    };
+    auto callback = [&]( int idx_list [[maybe_unused]], const auto & substring )
+    { res.data.opinion.push_back( std::stoi( substring ) ); };
 
     parse_comma_separated_list( str, callback );
     return res;
