@@ -13,7 +13,8 @@ class Model
 public:
     using AgentT = AgentT_;
 
-    std::optional<size_t> max_iterations = std::nullopt;
+    Model() = default;
+    Model( std::optional<size_t> max_iterations ) : max_iterations( max_iterations ){};
 
     virtual void initialize_iterations()
     {
@@ -45,6 +46,7 @@ public:
     virtual ~Model() = default;
 
 private:
+    std::optional<size_t> max_iterations = std::nullopt;
     size_t _n_iterations{};
 };
 
