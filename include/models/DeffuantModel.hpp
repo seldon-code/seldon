@@ -41,8 +41,6 @@ public:
             }
             network = NetworkGeneration::generate_square_lattice<AgentT>( n_edge );
         }
-
-        initialize_agents();
     }
 
     std::vector<std::size_t> select_interacting_agent_pair()

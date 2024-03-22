@@ -77,4 +77,22 @@ inline auto create_model_deffuant( Network<AgentT> & network, const ModelVariant
     }
 }
 
+template<typename AgentT>
+inline auto
+create_model_deffuant_vector( Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
+{
+    if constexpr( std::is_same_v<AgentT, DeffuantModelVector::AgentT> )
+    {
+        auto deffuant_settings = std::get<Config::DeffuantSettings>( model_settings );
+        auto model             = std::make_unique<DeffuantModelVector>( deffuant_settings, network, gen );
+        model.initialize_agents();
+        return model;
+    }
+    else
+    {
+        throw std::runtime_error( "Incompatible agent and model type!" );
+        return std::unique_ptr<Model<AgentT>>{};
+    }
+}
+
 } // namespace Seldon::ModelFactory
