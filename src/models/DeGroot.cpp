@@ -1,12 +1,16 @@
 #include "models/DeGroot.hpp"
+#include "config_parser.hpp"
 #include <cmath>
 #include <iterator>
 
 namespace Seldon
 {
 
-DeGrootModel::DeGrootModel( NetworkT & network )
-        : Model<AgentT>(), network( network ), agents_current_copy( network.agents )
+DeGrootModel::DeGrootModel( Config::DeGrootSettings settings, NetworkT & network )
+        : Model<AgentT>( settings.max_iterations ),
+          convergence_tol( settings.convergence_tol ),
+          network( network ),
+          agents_current_copy( network.agents )
 {
     // For a strongly connected network, the number of SCCs should be 1
     // Print a warning if this is not true

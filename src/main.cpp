@@ -1,5 +1,6 @@
 #include "config_parser.hpp"
 #include "models/DeGroot.hpp"
+#include "models/DeffuantModel.hpp"
 #include "simulation.hpp"
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -68,6 +69,15 @@ int main( int argc, char * argv[] )
     {
         simulation = std::make_unique<Seldon::Simulation<Seldon::ActivityDrivenModel::AgentT>>(
             simulation_options, network_file, agent_file );
+    }
+    else if( simulation_options.model == Seldon::Config::Model::DeffuantModel )
+    {
+        simulation = std::make_unique<Seldon::Simulation<Seldon::DeffuantModel::AgentT>>(
+            simulation_options, network_file, agent_file );
+    }
+    else
+    {
+        throw std::runtime_error( "Model has not been created" );
     }
 
     simulation->run( output_dir_path );

@@ -1,8 +1,11 @@
 #pragma once
 #include <algorithm>
 #include <cstddef>
+#include <optional>
 #include <queue>
 #include <random>
+#include <span>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -13,7 +16,8 @@ namespace Seldon
 // drawing from n agents (without duplication)
 // ignore_idx ignores the index of the agent itself, since we will later add the agent itself ourselves to prevent duplication
 inline void draw_unique_k_from_n(
-    std::size_t ignore_idx, std::size_t k, std::size_t n, std::vector<std::size_t> & buffer, std::mt19937 & gen )
+    std::optional<size_t> ignore_idx, std::size_t k, std::size_t n, std::vector<std::size_t> & buffer,
+    std::mt19937 & gen )
 {
     struct SequenceGenerator
     {
@@ -24,15 +28,15 @@ inline void draw_unique_k_from_n(
         using pointer           = size_t *; // or also value_type*
         using reference         = size_t &;
 
-        SequenceGenerator( const size_t i_, const size_t ignore_idx ) : i( i_ ), ignore_idx( ignore_idx )
+        SequenceGenerator( const size_t i_, std::optional<size_t> ignore_idx ) : i( i_ ), ignore_idx( ignore_idx )
         {
-            if( i == ignore_idx )
+            if( ignore_idx.has_value() && i == ignore_idx.value() )
             {
                 i++;
             }
         }
         size_t i;
-        size_t ignore_idx;
+        std::optional<size_t> ignore_idx;
 
         size_t & operator*()
         {
@@ -45,7 +49,7 @@ inline void draw_unique_k_from_n(
         SequenceGenerator & operator++()
         {
             i++;
-            if( i == ignore_idx )
+            if( ignore_idx.has_value() && i == ignore_idx )
                 i++;
             return *this;
         }
@@ -171,5 +175,22 @@ public:
         return eps;
     }
 };
+
+template<typename T>
+int hamming_distance( std::span<T> v1, std::span<T> v2 )
+{
+    if( v1.size() != v2.size() )
+    {
+        throw std::runtime_error( "v1 and v2 need to have the same size" );
+    }
+
+    int distance = 0;
+    for( size_t i = 0; i < v2.size(); i++ )
+    {
+        if( v1[i] != v2[i] )
+            distance++;
+    }
+    return distance;
+}
 
 } // namespace Seldon

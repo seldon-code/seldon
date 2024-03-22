@@ -10,6 +10,8 @@ sources_seldon = [
   'src/config_parser.cpp',
   'src/models/DeGroot.cpp',
   'src/models/ActivityDrivenModel.cpp',
+  'src/models/DeffuantModel.cpp',
+  'src/models/DeffuantModelVector.cpp',
   'src/util/tomlplusplus.cpp',
 ]
 
@@ -24,10 +26,12 @@ tests = [
   ['Test_Tarjan', 'test/test_tarjan.cpp'],
   ['Test_DeGroot', 'test/test_deGroot.cpp'],
   ['Test_Activity_Driven', 'test/test_activity.cpp'],
+  ['Test_Deffuant', 'test/test_deffuant.cpp'],
   ['Test_Network', 'test/test_network.cpp'],
   ['Test_Network_Generation', 'test/test_network_generation.cpp'],
   ['Test_Sampling', 'test/test_sampling.cpp'],
   ['Test_IO', 'test/test_io.cpp'],
+  ['Test_Util', 'test/test_util.cpp'],
 ]
 
 Catch2 = dependency('Catch2', method : 'cmake', modules : ['Catch2::Catch2WithMain', 'Catch2::Catch2'])
