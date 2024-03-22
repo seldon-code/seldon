@@ -73,11 +73,6 @@ public:
                     auto model = std::make_unique<DeGrootModel>( degroot_settings, network );
                     return model;
                 }();
-
-                if( cli_agent_file.has_value() )
-                {
-                    network.agents = agents_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
-                }
             }
             else if( options.model == Config::Model::DeffuantModel )
             {
@@ -90,11 +85,6 @@ public:
                         deffuant_settings, network, gen, deffuant_settings.use_network );
                     return model;
                 }();
-
-                if( cli_agent_file.has_value() )
-                {
-                    network.agents = agents_from_file<DeffuantModel::AgentT>( cli_agent_file.value() );
-                }
             }
         }
         else if constexpr( std::is_same_v<AgentType, ActivityDrivenModel::AgentT> )
@@ -106,11 +96,11 @@ public:
                 auto model = std::make_unique<ActivityDrivenModel>( activitydriven_settings, network, gen );
                 return model;
             }();
+        }
 
-            if( cli_agent_file.has_value() )
-            {
-                network.agents = agents_from_file<ActivityDrivenModel::AgentT>( cli_agent_file.value() );
-            }
+        if( cli_agent_file.has_value() )
+        {
+            network.agents = agents_from_file<AgentType>( cli_agent_file.value() );
         }
     }
 
