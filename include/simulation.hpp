@@ -70,9 +70,7 @@ public:
                 // DeGroot specific parameters
                 model = [&]()
                 {
-                    auto model             = std::make_unique<DeGrootModel>( network );
-                    model->max_iterations  = degroot_settings.max_iterations;
-                    model->convergence_tol = degroot_settings.convergence_tol;
+                    auto model = std::make_unique<DeGrootModel>( degroot_settings, network );
                     return model;
                 }();
 
@@ -88,10 +86,8 @@ public:
                 // Deffuant model specific parameters
                 model = [&]()
                 {
-                    auto model = std::make_unique<DeffuantModel>( network, gen, deffuant_settings.use_network );
-                    model->max_iterations      = deffuant_settings.max_iterations;
-                    model->homophily_threshold = deffuant_settings.homophily_threshold;
-                    model->mu                  = deffuant_settings.mu;
+                    auto model = std::make_unique<DeffuantModel>(
+                        deffuant_settings, network, gen, deffuant_settings.use_network );
                     return model;
                 }();
 

@@ -2,6 +2,7 @@
 
 #include "agents/discrete_vector_agent.hpp"
 #include "agents/simple_agent.hpp"
+#include "config_parser.hpp"
 #include "model.hpp"
 #include "network.hpp"
 #include "util/math.hpp"
@@ -9,9 +10,6 @@
 #include <random>
 
 #include "network_generation.hpp"
-#include <set>
-#include <string>
-#include <utility>
 
 #include <vector>
 
@@ -25,12 +23,14 @@ public:
     using AgentT   = AgentT_;
     using NetworkT = Network<AgentT>;
 
-    double homophily_threshold = 0.2;   // d in paper
-    double mu                  = 0.5;   // convergence parameter
-    bool use_network           = false; // for the basic Deffuant model
-
-    DeffuantModelAbstract( NetworkT & network, std::mt19937 & gen, bool use_network )
-            : Model<AgentT>(), use_network( use_network ), network( network ), gen( gen )
+    DeffuantModelAbstract(
+        const Config::DeffuantSettings & settings, NetworkT & network, std::mt19937 & gen, bool use_network )
+            : Model<AgentT>( settings.max_iterations ),
+              homophily_threshold( settings.homophily_threshold ),
+              mu( settings.mu ),
+              use_network( settings.use_network ),
+              network( network ),
+              gen( gen )
     {
         // Generate the network as a square lattice if use_network is true
         if( use_network )
@@ -103,6 +103,9 @@ public:
     // bool finished() override;
 
 private:
+    double homophily_threshold{}; // d in paper
+    double mu{};                  // convergence parameter
+    bool use_network{};           // for the basic Deffuant model
     NetworkT & network;
     std::mt19937 & gen; // reference to simulation Mersenne-Twister engine
 };
