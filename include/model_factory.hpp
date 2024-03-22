@@ -68,6 +68,7 @@ inline auto create_model_deffuant( Network<AgentT> & network, const ModelVariant
     {
         auto deffuant_settings = std::get<Config::DeffuantSettings>( model_settings );
         auto model             = std::make_unique<DeffuantModel>( deffuant_settings, network, gen );
+        model->initialize_agents( deffuant_settings.dim );
         return model;
     }
     else
@@ -85,7 +86,7 @@ create_model_deffuant_vector( Network<AgentT> & network, const ModelVariantT & m
     {
         auto deffuant_settings = std::get<Config::DeffuantSettings>( model_settings );
         auto model             = std::make_unique<DeffuantModelVector>( deffuant_settings, network, gen );
-        model.initialize_agents();
+        model->initialize_agents( deffuant_settings.dim );
         return model;
     }
     else

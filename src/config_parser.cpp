@@ -78,6 +78,9 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
         set_if_specified( model_settings.homophily_threshold, tbl[options.model_string]["homophily_threshold"] );
         set_if_specified( model_settings.mu, tbl[options.model_string]["mu"] );
         set_if_specified( model_settings.use_network, tbl[options.model_string]["use_network"] );
+        // Options for the DeffuantModelVector model
+        set_if_specified( model_settings.use_binary_vector, tbl[options.model_string]["binary_vector"] );
+        set_if_specified( model_settings.dim, tbl[options.model_string]["dim"] );
         options.model_settings = model_settings;
     }
     else if( options.model == Model::ActivityDrivenModel )
@@ -215,6 +218,15 @@ void validate_settings( const SimulationOptions & options )
         auto model_settings = std::get<DeffuantSettings>( options.model_settings );
         check( name_and_var( model_settings.homophily_threshold ), g_zero );
         check( name_and_var( model_settings.mu ), []( auto x ) { return x >= 0 && x <= 1; } );
+        // DeffuantModelVector settings
+        check( name_and_var( model_settings.dim ), g_zero );
+        // @TODO: maybe make this check nicer?
+        if( !model_settings.use_binary_vector )
+        {
+            const std::string basic_deff_msg
+                = "The basic Deffuant model has not been implemented with multiple dimensions";
+            check( name_and_var( model_settings.dim ), []( auto x ) { return x == 1; }, basic_deff_msg );
+        }
     }
 }
 
@@ -272,6 +284,8 @@ void print_settings( const SimulationOptions & options )
         fmt::print( "    homophily_threshold {}\n", model_settings.homophily_threshold );
         fmt::print( "    mu {}\n", model_settings.mu );
         fmt::print( "    use_network {}\n", model_settings.use_network );
+        fmt::print( "    use_binary_vector {}\n", model_settings.use_binary_vector );
+        fmt::print( "    dim {}\n", model_settings.dim );
     }
 
     fmt::print( "[Network]\n" );

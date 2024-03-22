@@ -10,10 +10,9 @@ namespace Seldon
 {
 
 template<>
-void DeffuantModelAbstract<DiscreteVectorAgent>::initialize_agents()
+void DeffuantModelAbstract<DiscreteVectorAgent>::initialize_agents( size_t dim )
 {
     std::uniform_int_distribution<int> dist( 0, 1 );
-    int dim = 5;
 
     for( size_t i = 0; i < network.agents.size(); i++ )
     {

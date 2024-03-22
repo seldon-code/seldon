@@ -95,7 +95,7 @@ public:
 
     // template<typename T>
     void update_rule( AgentT & agent1, AgentT & agent2 );
-    void initialize_agents();
+    void initialize_agents( size_t dim [[maybe_unused]] );
 
     // void iteration() override;
     // bool finished() override;

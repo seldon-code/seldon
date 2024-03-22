@@ -7,7 +7,7 @@ namespace Seldon
 {
 
 template<>
-void DeffuantModelAbstract<SimpleAgent>::initialize_agents()
+void DeffuantModelAbstract<SimpleAgent>::initialize_agents( size_t )
 {
     for( size_t i = 0; i < network.agents.size(); i++ )
     {

@@ -72,7 +72,15 @@ public:
         }
         else if( options.model == Config::Model::DeffuantModel )
         {
-            model = ModelFactory::create_model_deffuant( network, options.model_settings, gen );
+            auto deffuant_settings = std::get<Config::DeffuantSettings>( options.model_settings );
+            if( deffuant_settings.use_binary_vector )
+            {
+                model = ModelFactory::create_model_deffuant_vector( network, options.model_settings, gen );
+            }
+            else
+            {
+                model = ModelFactory::create_model_deffuant( network, options.model_settings, gen );
+            }
         }
 
         if( cli_agent_file.has_value() )

@@ -1,5 +1,7 @@
 #include "catch2/matchers/catch_matchers.hpp"
+#include "catch2/matchers/catch_matchers_range_equals.hpp"
 #include "models/DeffuantModel.hpp"
+#include <sys/types.h>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <config_parser.hpp>
@@ -112,4 +114,51 @@ TEST_CASE( "Test the lattice deffuant model for 16x16 agents", "[deffuantLattice
     {
         REQUIRE_THAT( simulation.network.agents[idx_agent].data.opinion, WithinRel( -avg_opinion ) );
     }
+}
+
+TEST_CASE(
+    "Test the multi-dimensional Deffuant vector model, with 3-dimensional binary opinions, for two agents",
+    "[deffuantVectorTwoAgents]" )
+{
+    using namespace Seldon;
+    using namespace Catch::Matchers;
+    using AgentT = DeffuantModelVector::AgentT;
+
+    auto proj_root_path = fs::current_path();
+    auto input_file     = proj_root_path / fs::path( "test/res/deffuant_vector_2agents.toml" );
+
+    auto options = Config::parse_config_file( input_file.string() );
+
+    auto simulation = Simulation<AgentT>( options, std::nullopt, std::nullopt );
+
+    // We need an output path for Simulation, but we won't write anything out there
+    fs::path output_dir_path = proj_root_path / fs::path( "test/output_deffuant_vector" );
+
+    // references to agent opinion
+    std::vector<int> & agent1_opinion = simulation.network.agents[0].data.opinion;
+    std::vector<int> & agent2_opinion = simulation.network.agents[1].data.opinion;
+
+    // agents are too far apart, we dont expect any change with the iterations
+    auto agent1_init = std::vector<int>{ 0, 1, 0 };
+    auto agent2_init = std::vector<int>{ 1, 0, 1 };
+
+    agent1_opinion = agent1_init;
+    agent2_opinion = agent2_init;
+
+    simulation.run( output_dir_path );
+
+    REQUIRE_THAT( agent1_opinion, Catch::Matchers::RangeEquals( agent1_init ) );
+    REQUIRE_THAT( agent2_opinion, Catch::Matchers::RangeEquals( agent2_init ) );
+
+    // agents are close enough, they should converge
+    // dim-1 or 2 opinions should be the same
+    agent1_init = std::vector<int>{ 0, 1, 1 };
+    agent2_init = std::vector<int>{ 1, 1, 1 };
+
+    agent1_opinion = agent1_init;
+    agent2_opinion = agent2_init;
+
+    simulation.run( output_dir_path );
+
+    REQUIRE_THAT( agent1_opinion, Catch::Matchers::RangeEquals( agent2_opinion ) );
 }
