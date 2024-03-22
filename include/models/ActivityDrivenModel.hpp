@@ -33,7 +33,7 @@ private:
     std::set<std::pair<size_t, size_t>> reciprocal_edge_buffer{};
 
     // Model-specific parameters
-    double dt = 0.01; // Timestep for the integration of the coupled ODEs
+    double dt{}; // Timestep for the integration of the coupled ODEs
     // Various free parameters
     int m{};            // Number of agents contacted, when the agent is active
     double eps{};       // Minimum activity epsilon; a_i belongs to [epsilon,1]

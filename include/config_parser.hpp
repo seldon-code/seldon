@@ -87,11 +87,12 @@ struct InitialNetworkSettings
 
 struct SimulationOptions
 {
+    using ModelVariantT = std::variant<DeGrootSettings, ActivityDrivenSettings, DeffuantSettings>;
     Model model;
     std::string model_string;
     int rng_seed = std::random_device()();
     OutputSettings output_settings;
-    std::variant<DeGrootSettings, ActivityDrivenSettings, DeffuantSettings> model_settings;
+    ModelVariantT model_settings;
     InitialNetworkSettings network_settings;
 };
 

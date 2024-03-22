@@ -2,6 +2,7 @@
 
 #include "config_parser.hpp"
 #include "fmt/core.h"
+#include "model_factory.hpp"
 #include "network.hpp"
 #include <fmt/chrono.h>
 #include <fmt/format.h>
@@ -61,41 +62,17 @@ public:
 
     void create_model( const Config::SimulationOptions & options, const std::optional<std::string> & cli_agent_file )
     {
-        if constexpr( std::is_same_v<AgentType, DeGrootModel::AgentT> )
+        if( options.model == Config::Model::DeGroot )
         {
-            if( options.model == Config::Model::DeGroot )
-            {
-                auto degroot_settings = std::get<Config::DeGrootSettings>( options.model_settings );
-
-                // DeGroot specific parameters
-                model = [&]()
-                {
-                    auto model = std::make_unique<DeGrootModel>( degroot_settings, network );
-                    return model;
-                }();
-            }
-            else if( options.model == Config::Model::DeffuantModel )
-            {
-                auto deffuant_settings = std::get<Config::DeffuantSettings>( options.model_settings );
-
-                // Deffuant model specific parameters
-                model = [&]()
-                {
-                    auto model = std::make_unique<DeffuantModel>(
-                        deffuant_settings, network, gen, deffuant_settings.use_network );
-                    return model;
-                }();
-            }
+            model = ModelFactory::create_model_degroot( network, options.model_settings );
         }
-        else if constexpr( std::is_same_v<AgentType, ActivityDrivenModel::AgentT> )
+        else if( options.model == Config::Model::ActivityDrivenModel )
         {
-            auto activitydriven_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
-
-            model = [&]()
-            {
-                auto model = std::make_unique<ActivityDrivenModel>( activitydriven_settings, network, gen );
-                return model;
-            }();
+            model = ModelFactory::create_model_activity_driven( network, options.model_settings, gen );
+        }
+        else if( options.model == Config::Model::DeffuantModel )
+        {
+            model = ModelFactory::create_model_deffuant( network, options.model_settings, gen );
         }
 
         if( cli_agent_file.has_value() )
@@ -103,8 +80,6 @@ public:
             network.agents = agents_from_file<AgentType>( cli_agent_file.value() );
         }
     }
-
-    // void create_agents( const std::optional<std::string> & cli_agent_file ) {}
 
     Simulation(
         const Config::SimulationOptions & options, const std::optional<std::string> & cli_network_file,

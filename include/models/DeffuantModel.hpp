@@ -23,8 +23,7 @@ public:
     using AgentT   = AgentT_;
     using NetworkT = Network<AgentT>;
 
-    DeffuantModelAbstract(
-        const Config::DeffuantSettings & settings, NetworkT & network, std::mt19937 & gen, bool use_network )
+    DeffuantModelAbstract( const Config::DeffuantSettings & settings, NetworkT & network, std::mt19937 & gen )
             : Model<AgentT>( settings.max_iterations ),
               homophily_threshold( settings.homophily_threshold ),
               mu( settings.mu ),
@@ -42,6 +41,7 @@ public:
             }
             network = NetworkGeneration::generate_square_lattice<AgentT>( n_edge );
         }
+
         initialize_agents();
     }
 
