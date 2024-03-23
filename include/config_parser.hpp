@@ -25,6 +25,7 @@ enum class Model
 {
     DeGroot,
     ActivityDrivenModel,
+    InertialModel,
     DeffuantModel
 };
 
@@ -79,6 +80,11 @@ struct ActivityDrivenSettings
     double reluctance_sigma           = 0.25;
     double reluctance_eps             = 0.01;
     double covariance_factor          = 0.0;
+};
+
+struct InertialSettings : public ActivityDrivenSettings
+{
+    double friction_coefficient = 1.0;
 };
 
 struct InitialNetworkSettings

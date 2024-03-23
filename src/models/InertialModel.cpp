@@ -9,6 +9,12 @@
 namespace Seldon
 {
 
+InertialModel::InertialModel( const Config::InertialSettings & settings, NetworkT & network, std::mt19937 & gen )
+        : ActivityDrivenModelAbstract<InertialAgent>( settings, network, gen ),
+          friction_coefficient( settings.friction_coefficient )
+{
+}
+
 // X(t+dt)
 // Also updates the position
 void InertialModel::calc_position()
