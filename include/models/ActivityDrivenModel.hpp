@@ -71,6 +71,7 @@ private:
     std::mt19937 & gen; // reference to simulation Mersenne-Twister engine
     std::set<std::pair<size_t, size_t>> reciprocal_edge_buffer{};
 
+protected:
     // Model-specific parameters
     double dt{}; // Timestep for the integration of the coupled ODEs
     // Various free parameters
@@ -93,7 +94,6 @@ private:
     double reluctance_eps{};
     double covariance_factor{};
 
-protected:
     size_t n_bots                     = 0; // The first n_bots agents are bots
     std::vector<int> bot_m            = std::vector<int>( 0 );
     std::vector<double> bot_activity  = std::vector<double>( 0 );
@@ -343,8 +343,8 @@ protected:
                 k_buffer[idx_agent] += 1.0 / network.agents[idx_agent].data.reluctance * K * weight_buffer[j]
                                        * std::tanh( alpha * opinion( j_index ) );
             }
-            // Multiply by the timestep
-            k_buffer[idx_agent] *= dt;
+            // Here, we won't multiply by the timestep.
+            // Instead multiply in the update rule
         }
     }
 };
