@@ -18,7 +18,7 @@ using namespace Catch::Matchers;
 using AgentT  = ActivityDrivenModel::AgentT;
 using Network = Network<AgentT>;
 
-const std::filesystem::path CURRENT_PATH = std::filesystem::current_path();
+const std::filesystem::path CURRENT_PATH = std::filesystem::path(std::system("git rev-parse --show-toplevel")).parent_path();
 
 TEST_CASE( "Test reading in the network from a file", "[io_network]" )
 {
