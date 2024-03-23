@@ -1,5 +1,6 @@
 #include "models/ActivityDrivenModel.hpp"
 #include "network.hpp"
+#include "network_generation.hpp"
 #include "util/math.hpp"
 #include <cstddef>
 #include <random>
@@ -8,12 +9,40 @@
 namespace Seldon
 {
 
-ActivityDrivenModel::ActivityDrivenModel( NetworkT & network, std::mt19937 & gen )
-        : Model<ActivityDrivenModel::AgentT>(),
+ActivityDrivenModel::ActivityDrivenModel(
+    const Config::ActivityDrivenSettings & settings, NetworkT & network, std::mt19937 & gen )
+        : Model<ActivityDrivenModel::AgentT>( settings.max_iterations ),
           network( network ),
           contact_prob_list( std::vector<std::vector<NetworkT::WeightT>>( network.n_agents() ) ),
-          gen( gen )
+          gen( gen ),
+          dt( settings.dt ),
+          m( settings.m ),
+          eps( settings.eps ),
+          gamma( settings.gamma ),
+          alpha( settings.alpha ),
+          homophily( settings.homophily ),
+          reciprocity( settings.reciprocity ),
+          K( settings.K ),
+          mean_activities( settings.mean_activities ),
+          mean_weights( settings.mean_weights ),
+          use_reluctances( settings.use_reluctances ),
+          reluctance_mean( settings.reluctance_mean ),
+          reluctance_sigma( settings.reluctance_sigma ),
+          reluctance_eps( settings.reluctance_eps ),
+          n_bots( settings.n_bots ),
+          bot_m( settings.bot_m ),
+          bot_activity( settings.bot_activity ),
+          bot_opinion( settings.bot_opinion ),
+          bot_homophily( settings.bot_homophily )
 {
+    get_agents_from_power_law();
+
+    if( mean_weights )
+    {
+        auto agents_copy = network.agents;
+        network          = NetworkGeneration::generate_fully_connected<AgentT>( network.n_agents() );
+        network.agents   = agents_copy;
+    }
 }
 
 double ActivityDrivenModel::homophily_weight( size_t idx_contacter, size_t idx_contacted )

@@ -1,0 +1,21 @@
+[simulation]
+model = "Deffuant"
+# rng_seed = 120 # Leaving this empty will pick a random seed
+
+[io]
+# n_output_network = 20 # Write the network every 20 iterations
+# n_output_agents = 1 # Write the opinions of agents after every iteration
+# print_progress = false # Print the iteration time ; if not set, then does not prints
+# output_initial = true # Print the initial opinions and network file from step 0. If not set, this is true by default.
+# start_output = 1 # Start writing out opinions and/or network files from this iteration. If not set, this is 1.
+
+[model]
+max_iterations = 10 # If not set, max iterations is infinite
+
+[Deffuant]
+homophily_threshold = 0.2 # d in the paper; agents interact if difference in opinion is less than this value 
+mu = 0.5 # convergence parameter; similar to social interaction strength K (0,0.5] 
+
+[network]
+number_of_agents = 2
+connections_per_agent = 0

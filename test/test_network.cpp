@@ -120,4 +120,80 @@ TEST_CASE( "Testing the network class" )
 
         REQUIRE( old_edges.empty() );
     }
+
+    SECTION( "Test remove double counting" )
+    {
+        // clang-format off
+        std::vector<std::vector<size_t>> neighbour_list =  { 
+                { 2, 1, 1, 0 }, 
+                { 2, 0, 1, 2}, 
+                { 1, 1, 0, 2, 1 },
+                {},
+                {3,1}
+            };
+  
+        std::vector<std::vector<double>> weight_list =  { 
+                { -1, 1, 2, 0 }, 
+                { -1, 1, 2, -1 }, 
+                { -1, 1, 2, 3, 1 },
+                {},
+                {1, 1}
+            };
+
+        std::vector<std::vector<size_t>> neighbour_no_double_counting =  { 
+            { 0, 1, 2 }, 
+            { 0, 1, 2}, 
+            { 0, 1, 2},
+            {},
+            {1,3}
+        };
+
+        std::vector<std::vector<double>> weights_no_double_counting =  { 
+            { 0, 3, -1 }, 
+            { 1, 2, -2}, 
+            { 2, 1, 3},
+            {},
+            {1,1}
+        };
+        // clang-format on
+
+        auto network = Seldon::Network<double>(
+            std::move( neighbour_list ), std::move( weight_list ), Seldon::Network<double>::EdgeDirection::Incoming );
+
+        network.remove_double_counting();
+
+        for( size_t i_agent = 0; i_agent < network.n_agents(); i_agent++ )
+        {
+            auto weights    = network.get_weights( i_agent );
+            auto neighbours = network.get_neighbours( i_agent );
+            fmt::print( "i_agent {}\n", i_agent );
+            REQUIRE_THAT( neighbours, Catch::Matchers::RangeEquals( neighbour_no_double_counting[i_agent] ) );
+            REQUIRE_THAT( weights, Catch::Matchers::RangeEquals( weights_no_double_counting[i_agent] ) );
+        }
+    }
+
+    SECTION( "Test the generation of a square lattice neighbour list for three agents" )
+    {
+        // clang-format off
+        std::vector<std::vector<size_t>> desired_neighbour_list =  { 
+                { 2, 1, 3, 6 }, 
+                { 2, 0, 4, 7 }, 
+                { 0, 1, 5, 8 },
+                { 4, 5, 6, 0 },
+                { 5, 3, 1, 7 },
+                { 3, 4, 2, 8 },
+                { 7, 8, 3, 0 },
+                { 8, 6, 4, 1 },
+                { 7, 6, 5, 2 }, 
+            };
+        // clang-format on
+
+        auto network = Seldon::NetworkGeneration::generate_square_lattice<double>( 3 );
+
+        for( size_t i_agent = 0; i_agent < network.n_agents(); i_agent++ )
+        {
+            auto neighbours = network.get_neighbours( i_agent );
+            REQUIRE_THAT( neighbours, Catch::Matchers::UnorderedRangeEquals( desired_neighbour_list[i_agent] ) );
+        }
+    }
 }

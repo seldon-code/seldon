@@ -16,6 +16,6 @@ dependencies:
   - cmake
   - ninja 
   - cpp-argparse
-  - clang-format
+  - clang-format=18.1.1
   - tomlplusplus
   - catch2
