@@ -70,6 +70,10 @@ public:
         {
             model = ModelFactory::create_model_activity_driven( network, options.model_settings, gen );
         }
+        else if( options.model == Config::Model::ActivityDrivenInertial )
+        {
+            model = ModelFactory::create_model_activity_driven_inertial( network, options.model_settings, gen );
+        }
         else if( options.model == Config::Model::DeffuantModel )
         {
             auto deffuant_settings = std::get<Config::DeffuantSettings>( options.model_settings );

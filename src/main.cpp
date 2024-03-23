@@ -1,6 +1,7 @@
 #include "config_parser.hpp"
 #include "models/DeGroot.hpp"
 #include "models/DeffuantModel.hpp"
+#include "models/InertialModel.hpp"
 #include "simulation.hpp"
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -68,6 +69,11 @@ int main( int argc, char * argv[] )
     else if( simulation_options.model == Seldon::Config::Model::ActivityDrivenModel )
     {
         simulation = std::make_unique<Seldon::Simulation<Seldon::ActivityDrivenModel::AgentT>>(
+            simulation_options, network_file, agent_file );
+    }
+    else if( simulation_options.model == Seldon::Config::Model::ActivityDrivenInertial )
+    {
+        simulation = std::make_unique<Seldon::Simulation<Seldon::InertialModel::AgentT>>(
             simulation_options, network_file, agent_file );
     }
     else if( simulation_options.model == Seldon::Config::Model::DeffuantModel )

@@ -63,6 +63,23 @@ create_model_activity_driven( Network<AgentT> & network, const ModelVariantT & m
 }
 
 template<typename AgentT>
+inline auto create_model_activity_driven_inertial(
+    Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
+{
+    if constexpr( std::is_same_v<AgentT, InertialModel::AgentT> )
+    {
+        auto settings = std::get<Config::ActivityDrivenInertialSettings>( model_settings );
+        auto model    = std::make_unique<InertialModel>( settings, network, gen );
+        return model;
+    }
+    else
+    {
+        throw std::runtime_error( "Incompatible agent and model type!" );
+        return std::unique_ptr<Model<AgentT>>{};
+    }
+}
+
+template<typename AgentT>
 inline auto create_model_deffuant( Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
 {
     if constexpr( std::is_same_v<AgentT, DeffuantModel::AgentT> )

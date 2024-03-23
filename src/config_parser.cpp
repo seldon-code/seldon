@@ -29,7 +29,80 @@ Model model_string_to_enum( std::string_view model_string )
     {
         return Model::DeffuantModel;
     }
+    else if( model_string == "ActivityDrivenInertial" )
+    {
+        return Model::ActivityDrivenInertial;
+    }
     throw std::runtime_error( fmt::format( "Invalid model string {}", model_string ) );
+}
+
+void set_if_specified( auto & opt, const auto & toml_opt )
+{
+    using T    = typename std::remove_reference<decltype( opt )>::type;
+    auto t_opt = toml_opt.template value<T>();
+    if( t_opt.has_value() )
+        opt = t_opt.value();
+}
+
+// Convenience function to parse activity settings
+void parse_activity_settings( auto & model_settings, const auto & toml_model_opt, const auto & tbl )
+{
+    set_if_specified( model_settings.dt, toml_model_opt["dt"] );
+    set_if_specified( model_settings.m, toml_model_opt["m"] );
+    set_if_specified( model_settings.eps, toml_model_opt["eps"] );
+    set_if_specified( model_settings.gamma, toml_model_opt["gamma"] );
+    set_if_specified( model_settings.homophily, toml_model_opt["homophily"] );
+    set_if_specified( model_settings.reciprocity, toml_model_opt["reciprocity"] );
+    set_if_specified( model_settings.alpha, toml_model_opt["alpha"] );
+    set_if_specified( model_settings.K, toml_model_opt["K"] );
+    // Mean activity model options
+    set_if_specified( model_settings.mean_activities, toml_model_opt["mean_activities"] );
+    set_if_specified( model_settings.mean_weights, toml_model_opt["mean_weights"] );
+    // Reluctances
+    set_if_specified( model_settings.use_reluctances, toml_model_opt["reluctances"] );
+    set_if_specified( model_settings.reluctance_mean, toml_model_opt["reluctance_mean"] );
+    set_if_specified( model_settings.reluctance_sigma, toml_model_opt["reluctance_sigma"] );
+    set_if_specified( model_settings.reluctance_eps, toml_model_opt["reluctance_eps"] );
+
+    model_settings.max_iterations = tbl["model"]["max_iterations"].template value<int>();
+
+    // bot
+    set_if_specified( model_settings.n_bots, toml_model_opt["n_bots"] );
+
+    auto push_back_bot_array = [&]( auto toml_node, auto & options_array, auto default_value )
+    {
+        if( toml_node.is_array() )
+        {
+            toml::array * toml_arr = toml_node.as_array();
+
+            toml_arr->for_each(
+                [&]( auto && elem )
+                {
+                    if( elem.is_integer() )
+                    {
+                        options_array.push_back( elem.as_integer()->get() );
+                    }
+                    else if( elem.is_floating_point() )
+                    {
+                        options_array.push_back( elem.as_floating_point()->get() );
+                    }
+                } );
+        }
+        else
+        {
+            options_array = std::vector<decltype( default_value )>( model_settings.n_bots, default_value );
+        }
+    };
+
+    auto bot_opinion   = toml_model_opt["bot_opinion"];
+    auto bot_m         = toml_model_opt["bot_m"];
+    auto bot_activity  = toml_model_opt["bot_activity"];
+    auto bot_homophily = toml_model_opt["bot_homophily"];
+
+    push_back_bot_array( bot_m, model_settings.bot_m, model_settings.m );
+    push_back_bot_array( bot_opinion, model_settings.bot_opinion, 0.0 );
+    push_back_bot_array( bot_activity, model_settings.bot_activity, 1.0 );
+    push_back_bot_array( bot_homophily, model_settings.bot_homophily, model_settings.homophily );
 }
 
 SimulationOptions parse_config_file( std::string_view config_file_path )
@@ -40,14 +113,6 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
     tbl = toml::parse_file( config_file_path );
 
     options.rng_seed = tbl["simulation"]["rng_seed"].value_or( int( options.rng_seed ) );
-
-    auto set_if_specified = [&]( auto & opt, const auto & toml_opt )
-    {
-        using T    = typename std::remove_reference<decltype( opt )>::type;
-        auto t_opt = toml_opt.template value<T>();
-        if( t_opt.has_value() )
-            opt = t_opt.value();
-    };
 
     // Parse output settings
     options.output_settings.n_output_network = tbl["io"]["n_output_network"].value<size_t>();
@@ -87,63 +152,15 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
     {
         auto model_settings = ActivityDrivenSettings();
 
-        set_if_specified( model_settings.dt, tbl[options.model_string]["dt"] );
-        set_if_specified( model_settings.m, tbl[options.model_string]["m"] );
-        set_if_specified( model_settings.eps, tbl[options.model_string]["eps"] );
-        set_if_specified( model_settings.gamma, tbl[options.model_string]["gamma"] );
-        set_if_specified( model_settings.homophily, tbl[options.model_string]["homophily"] );
-        set_if_specified( model_settings.reciprocity, tbl[options.model_string]["reciprocity"] );
-        set_if_specified( model_settings.alpha, tbl[options.model_string]["alpha"] );
-        set_if_specified( model_settings.K, tbl[options.model_string]["K"] );
-        // Mean activity model options
-        set_if_specified( model_settings.mean_activities, tbl[options.model_string]["mean_activities"] );
-        set_if_specified( model_settings.mean_weights, tbl[options.model_string]["mean_weights"] );
-        // Reluctances
-        set_if_specified( model_settings.use_reluctances, tbl[options.model_string]["reluctances"] );
-        set_if_specified( model_settings.reluctance_mean, tbl[options.model_string]["reluctance_mean"] );
-        set_if_specified( model_settings.reluctance_sigma, tbl[options.model_string]["reluctance_sigma"] );
-        set_if_specified( model_settings.reluctance_eps, tbl[options.model_string]["reluctance_eps"] );
+        parse_activity_settings( model_settings, tbl[options.model_string], tbl );
+        options.model_settings = model_settings;
+    }
+    else if( options.model == Model::ActivityDrivenInertial )
+    {
+        auto model_settings = ActivityDrivenInertialSettings();
 
-        model_settings.max_iterations = tbl["model"]["max_iterations"].value<int>();
-
-        // bot
-        set_if_specified( model_settings.n_bots, tbl[options.model_string]["n_bots"] );
-
-        auto push_back_bot_array = [&]( auto toml_node, auto & options_array, auto default_value )
-        {
-            if( toml_node.is_array() )
-            {
-                toml::array * toml_arr = toml_node.as_array();
-
-                toml_arr->for_each(
-                    [&]( auto && elem )
-                    {
-                        if( elem.is_integer() )
-                        {
-                            options_array.push_back( elem.as_integer()->get() );
-                        }
-                        else if( elem.is_floating_point() )
-                        {
-                            options_array.push_back( elem.as_floating_point()->get() );
-                        }
-                    } );
-            }
-            else
-            {
-                options_array = std::vector<decltype( default_value )>( model_settings.n_bots, default_value );
-            }
-        };
-
-        auto bot_opinion   = tbl[options.model_string]["bot_opinion"];
-        auto bot_m         = tbl[options.model_string]["bot_m"];
-        auto bot_activity  = tbl[options.model_string]["bot_activity"];
-        auto bot_homophily = tbl[options.model_string]["bot_homophily"];
-
-        push_back_bot_array( bot_m, model_settings.bot_m, model_settings.m );
-        push_back_bot_array( bot_opinion, model_settings.bot_opinion, 0.0 );
-        push_back_bot_array( bot_activity, model_settings.bot_activity, 1.0 );
-        push_back_bot_array( bot_homophily, model_settings.bot_homophily, model_settings.homophily );
-
+        parse_activity_settings( model_settings, tbl[options.model_string], tbl );
+        set_if_specified( model_settings.friction_coefficient, tbl[options.model_string]["friction_coefficient"] );
         options.model_settings = model_settings;
     }
 
@@ -183,10 +200,8 @@ void validate_settings( const SimulationOptions & options )
     // @TODO: Check that start_output is less than the max_iterations?
     check( name_and_var( options.output_settings.start_output ), g_zero );
 
-    if( options.model == Model::ActivityDrivenModel )
+    auto validate_activity = [&]( const auto & model_settings )
     {
-        auto model_settings = std::get<ActivityDrivenSettings>( options.model_settings );
-
         check( name_and_var( model_settings.dt ), g_zero );
         check( name_and_var( model_settings.m ), geq_zero );
         check( name_and_var( model_settings.eps ), g_zero );
@@ -207,6 +222,19 @@ void validate_settings( const SimulationOptions & options )
         check( name_and_var( model_settings.bot_activity ), check_bot_size, bot_msg );
         check( name_and_var( model_settings.bot_opinion ), check_bot_size, bot_msg );
         check( name_and_var( model_settings.bot_homophily ), check_bot_size, bot_msg );
+    };
+
+    if( options.model == Model::ActivityDrivenModel )
+    {
+        auto model_settings = std::get<ActivityDrivenSettings>( options.model_settings );
+
+        validate_activity( model_settings );
+    }
+    else if( options.model == Model::ActivityDrivenInertial )
+    {
+        auto model_settings = std::get<ActivityDrivenInertialSettings>( options.model_settings );
+        check( name_and_var( model_settings.friction_coefficient ), geq_zero );
+        validate_activity( model_settings );
     }
     else if( options.model == Model::DeGroot )
     {
@@ -237,11 +265,8 @@ void print_settings( const SimulationOptions & options )
     fmt::print( "[Model]\n" );
     fmt::print( "    type {}\n", options.model_string );
 
-    // @TODO: Optionally print *all* settings to the console, including defaults that were set
-    if( options.model == Model::ActivityDrivenModel )
+    auto print_activity_settings = [&]( auto model_settings )
     {
-        auto model_settings = std::get<ActivityDrivenSettings>( options.model_settings );
-
         fmt::print( "    max_iterations {}\n", model_settings.max_iterations );
         fmt::print( "    dt {} \n", model_settings.dt );
         fmt::print( "    m {} \n", model_settings.m );
@@ -270,6 +295,20 @@ void print_settings( const SimulationOptions & options )
             fmt::print( "    reluctance_eps {}\n", model_settings.reluctance_eps );
             fmt::print( "    covariance_factor {}\n", model_settings.covariance_factor );
         }
+    };
+
+    // @TODO: Optionally print *all* settings to the console, including defaults that were set
+    if( options.model == Model::ActivityDrivenModel )
+    {
+        auto model_settings = std::get<ActivityDrivenSettings>( options.model_settings );
+
+        print_activity_settings( model_settings );
+    }
+    else if( options.model == Model::ActivityDrivenInertial )
+    {
+        auto model_settings = std::get<ActivityDrivenInertialSettings>( options.model_settings );
+        print_activity_settings( model_settings );
+        fmt::print( "    friction_coefficient {}\n", model_settings.friction_coefficient );
     }
     else if( options.model == Model::DeGroot )
     {

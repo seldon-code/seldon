@@ -9,7 +9,8 @@
 namespace Seldon
 {
 
-InertialModel::InertialModel( const Config::InertialSettings & settings, NetworkT & network, std::mt19937 & gen )
+InertialModel::InertialModel(
+    const Config::ActivityDrivenInertialSettings & settings, NetworkT & network, std::mt19937 & gen )
         : ActivityDrivenModelAbstract<InertialAgent>( settings, network, gen ),
           friction_coefficient( settings.friction_coefficient )
 {

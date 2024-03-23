@@ -24,7 +24,7 @@ public:
     using NetworkT = Network<AgentT>;
     using WeightT  = typename NetworkT::WeightT;
 
-    InertialModel( const Config::InertialSettings & settings, NetworkT & network, std::mt19937 & gen );
+    InertialModel( const Config::ActivityDrivenInertialSettings & settings, NetworkT & network, std::mt19937 & gen );
 
     void iteration() override;
 
