@@ -44,6 +44,20 @@ public:
 
     Network() = default;
 
+    Network( size_t n_agents )
+            : agents( std::vector<AgentT>( n_agents ) ),
+              neighbour_list( std::vector<std::vector<size_t>>( n_agents, std::vector<size_t>{} ) ),
+              weight_list( std::vector<std::vector<WeightT>>( n_agents, std::vector<WeightT>{} ) )
+    {
+    }
+
+    Network( std::vector<AgentT> agents )
+            : agents( agents ),
+              neighbour_list( std::vector<std::vector<size_t>>( agents.size(), std::vector<size_t>{} ) ),
+              weight_list( std::vector<std::vector<WeightT>>( agents.size(), std::vector<WeightT>{} ) )
+    {
+    }
+
     Network(
         std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list,
         EdgeDirection direction )
@@ -59,7 +73,7 @@ public:
     */
     [[nodiscard]] std::size_t n_agents() const
     {
-        return neighbour_list.size();
+        return agents.size();
     }
 
     /*
@@ -228,10 +242,73 @@ public:
         }
     }
 
+    /*
+    Sorts the neighbours by index and removes doubly counted edges by summing the weights
+    */
+    void remove_double_counting()
+    {
+        std::vector<size_t> sorting_indices{};
+
+        for( size_t idx_agent = 0; idx_agent < n_agents(); idx_agent++ )
+        {
+
+            auto & neighbours = neighbour_list[idx_agent];
+            auto & weights    = weight_list[idx_agent];
+
+            std::vector<WeightT> weights_copy{};
+            std::vector<size_t> neighbours_copy{};
+
+            const auto n_neighbours = neighbours.size();
+
+            // First we will the sorting_indices array
+            sorting_indices.resize( n_neighbours );
+            std::iota( sorting_indices.begin(), sorting_indices.end(), 0 );
+
+            // Then, we figure out how to sort the neighbour indices list
+            std::sort(
+                sorting_indices.begin(), sorting_indices.end(),
+                [&]( auto i1, auto i2 ) { return neighbours[i1] < neighbours[i2]; } );
+
+            std::optional<size_t> last_neighbour_index = std::nullopt;
+            for( size_t i = 0; i < n_neighbours; i++ )
+            {
+                const auto sort_idx              = sorting_indices[i];
+                const auto current_neigbhour_idx = neighbours[sort_idx];
+                const auto current_weight        = weights[sort_idx];
+
+                if( last_neighbour_index != current_neigbhour_idx )
+                {
+                    weights_copy.push_back( current_weight );
+                    neighbours_copy.push_back( current_neigbhour_idx );
+                    last_neighbour_index = current_neigbhour_idx;
+                }
+                else
+                {
+                    weights_copy.back() += current_weight;
+                }
+            }
+
+            weight_list[idx_agent]    = weights_copy;
+            neighbour_list[idx_agent] = neighbours_copy;
+        }
+    }
+
+    /*
+    Clears the network
+    */
+    void clear()
+    {
+        for( auto & w : weight_list )
+            w.clear();
+
+        for( auto & n : neighbour_list )
+            n.clear();
+    }
+
 private:
-    std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
-    std::vector<std::vector<WeightT>> weight_list;   // List for the interaction weights of each connection
-    EdgeDirection _direction;
+    std::vector<std::vector<size_t>> neighbour_list{}; // Neighbour list for the connections
+    std::vector<std::vector<WeightT>> weight_list{};   // List for the interaction weights of each connection
+    EdgeDirection _direction{};
 };
 
 } // namespace Seldon

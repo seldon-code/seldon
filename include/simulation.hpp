@@ -1,6 +1,8 @@
 #pragma once
 
 #include "config_parser.hpp"
+#include "fmt/core.h"
+#include "model_factory.hpp"
 #include "network.hpp"
 #include <fmt/chrono.h>
 #include <fmt/format.h>
@@ -8,6 +10,7 @@
 #include <memory>
 #include <models/ActivityDrivenModel.hpp>
 #include <models/DeGroot.hpp>
+#include <models/DeffuantModel.hpp>
 #include <network_generation.hpp>
 #include <network_io.hpp>
 #include <optional>
@@ -37,14 +40,9 @@ public:
 
     Config::OutputSettings output_settings;
 
-    Simulation(
-        const Config::SimulationOptions & options, const std::optional<std::string> & cli_network_file,
-        const std::optional<std::string> & cli_agent_file )
-            : output_settings( options.output_settings )
+    void
+    create_network( const Config::SimulationOptions & options, const std::optional<std::string> & cli_network_file )
     {
-        // Initialize the rng
-        gen = std::mt19937( options.rng_seed );
-
         // Construct the network
         std::optional<std::string> file = cli_network_file;
         if( !file.has_value() ) // Check if toml file should be superceded by cli_network_file
@@ -58,83 +56,49 @@ public:
         {
             int n_agents       = options.network_settings.n_agents;
             auto n_connections = options.network_settings.n_connections;
+            network = NetworkGeneration::generate_n_connections<AgentType>( n_agents, n_connections, true, gen );
+        }
+    }
 
-            //@TODO figure this out
-            if( options.model == Config::Model::ActivityDrivenModel )
+    void create_model( const Config::SimulationOptions & options, const std::optional<std::string> & cli_agent_file )
+    {
+        if( options.model == Config::Model::DeGroot )
+        {
+            model = ModelFactory::create_model_degroot( network, options.model_settings );
+        }
+        else if( options.model == Config::Model::ActivityDrivenModel )
+        {
+            model = ModelFactory::create_model_activity_driven( network, options.model_settings, gen );
+        }
+        else if( options.model == Config::Model::DeffuantModel )
+        {
+            auto deffuant_settings = std::get<Config::DeffuantSettings>( options.model_settings );
+            if( deffuant_settings.use_binary_vector )
             {
-                auto model_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
-                if( model_settings.mean_weights )
-                {
-                    network = NetworkGeneration::generate_fully_connected<AgentType>( n_agents );
-                }
-                else
-                {
-                    network
-                        = NetworkGeneration::generate_n_connections<AgentType>( n_agents, n_connections, true, gen );
-                }
+                model = ModelFactory::create_model_deffuant_vector( network, options.model_settings, gen );
             }
             else
             {
-                network = NetworkGeneration::generate_n_connections<AgentType>( n_agents, n_connections, true, gen );
+                model = ModelFactory::create_model_deffuant( network, options.model_settings, gen );
             }
         }
 
-        if constexpr( std::is_same_v<AgentType, DeGrootModel::AgentT> )
+        if( cli_agent_file.has_value() )
         {
-            auto degroot_settings = std::get<Config::DeGrootSettings>( options.model_settings );
-
-            // DeGroot specific parameters
-            model = [&]()
-            {
-                auto model             = std::make_unique<DeGrootModel>( network );
-                model->max_iterations  = degroot_settings.max_iterations;
-                model->convergence_tol = degroot_settings.convergence_tol;
-                return model;
-            }();
-
-            if( cli_agent_file.has_value() )
-            {
-                network.agents = agents_from_file<DeGrootModel::AgentT>( cli_agent_file.value() );
-            }
+            network.agents = agents_from_file<AgentType>( cli_agent_file.value() );
         }
-        else if constexpr( std::is_same_v<AgentType, ActivityDrivenModel::AgentT> )
-        {
-            auto activitydriven_settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
+    }
 
-            model = [&]()
-            {
-                auto model             = std::make_unique<ActivityDrivenModel>( network, gen );
-                model->dt              = activitydriven_settings.dt;
-                model->m               = activitydriven_settings.m;
-                model->eps             = activitydriven_settings.eps;
-                model->gamma           = activitydriven_settings.gamma;
-                model->homophily       = activitydriven_settings.homophily;
-                model->reciprocity     = activitydriven_settings.reciprocity;
-                model->alpha           = activitydriven_settings.alpha;
-                model->K               = activitydriven_settings.K;
-                model->mean_activities = activitydriven_settings.mean_activities;
-                model->mean_weights    = activitydriven_settings.mean_weights;
-                model->max_iterations  = activitydriven_settings.max_iterations;
-                // Reluctance
-                model->use_reluctances  = activitydriven_settings.use_reluctances;
-                model->reluctance_mean  = activitydriven_settings.reluctance_mean;
-                model->reluctance_sigma = activitydriven_settings.reluctance_sigma;
-                model->reluctance_eps   = activitydriven_settings.reluctance_eps;
-                // bot
-                model->n_bots        = activitydriven_settings.n_bots;
-                model->bot_opinion   = activitydriven_settings.bot_opinion;
-                model->bot_m         = activitydriven_settings.bot_m;
-                model->bot_homophily = activitydriven_settings.bot_homophily;
-                model->bot_activity  = activitydriven_settings.bot_activity;
-                model->get_agents_from_power_law();
-                return model;
-            }();
+    Simulation(
+        const Config::SimulationOptions & options, const std::optional<std::string> & cli_network_file,
+        const std::optional<std::string> & cli_agent_file )
+            : output_settings( options.output_settings )
+    {
+        // Initialize the rng
+        gen = std::mt19937( options.rng_seed );
 
-            if( cli_agent_file.has_value() )
-            {
-                network.agents = agents_from_file<ActivityDrivenModel::AgentT>( cli_agent_file.value() );
-            }
-        }
+        create_network( options, cli_network_file );
+        create_model( options, cli_agent_file );
     }
 
     void run( const fs::path & output_dir_path ) override
@@ -201,6 +165,6 @@ public:
             std::chrono::floor<ms>( total_time ) );
         fmt::print( "=================================================================\n" );
     }
-};
+}; // namespace Seldon
 
 } // namespace Seldon

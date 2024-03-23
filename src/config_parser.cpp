@@ -25,6 +25,10 @@ Model model_string_to_enum( std::string_view model_string )
     {
         return Model::ActivityDrivenModel;
     }
+    else if( model_string == "Deffuant" )
+    {
+        return Model::DeffuantModel;
+    }
     throw std::runtime_error( fmt::format( "Invalid model string {}", model_string ) );
 }
 
@@ -62,36 +66,48 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
 
     if( options.model == Model::DeGroot )
     {
-        auto model_settings            = DeGrootSettings();
-        model_settings.max_iterations  = tbl["model"]["max_iterations"].value<int>();
-        model_settings.convergence_tol = tbl["DeGroot"]["convergence"].value_or( model_settings.convergence_tol );
-        options.model_settings         = model_settings;
+        auto model_settings           = DeGrootSettings();
+        model_settings.max_iterations = tbl["model"]["max_iterations"].value<int>();
+        set_if_specified( model_settings.convergence_tol, tbl[options.model_string]["convergence"] );
+        options.model_settings = model_settings;
+    }
+    else if( options.model == Model::DeffuantModel )
+    {
+        auto model_settings           = DeffuantSettings();
+        model_settings.max_iterations = tbl["model"]["max_iterations"].value<int>();
+        set_if_specified( model_settings.homophily_threshold, tbl[options.model_string]["homophily_threshold"] );
+        set_if_specified( model_settings.mu, tbl[options.model_string]["mu"] );
+        set_if_specified( model_settings.use_network, tbl[options.model_string]["use_network"] );
+        // Options for the DeffuantModelVector model
+        set_if_specified( model_settings.use_binary_vector, tbl[options.model_string]["binary_vector"] );
+        set_if_specified( model_settings.dim, tbl[options.model_string]["dim"] );
+        options.model_settings = model_settings;
     }
     else if( options.model == Model::ActivityDrivenModel )
     {
         auto model_settings = ActivityDrivenSettings();
 
-        set_if_specified( model_settings.dt, tbl["ActivityDriven"]["dt"] );
-        set_if_specified( model_settings.m, tbl["ActivityDriven"]["m"] );
-        set_if_specified( model_settings.eps, tbl["ActivityDriven"]["eps"] );
-        set_if_specified( model_settings.gamma, tbl["ActivityDriven"]["gamma"] );
-        set_if_specified( model_settings.homophily, tbl["ActivityDriven"]["homophily"] );
-        set_if_specified( model_settings.reciprocity, tbl["ActivityDriven"]["reciprocity"] );
-        set_if_specified( model_settings.alpha, tbl["ActivityDriven"]["alpha"] );
-        set_if_specified( model_settings.K, tbl["ActivityDriven"]["K"] );
+        set_if_specified( model_settings.dt, tbl[options.model_string]["dt"] );
+        set_if_specified( model_settings.m, tbl[options.model_string]["m"] );
+        set_if_specified( model_settings.eps, tbl[options.model_string]["eps"] );
+        set_if_specified( model_settings.gamma, tbl[options.model_string]["gamma"] );
+        set_if_specified( model_settings.homophily, tbl[options.model_string]["homophily"] );
+        set_if_specified( model_settings.reciprocity, tbl[options.model_string]["reciprocity"] );
+        set_if_specified( model_settings.alpha, tbl[options.model_string]["alpha"] );
+        set_if_specified( model_settings.K, tbl[options.model_string]["K"] );
         // Mean activity model options
-        set_if_specified( model_settings.mean_activities, tbl["ActivityDriven"]["mean_activities"] );
-        set_if_specified( model_settings.mean_weights, tbl["ActivityDriven"]["mean_weights"] );
+        set_if_specified( model_settings.mean_activities, tbl[options.model_string]["mean_activities"] );
+        set_if_specified( model_settings.mean_weights, tbl[options.model_string]["mean_weights"] );
         // Reluctances
-        set_if_specified( model_settings.use_reluctances, tbl["ActivityDriven"]["reluctances"] );
-        set_if_specified( model_settings.reluctance_mean, tbl["ActivityDriven"]["reluctance_mean"] );
-        set_if_specified( model_settings.reluctance_sigma, tbl["ActivityDriven"]["reluctance_sigma"] );
-        set_if_specified( model_settings.reluctance_eps, tbl["ActivityDriven"]["reluctance_eps"] );
+        set_if_specified( model_settings.use_reluctances, tbl[options.model_string]["reluctances"] );
+        set_if_specified( model_settings.reluctance_mean, tbl[options.model_string]["reluctance_mean"] );
+        set_if_specified( model_settings.reluctance_sigma, tbl[options.model_string]["reluctance_sigma"] );
+        set_if_specified( model_settings.reluctance_eps, tbl[options.model_string]["reluctance_eps"] );
 
         model_settings.max_iterations = tbl["model"]["max_iterations"].value<int>();
 
         // bot
-        set_if_specified( model_settings.n_bots, tbl["ActivityDriven"]["n_bots"] );
+        set_if_specified( model_settings.n_bots, tbl[options.model_string]["n_bots"] );
 
         auto push_back_bot_array = [&]( auto toml_node, auto & options_array, auto default_value )
         {
@@ -118,10 +134,10 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
             }
         };
 
-        auto bot_opinion   = tbl["ActivityDriven"]["bot_opinion"];
-        auto bot_m         = tbl["ActivityDriven"]["bot_m"];
-        auto bot_activity  = tbl["ActivityDriven"]["bot_activity"];
-        auto bot_homophily = tbl["ActivityDriven"]["bot_homophily"];
+        auto bot_opinion   = tbl[options.model_string]["bot_opinion"];
+        auto bot_m         = tbl[options.model_string]["bot_m"];
+        auto bot_activity  = tbl[options.model_string]["bot_activity"];
+        auto bot_homophily = tbl[options.model_string]["bot_homophily"];
 
         push_back_bot_array( bot_m, model_settings.bot_m, model_settings.m );
         push_back_bot_array( bot_opinion, model_settings.bot_opinion, 0.0 );
@@ -197,6 +213,21 @@ void validate_settings( const SimulationOptions & options )
         auto model_settings = std::get<DeGrootSettings>( options.model_settings );
         check( name_and_var( model_settings.convergence_tol ), geq_zero );
     }
+    else if( options.model == Model::DeffuantModel )
+    {
+        auto model_settings = std::get<DeffuantSettings>( options.model_settings );
+        check( name_and_var( model_settings.homophily_threshold ), g_zero );
+        check( name_and_var( model_settings.mu ), []( auto x ) { return x >= 0 && x <= 1; } );
+        // DeffuantModelVector settings
+        check( name_and_var( model_settings.dim ), g_zero );
+        // @TODO: maybe make this check nicer?
+        if( !model_settings.use_binary_vector )
+        {
+            const std::string basic_deff_msg
+                = "The basic Deffuant model has not been implemented with multiple dimensions";
+            check( name_and_var( model_settings.dim ), []( auto x ) { return x == 1; }, basic_deff_msg );
+        }
+    }
 }
 
 void print_settings( const SimulationOptions & options )
@@ -245,6 +276,16 @@ void print_settings( const SimulationOptions & options )
         auto model_settings = std::get<DeGrootSettings>( options.model_settings );
         fmt::print( "    max_iterations {}\n", model_settings.max_iterations );
         fmt::print( "    convergence_tol {}\n", model_settings.convergence_tol );
+    }
+    else if( options.model == Model::DeffuantModel )
+    {
+        auto model_settings = std::get<DeffuantSettings>( options.model_settings );
+        fmt::print( "    max_iterations {}\n", model_settings.max_iterations );
+        fmt::print( "    homophily_threshold {}\n", model_settings.homophily_threshold );
+        fmt::print( "    mu {}\n", model_settings.mu );
+        fmt::print( "    use_network {}\n", model_settings.use_network );
+        fmt::print( "    use_binary_vector {}\n", model_settings.use_binary_vector );
+        fmt::print( "    dim {}\n", model_settings.dim );
     }
 
     fmt::print( "[Network]\n" );
