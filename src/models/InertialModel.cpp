@@ -1,5 +1,5 @@
+#include "models/InertialModel.hpp"
 #include "agents/inertial_agent.hpp"
-#include "models/ActivityDrivenModel.hpp"
 #include "network.hpp"
 #include "util/math.hpp"
 #include <cstddef>
@@ -9,8 +9,7 @@
 namespace Seldon
 {
 
-template<>
-void ActivityDrivenModelAbstract<InertialAgent>::iteration()
+void InertialModel::iteration()
 {
     Model<AgentT>::iteration();
 
@@ -46,5 +45,4 @@ void ActivityDrivenModelAbstract<InertialAgent>::iteration()
     }
 }
 
-template class ActivityDrivenModelAbstract<InertialAgent>;
 } // namespace Seldon

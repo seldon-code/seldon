@@ -60,10 +60,12 @@ public:
         }
     }
 
-    void iteration() override;
+    void iteration() override {};
+
+protected:
+    NetworkT & network;
 
 private:
-    NetworkT & network;
     std::vector<std::vector<WeightT>> contact_prob_list; // Probability of choosing i in 1 to m rounds
     // Random number generation
     std::mt19937 & gen; // reference to simulation Mersenne-Twister engine
@@ -91,6 +93,7 @@ private:
     double reluctance_eps{};
     double covariance_factor{};
 
+protected:
     size_t n_bots                     = 0; // The first n_bots agents are bots
     std::vector<int> bot_m            = std::vector<int>( 0 );
     std::vector<double> bot_activity  = std::vector<double>( 0 );
@@ -103,6 +106,7 @@ private:
     std::vector<double> k3_buffer{};
     std::vector<double> k4_buffer{};
 
+private:
     void get_agents_from_power_law()
     {
         std::uniform_real_distribution<> dis_opinion( -1, 1 ); // Opinion initial values
@@ -139,36 +143,6 @@ private:
                 network.agents[bot_idx].data.opinion  = bot_opinion[bot_idx];
                 network.agents[bot_idx].data.activity = bot_activity[bot_idx];
             }
-        }
-    }
-
-    [[nodiscard]] bool bot_present() const
-    {
-        return n_bots > 0;
-    }
-
-    template<typename Opinion_Callback>
-    void get_euler_slopes( std::vector<double> & k_buffer, Opinion_Callback opinion )
-    {
-        // h is the timestep
-        size_t j_index = 0;
-
-        k_buffer.resize( network.n_agents() );
-
-        for( size_t idx_agent = 0; idx_agent < network.n_agents(); ++idx_agent )
-        {
-            auto neighbour_buffer = network.get_neighbours( idx_agent ); // Get the incoming neighbours
-            auto weight_buffer    = network.get_weights( idx_agent );    // Get incoming weights
-            k_buffer[idx_agent]   = -opinion( idx_agent );
-            // Loop through neighbouring agents
-            for( size_t j = 0; j < neighbour_buffer.size(); j++ )
-            {
-                j_index = neighbour_buffer[j];
-                k_buffer[idx_agent] += 1.0 / network.agents[idx_agent].data.reluctance * K * weight_buffer[j]
-                                       * std::tanh( alpha * opinion( j_index ) );
-            }
-            // Multiply by the timestep
-            k_buffer[idx_agent] *= dt;
         }
     }
 
@@ -330,6 +304,12 @@ private:
         }
     }
 
+protected:
+    [[nodiscard]] bool bot_present() const
+    {
+        return n_bots > 0;
+    }
+
     void update_network()
     {
 
@@ -342,9 +322,33 @@ private:
             update_network_mean();
         }
     }
+
+    template<typename Opinion_Callback>
+    void get_euler_slopes( std::vector<double> & k_buffer, Opinion_Callback opinion )
+    {
+        // h is the timestep
+        size_t j_index = 0;
+
+        k_buffer.resize( network.n_agents() );
+
+        for( size_t idx_agent = 0; idx_agent < network.n_agents(); ++idx_agent )
+        {
+            auto neighbour_buffer = network.get_neighbours( idx_agent ); // Get the incoming neighbours
+            auto weight_buffer    = network.get_weights( idx_agent );    // Get incoming weights
+            k_buffer[idx_agent]   = -opinion( idx_agent );
+            // Loop through neighbouring agents
+            for( size_t j = 0; j < neighbour_buffer.size(); j++ )
+            {
+                j_index = neighbour_buffer[j];
+                k_buffer[idx_agent] += 1.0 / network.agents[idx_agent].data.reluctance * K * weight_buffer[j]
+                                       * std::tanh( alpha * opinion( j_index ) );
+            }
+            // Multiply by the timestep
+            k_buffer[idx_agent] *= dt;
+        }
+    }
 };
 
 using ActivityDrivenModel = ActivityDrivenModelAbstract<ActivityAgent>;
-using InertialModel       = ActivityDrivenModelAbstract<InertialAgent>;
 
 } // namespace Seldon

@@ -3,6 +3,7 @@
 #include "models/ActivityDrivenModel.hpp"
 #include "models/DeGroot.hpp"
 #include "models/DeffuantModel.hpp"
+#include "models/InertialModel.hpp"
 #include "network.hpp"
 #include <memory>
 #include <random>

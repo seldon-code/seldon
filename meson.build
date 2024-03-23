@@ -12,6 +12,7 @@ sources_seldon = [
   'src/models/ActivityDrivenModel.cpp',
   'src/models/DeffuantModel.cpp',
   'src/models/DeffuantModelVector.cpp',
+  'src/models/InertialModel.cpp',
   'src/util/tomlplusplus.cpp',
 ]
 
