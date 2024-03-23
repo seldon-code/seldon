@@ -9,32 +9,54 @@
 namespace Seldon
 {
 
+// X(t+dt)
+// Also updates the position
+void InertialModel::calc_position()
+{
+    // Calculating 'drift' = a(t)-friction
+    get_euler_slopes( drift_t_buffer, [this]( size_t i ) { return network.agents[i].data.opinion; } );
+
+    for( size_t idx_agent = 0; idx_agent < network.n_agents(); idx_agent++ )
+    {
+        auto & agent_data    = network.agents[idx_agent].data;
+        auto accleration     = drift_t_buffer[idx_agent] - friction_coefficient * agent_data.velocity;
+        double next_position = agent_data.opinion + agent_data.velocity * dt + 0.5 * (accleration)*dt * dt;
+
+        // Update the position to the new position
+        agent_data.opinion = next_position;
+    }
+}
+
+// V(t+dt)
+// Also updates the velocity
+void InertialModel::calc_velocity()
+{
+    // Calculating new 'drift'
+    get_euler_slopes( drift_next_t_buffer, [this]( size_t i ) { return network.agents[i].data.opinion; } );
+
+    for( size_t idx_agent = 0; idx_agent < network.n_agents(); idx_agent++ )
+    {
+        auto & agent_data    = network.agents[idx_agent].data;
+        double next_velocity = agent_data.velocity
+                               + 0.5 * dt
+                                     * ( drift_t_buffer[idx_agent] - friction_coefficient * agent_data.velocity
+                                         + drift_next_t_buffer[idx_agent] );
+        next_velocity /= 1.0 + 0.5 * friction_coefficient * dt;
+
+        // Update velocity
+        agent_data.velocity = next_velocity;
+    }
+}
+
 void InertialModel::iteration()
 {
     Model<AgentT>::iteration();
 
     update_network();
 
-    // Integrate the ODE using 4th order Runge-Kutta
-    // k_1 =   hf(x_n,y_n)
-    get_euler_slopes( k1_buffer, [this]( size_t i ) { return network.agents[i].data.opinion; } );
-    // k_2  =   hf(x_n+1/2h,y_n+1/2k_1)
-    get_euler_slopes(
-        k2_buffer, [this]( size_t i ) { return network.agents[i].data.opinion + 0.5 * this->k1_buffer[i]; } );
-    // k_3  =   hf(x_n+1/2h,y_n+1/2k_2)
-    get_euler_slopes(
-        k3_buffer, [this]( size_t i ) { return network.agents[i].data.opinion + 0.5 * this->k2_buffer[i]; } );
-    // k_4  =   hf(x_n+h,y_n+k_3)
-    get_euler_slopes( k4_buffer, [this]( size_t i ) { return network.agents[i].data.opinion + this->k3_buffer[i]; } );
-
-    // Update the agent opinions
-    for( size_t idx_agent = 0; idx_agent < network.n_agents(); ++idx_agent )
-    {
-        // y_(n+1) =   y_n+1/6k_1+1/3k_2+1/3k_3+1/6k_4+O(h^5)
-        network.agents[idx_agent].data.opinion
-            += ( k1_buffer[idx_agent] + 2 * k2_buffer[idx_agent] + 2 * k3_buffer[idx_agent] + k4_buffer[idx_agent] )
-               / 6.0;
-    }
+    // Use Velocity Verlet algorithm
+    calc_position();
+    calc_velocity();
 
     if( bot_present() )
     {

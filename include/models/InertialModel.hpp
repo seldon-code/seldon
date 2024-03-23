@@ -28,6 +28,11 @@ public:
 
 private:
     double friction_coefficient = 1.0;
+    std::vector<double> drift_t_buffer{};
+    std::vector<double> drift_next_t_buffer{};
+
+    void calc_velocity();
+    void calc_position();
 };
 
 } // namespace Seldon
