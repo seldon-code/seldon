@@ -20,11 +20,14 @@ static void BM_DeGroot_Model(benchmark::State& state) {
         {0.2, 0.8},
     };
 
+    auto settings = Config::DeGrootSettings(); 
     auto network = Network(std::move(neighbour_list), std::move(weight_list), Network::EdgeDirection::Incoming);
-    auto model = DeGrootModel(network);
 
-    model.convergence_tol = 1e-6;
-    model.max_iterations = 100;
+    settings.convergence_tol = 1e-6;
+    settings.max_iterations  = 100;    
+
+    auto model = DeGrootModel(settings,network);
+
     network.agents[0].data.opinion = 0.0;
     network.agents[1].data.opinion = 1.0;
 
