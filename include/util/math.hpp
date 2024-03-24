@@ -243,11 +243,11 @@ class bivariate_gaussian_copula
 {
 private:
     ScalarT covariance;
-    bivariate_normal_distribution<ScalarT> bivariate_normal_dist{};
+    bivariate_normal_distribution<ScalarT> biv_normal_dist{};
     // std::normal_distribution<ScalarT> normal_dist{};
 
     // Cumulative probability function for gaussian with mean 0 and variance 1
-    ScalarT cum_gauss( ScalarT x )
+    ScalarT cdf_gauss( ScalarT x )
     {
         return 0.5 * ( 1 + std::erf( ( x ) / std::sqrt( 2.0 ) ) );
     }
@@ -258,9 +258,9 @@ private:
 public:
     bivariate_gaussian_copula( ScalarT covariance, dist1T dist1, dist2T dist2 )
             : covariance( covariance ),
+              biv_normal_dist( bivariate_normal_distribution( covariance ) ),
               dist1( dist1 ),
-              dist2( dist2 ),
-              bivariate_normal_dist( bivariate_normal_dist( covariance ) )
+              dist2( dist2 )
     {
     }
 
@@ -268,12 +268,11 @@ public:
     std::array<ScalarT, 2> operator()( Generator & gen )
     {
         // 1. Draw from bivariate gaussian
-        auto z = bivariate_normal_dist( gen );
+        auto z = biv_normal_dist( gen );
         // 2. Transform marginals to unit interval
-        std::array<ScalarT, 2> z_unit = { cum_gauss( z[0] ), cum_gauss( z[1] ) };
+        std::array<ScalarT, 2> z_unit = { cdf_gauss( z[0] ), cdf_gauss( z[1] ) };
         // 3. Apply inverse transform sampling
-        std::array<ScalarT, 2> res
-            = { dist1.inverse_cumulative_probability( z_unit[0] ), dist2.inverse_cumulative_probability( z_unit[1] ) };
+        std::array<ScalarT, 2> res = { dist1.inverse_cdf( z_unit[0] ), dist2.inverse_cdf( z_unit[1] ) };
         return res;
     }
 };
