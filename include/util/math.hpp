@@ -161,12 +161,11 @@ private:
     ScalarT mean{};
     ScalarT sigma{};
     ScalarT eps{};
-    std::normal_distribution<ScalarT> normal_dist{};
-    size_t max_tries = 5000;
+    std::uniform_real_distribution<ScalarT> uniform_dist{};
 
     ScalarT inverse_cum_gauss( ScalarT y )
     {
-        return erfinv( 2.0 * y - 1 ) * std::sqrt( 2.0 ) * sigma + mean;
+        return Math::erfinv( 2.0 * y - 1 ) * std::sqrt( 2.0 ) * sigma + mean;
     }
 
     ScalarT cum_gauss( ScalarT x )
@@ -176,26 +175,19 @@ private:
 
 public:
     truncated_normal_distribution( ScalarT mean, ScalarT sigma, ScalarT eps )
-            : mean( mean ), sigma( sigma ), eps( eps ), normal_dist( std::normal_distribution<ScalarT>( mean, sigma ) )
+            : mean( mean ), sigma( sigma ), eps( eps ), uniform_dist( 0, 1 )
     {
     }
 
     template<typename Generator>
     ScalarT operator()( Generator & gen )
     {
-        for( size_t i = 0; i < max_tries; i++ )
-        {
-            auto sample = normal_dist( gen );
-            if( sample > eps )
-                return sample;
-        }
-        return eps;
+        return inverse_cumulative_probability( uniform_dist( gen ) );
     }
 
     ScalarT inverse_cumulative_probability( ScalarT y )
     {
-        return inverse_cum_gauss(
-            y * ( 1.0 - cum_gauss( eps, sigma, mean ) ) + cum_gauss( eps, sigma, mean ), sigma, mean );
+        return inverse_cum_gauss( y * ( 1.0 - cum_gauss( eps ) ) + cum_gauss( eps ) );
     }
 };
 
@@ -222,7 +214,7 @@ public:
         ScalarT n2 = normal_dist( gen );
 
         ScalarT r1 = n1;
-        ScalarT r2 = covariance * n1 + std::sqrt( 1 - covariance * covariance );
+        ScalarT r2 = covariance * n1 + std::sqrt( 1.0 - covariance * covariance ) * n2;
 
         return { r1, r2 };
     }
