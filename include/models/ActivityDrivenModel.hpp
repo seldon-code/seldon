@@ -60,7 +60,7 @@ public:
         }
     }
 
-    void iteration() override {};
+    void iteration() override{};
 
 protected:
     NetworkT & network;
@@ -234,7 +234,6 @@ private:
 
     void update_network_mean()
     {
-        using WeightT = NetworkT::WeightT;
         std::vector<WeightT> weights( network.n_agents(), 0.0 );
 
         // Set all weights to zero in the beginning

@@ -253,7 +253,8 @@ void validate_settings( const SimulationOptions & options )
         {
             const std::string basic_deff_msg
                 = "The basic Deffuant model has not been implemented with multiple dimensions";
-            check( name_and_var( model_settings.dim ), []( auto x ) { return x == 1; }, basic_deff_msg );
+            check(
+                name_and_var( model_settings.dim ), []( auto x ) { return x == 1; }, basic_deff_msg );
         }
     }
 }
