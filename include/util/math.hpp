@@ -132,10 +132,15 @@ public:
     template<typename Generator>
     ScalarT operator()( Generator & gen )
     {
-        return inverse_cumulative_probability( dist( gen ) );
+        return inverse_cdf( dist( gen ) );
     }
 
-    ScalarT inverse_cumulative_probability( ScalarT x )
+    ScalarT pdf( ScalarT x )
+    {
+        return ( 1.0 - gamma ) / ( 1.0 - std::pow( eps, ( 1 - gamma ) ) * std::pow( x, ( -gamma ) ) );
+    }
+
+    ScalarT inverse_cdf( ScalarT x )
     {
         return std::pow(
             ( 1.0 - std::pow( eps, ( 1.0 - gamma ) ) ) * x + std::pow( eps, ( 1.0 - gamma ) ),
@@ -163,14 +168,19 @@ private:
     ScalarT eps{};
     std::uniform_real_distribution<ScalarT> uniform_dist{};
 
-    ScalarT inverse_cum_gauss( ScalarT y )
+    ScalarT inverse_cdf_gauss( ScalarT y )
     {
         return Math::erfinv( 2.0 * y - 1 ) * std::sqrt( 2.0 ) * sigma + mean;
     }
 
-    ScalarT cum_gauss( ScalarT x )
+    ScalarT cdf_gauss( ScalarT x )
     {
         return 0.5 * ( 1 + std::erf( ( x - mean ) / ( sigma * std::sqrt( 2.0 ) ) ) );
+    }
+
+    ScalarT pdf_gauss( ScalarT x )
+    {
+        return 1.0 / ( sigma * std::sqrt( 2 * Math::pi ) ) * std::exp( -0.5 * std::pow( ( ( x - mean ) / sigma ), 2 ) );
     }
 
 public:
@@ -182,12 +192,20 @@ public:
     template<typename Generator>
     ScalarT operator()( Generator & gen )
     {
-        return inverse_cumulative_probability( uniform_dist( gen ) );
+        return inverse_cdf( uniform_dist( gen ) );
     }
 
-    ScalarT inverse_cumulative_probability( ScalarT y )
+    ScalarT inverse_cdf( ScalarT y )
     {
-        return inverse_cum_gauss( y * ( 1.0 - cum_gauss( eps ) ) + cum_gauss( eps ) );
+        return inverse_cdf_gauss( y * ( 1.0 - cdf_gauss( eps ) ) + cdf_gauss( eps ) );
+    }
+
+    ScalarT pdf( ScalarT x )
+    {
+        if( x < eps )
+            return 0.0;
+        else
+            return 1.0 / ( 1.0 - cdf_gauss( eps ) ) * pdf_gauss( x );
     }
 };
 
