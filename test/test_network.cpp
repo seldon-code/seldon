@@ -112,7 +112,7 @@ TEST_CASE( "Testing the network class" )
                 auto weight    = buffer_w[i_neighbour];
                 std::tuple<size_t, size_t, Network::WeightT> edge{
                     neighbour, i_agent, weight
-                };                                     // Note that i_agent and neighbour are flipped compared to before
+                }; // Note that i_agent and neighbour are flipped compared to before
                 REQUIRE( old_edges.contains( edge ) ); // can we find the transposed edge?
                 old_edges.extract( edge );             // extract the edge afterwards
             }
