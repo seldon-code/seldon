@@ -214,7 +214,7 @@ void validate_settings( const SimulationOptions & options )
         check( name_and_var( model_settings.reluctance_mean ), g_zero );
         check( name_and_var( model_settings.reluctance_sigma ), g_zero );
         check( name_and_var( model_settings.reluctance_eps ), g_zero );
-        check( name_and_var( model_settings.covariance_factor ), []( auto x ) { return x >= -1.0 && x<=1.0; }  );
+        check( name_and_var( model_settings.covariance_factor ), []( auto x ) { return x >= -1.0 && x <= 1.0; } );
         // Bot options
         size_t n_bots             = model_settings.n_bots;
         auto check_bot_size       = [&]( auto x ) { return x.size() >= n_bots; };
