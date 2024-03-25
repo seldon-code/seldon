@@ -60,7 +60,7 @@ public:
         }
     }
 
-    void iteration() override{};
+    void iteration() override {};
 
 protected:
     NetworkT & network;
@@ -113,6 +113,8 @@ private:
         power_law_distribution<> dist_activity( eps, gamma );
         truncated_normal_distribution<> dist_reluctance( reluctance_mean, reluctance_sigma, reluctance_eps );
 
+        bivariate_gaussian_copula copula( covariance_factor, dist_activity, dist_reluctance );
+
         auto mean_activity = dist_activity.mean();
 
         // Initial conditions for the opinions, initialize to [-1,1]
@@ -121,18 +123,16 @@ private:
         {
             network.agents[i].data.opinion = dis_opinion( gen ); // Draw the opinion value
 
-            if( !mean_activities )
-            { // Draw from a power law distribution (1-gamma)/(1-eps^(1-gamma)) * a^(-gamma)
-                network.agents[i].data.activity = dist_activity( gen );
-            }
-            else
-            {
-                network.agents[i].data.activity = mean_activity;
-            }
+            auto res                        = copula( gen );
+            network.agents[i].data.activity = res[0];
 
             if( use_reluctances )
             {
-                network.agents[i].data.reluctance = dist_reluctance( gen );
+                network.agents[i].data.reluctance = res[1];
+            }
+            if( mean_activities )
+            {
+                network.agents[i].data.activity = mean_activity;
             }
         }
 
