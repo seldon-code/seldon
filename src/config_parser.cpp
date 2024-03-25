@@ -59,6 +59,7 @@ void parse_activity_settings( auto & model_settings, const auto & toml_model_opt
     set_if_specified( model_settings.mean_activities, toml_model_opt["mean_activities"] );
     set_if_specified( model_settings.mean_weights, toml_model_opt["mean_weights"] );
     // Reluctances
+    set_if_specified( model_settings.covariance_factor, toml_model_opt["covariance_factor"] );
     set_if_specified( model_settings.use_reluctances, toml_model_opt["reluctances"] );
     set_if_specified( model_settings.reluctance_mean, toml_model_opt["reluctance_mean"] );
     set_if_specified( model_settings.reluctance_sigma, toml_model_opt["reluctance_sigma"] );
@@ -213,7 +214,7 @@ void validate_settings( const SimulationOptions & options )
         check( name_and_var( model_settings.reluctance_mean ), g_zero );
         check( name_and_var( model_settings.reluctance_sigma ), g_zero );
         check( name_and_var( model_settings.reluctance_eps ), g_zero );
-        check( name_and_var( model_settings.covariance_factor ), geq_zero );
+        check( name_and_var( model_settings.covariance_factor ), []( auto x ) { return x >= -1.0 && x<=1.0; }  );
         // Bot options
         size_t n_bots             = model_settings.n_bots;
         auto check_bot_size       = [&]( auto x ) { return x.size() >= n_bots; };

@@ -44,6 +44,7 @@ public:
               reluctance_mean( settings.reluctance_mean ),
               reluctance_sigma( settings.reluctance_sigma ),
               reluctance_eps( settings.reluctance_eps ),
+              covariance_factor( settings.covariance_factor ),
               n_bots( settings.n_bots ),
               bot_m( settings.bot_m ),
               bot_activity( settings.bot_activity ),
