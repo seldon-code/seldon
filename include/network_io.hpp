@@ -1,6 +1,6 @@
 #pragma once
+#include "directed_network.hpp"
 #include "fstream"
-#include "network.hpp"
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
@@ -10,7 +10,7 @@ namespace Seldon
 {
 
 template<typename AgentT>
-void network_to_dot_file( const Network<AgentT> & network, const std::string & file_path )
+void network_to_dot_file( const DirectedNetwork<AgentT> & network, const std::string & file_path )
 {
     std::fstream fs;
     fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );
@@ -36,7 +36,7 @@ void network_to_dot_file( const Network<AgentT> & network, const std::string & f
 }
 
 template<typename AgentT>
-void network_to_file( const Network<AgentT> & network, const std::string & file_path )
+void network_to_file( const DirectedNetwork<AgentT> & network, const std::string & file_path )
 {
     std::fstream fs;
     fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );

@@ -6,7 +6,7 @@
 namespace Seldon
 {
 
-DeGrootModel::DeGrootModel( Config::DeGrootSettings settings, NetworkT & network )
+DeGrootModel::DeGrootModel( Config::DeGrootSettings settings, DirectedNetworkT & network )
         : Model<AgentT>( settings.max_iterations ),
           convergence_tol( settings.convergence_tol ),
           network( network ),

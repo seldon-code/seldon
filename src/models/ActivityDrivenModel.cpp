@@ -1,5 +1,5 @@
 #include "models/ActivityDrivenModel.hpp"
-#include "network.hpp"
+#include "directed_network.hpp"
 #include "util/math.hpp"
 #include <cstddef>
 #include <random>

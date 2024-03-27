@@ -19,7 +19,6 @@ template<typename AgentType, typename WeightType = double>
 class UndirectedNetwork
 {
 public:
-
     using WeightT = WeightType;
     using AgentT  = AgentType;
     // @TODO: Make this private later
@@ -42,7 +41,7 @@ public:
     }
 
     UndirectedNetwork(
-        std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list)
+        std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list )
             : agents( std::vector<AgentT>( neighbour_list.size() ) ),
               neighbour_list( neighbour_list ),
               weight_list( weight_list )
@@ -69,10 +68,11 @@ public:
         }
         else
         {
-            // Return the number of edges in the undirected graph, which is half effectively half the edges 
-            return 0.5*std::transform_reduce(
-                neighbour_list.cbegin(), neighbour_list.cend(), 0, std::plus{},
-                []( const auto & neigh_list ) { return neigh_list.size(); } );
+            // Return the number of edges in the undirected graph, which is half effectively half the edges
+            return 0.5
+                   * std::transform_reduce(
+                       neighbour_list.cbegin(), neighbour_list.cend(), 0, std::plus{},
+                       []( const auto & neigh_list ) { return neigh_list.size(); } );
         }
     }
 
@@ -107,25 +107,28 @@ public:
     /*
     Sets the weight for agent_idx, for an existing neighbour index
     */
-    void set_edge_weight(std::size_t agent_idx, std::size_t index_neighbour, WeightT weight){
+    void set_edge_weight( std::size_t agent_idx, std::size_t index_neighbour, WeightT weight )
+    {
         weight_list[agent_idx][index_neighbour] = weight;
-        auto agent_jdx = neighbour_list[agent_idx][index_neighbour];
-        auto it = std::find(neighbour_list[agent_jdx].begin(), neighbour_list[agent_jdx].end(), agent_idx);
-        // If agent_idx is not in the neighbour list of agent_jdx, add it to the list and add the weight 
-        if(it==neighbour_list[agent_jdx].end()){
-            neighbour_list[agent_jdx].push_back(agent_idx);
-            weight_list[agent_jdx].push_back(weight);
-        } 
-        // If found then update the weight 
-        else{
-            weight_list[agent_jdx][*it]= weight;
+        auto agent_jdx                          = neighbour_list[agent_idx][index_neighbour];
+        auto it = std::find( neighbour_list[agent_jdx].begin(), neighbour_list[agent_jdx].end(), agent_idx );
+        // If agent_idx is not in the neighbour list of agent_jdx, add it to the list and add the weight
+        if( it == neighbour_list[agent_jdx].end() )
+        {
+            neighbour_list[agent_jdx].push_back( agent_idx );
+            weight_list[agent_jdx].push_back( weight );
+        }
+        // If found then update the weight
+        else
+        {
+            weight_list[agent_jdx][*it] = weight;
         }
     }
 
     /*
     Gets the weight for agent_idx, for a neighbour index
     */
-    const WeightT get_edge_weight(std::size_t agent_idx, std::size_t index_neighbour) const
+    const WeightT get_edge_weight( std::size_t agent_idx, std::size_t index_neighbour ) const
     {
         return weight_list[agent_idx][index_neighbour];
     }
@@ -135,7 +138,7 @@ public:
     This could cause double counting, if not carefully called.
     */
     void push_back_neighbour_and_weight( size_t agent_idx_i, size_t agent_idx_j, WeightT w )
-    {   
+    {
         // agent_idx_j is a neighbour of agent_idx_i
         neighbour_list[agent_idx_i].push_back( agent_idx_j );
         weight_list[agent_idx_i].push_back( w );
@@ -143,7 +146,6 @@ public:
         neighbour_list[agent_idx_j].push_back( agent_idx_i );
         weight_list[agent_idx_j].push_back( w );
     }
-
 
     /*
     Sorts the neighbours by index and removes doubly counted edges by summing the weights

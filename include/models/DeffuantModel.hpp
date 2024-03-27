@@ -3,8 +3,8 @@
 #include "agents/discrete_vector_agent.hpp"
 #include "agents/simple_agent.hpp"
 #include "config_parser.hpp"
+#include "directed_network.hpp"
 #include "model.hpp"
-#include "network.hpp"
 #include "util/math.hpp"
 #include <cstddef>
 #include <random>
@@ -20,10 +20,10 @@ template<typename AgentT_>
 class DeffuantModelAbstract : public Model<AgentT_>
 {
 public:
-    using AgentT   = AgentT_;
-    using NetworkT = Network<AgentT>;
+    using AgentT           = AgentT_;
+    using DirectedNetworkT = DirectedNetwork<AgentT>;
 
-    DeffuantModelAbstract( const Config::DeffuantSettings & settings, NetworkT & network, std::mt19937 & gen )
+    DeffuantModelAbstract( const Config::DeffuantSettings & settings, DirectedNetworkT & network, std::mt19937 & gen )
             : Model<AgentT>( settings.max_iterations ),
               homophily_threshold( settings.homophily_threshold ),
               mu( settings.mu ),
@@ -39,7 +39,7 @@ public:
             {
                 throw std::runtime_error( "Number of agents is not a square number." );
             }
-            network = NetworkGeneration::generate_square_lattice<AgentT>( n_edge );
+            network = DirectedNetworkGeneration::generate_square_lattice<AgentT>( n_edge );
         }
     }
 
@@ -104,7 +104,7 @@ private:
     double homophily_threshold{}; // d in paper
     double mu{};                  // convergence parameter
     bool use_network{};           // for the basic Deffuant model
-    NetworkT & network;
+    DirectedNetworkT & network;
     std::mt19937 & gen; // reference to simulation Mersenne-Twister engine
 };
 

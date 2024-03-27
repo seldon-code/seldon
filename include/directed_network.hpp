@@ -28,7 +28,7 @@ namespace Seldon
     Note: switch is equivalent to toggle + transpose, but much cheaper!
 */
 template<typename AgentType, typename WeightType = double>
-class Network
+class DirectedNetwork
 {
 public:
     enum class EdgeDirection
@@ -42,23 +42,23 @@ public:
     // @TODO: Make this private later
     std::vector<AgentT> agents{}; // List of agents of type AgentType
 
-    Network() = default;
+    DirectedNetwork() = default;
 
-    Network( size_t n_agents )
+    DirectedNetwork( size_t n_agents )
             : agents( std::vector<AgentT>( n_agents ) ),
               neighbour_list( std::vector<std::vector<size_t>>( n_agents, std::vector<size_t>{} ) ),
               weight_list( std::vector<std::vector<WeightT>>( n_agents, std::vector<WeightT>{} ) )
     {
     }
 
-    Network( std::vector<AgentT> agents )
+    DirectedNetwork( std::vector<AgentT> agents )
             : agents( agents ),
               neighbour_list( std::vector<std::vector<size_t>>( agents.size(), std::vector<size_t>{} ) ),
               weight_list( std::vector<std::vector<WeightT>>( agents.size(), std::vector<WeightT>{} ) )
     {
     }
 
-    Network(
+    DirectedNetwork(
         std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list,
         EdgeDirection direction )
             : agents( std::vector<AgentT>( neighbour_list.size() ) ),
@@ -136,7 +136,7 @@ public:
     {
         if( neighbour_list[agent_idx].size() != weights.size() )
         {
-            throw std::runtime_error( "Network::set_weights: tried to set weights of the wrong size!" );
+            throw std::runtime_error( "DirectedNetwork::set_weights: tried to set weights of the wrong size!" );
         }
         weight_list[agent_idx].assign( weights.begin(), weights.end() );
     }
@@ -144,10 +144,9 @@ public:
     /*
     Sets the neighbour indices
     */
-    void set_edge(
-        std::size_t agent_idx, std::size_t index_neighbour, std::size_t agent_jdx )
+    void set_edge( std::size_t agent_idx, std::size_t index_neighbour, std::size_t agent_jdx )
     {
-        neighbour_list[agent_idx][index_neighbour]=agent_jdx;
+        neighbour_list[agent_idx][index_neighbour] = agent_jdx;
     }
 
     /*
@@ -170,7 +169,7 @@ public:
         if( buffer_neighbours.size() != buffer_weights.size() )
         {
             throw std::runtime_error(
-                "Network::set_neighbours_and_weights: both buffers need to have the same length!" );
+                "DirectedNetwork::set_neighbours_and_weights: both buffers need to have the same length!" );
         }
 
         neighbour_list[agent_idx].assign( buffer_neighbours.begin(), buffer_neighbours.end() );
@@ -180,14 +179,15 @@ public:
     /*
     Sets the weight for agent_idx, for a neighbour index
     */
-    void set_edge_weight(std::size_t agent_idx, std::size_t index_neighbour, WeightT weight){
+    void set_edge_weight( std::size_t agent_idx, std::size_t index_neighbour, WeightT weight )
+    {
         weight_list[agent_idx][index_neighbour] = weight;
     }
 
     /*
     Gets the weight for agent_idx, for a neighbour index
     */
-    const WeightT get_edge_weight(std::size_t agent_idx, std::size_t index_neighbour) const
+    const WeightT get_edge_weight( std::size_t agent_idx, std::size_t index_neighbour ) const
     {
         return weight_list[agent_idx][index_neighbour];
     }

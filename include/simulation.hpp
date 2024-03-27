@@ -1,9 +1,9 @@
 #pragma once
 
 #include "config_parser.hpp"
+#include "directed_network.hpp"
 #include "fmt/core.h"
 #include "model_factory.hpp"
-#include "network.hpp"
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <filesystem>
@@ -36,7 +36,7 @@ private:
 
 public:
     std::unique_ptr<Model<AgentType>> model;
-    Network<AgentType> network;
+    DirectedNetwork<AgentType> network;
 
     Config::OutputSettings output_settings;
 
@@ -50,13 +50,14 @@ public:
 
         if( file.has_value() )
         {
-            network = NetworkGeneration::generate_from_file<AgentType>( file.value() );
+            network = DirectedNetworkGeneration::generate_from_file<AgentType>( file.value() );
         }
         else
         {
             int n_agents       = options.network_settings.n_agents;
             auto n_connections = options.network_settings.n_connections;
-            network = NetworkGeneration::generate_n_connections<AgentType>( n_agents, n_connections, true, gen );
+            network
+                = DirectedNetworkGeneration::generate_n_connections<AgentType>( n_agents, n_connections, true, gen );
         }
     }
 

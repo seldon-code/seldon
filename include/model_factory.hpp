@@ -1,10 +1,10 @@
 #include "config_parser.hpp"
+#include "directed_network.hpp"
 #include "model.hpp"
 #include "models/ActivityDrivenModel.hpp"
 #include "models/DeGroot.hpp"
 #include "models/DeffuantModel.hpp"
 #include "models/InertialModel.hpp"
-#include "network.hpp"
 #include <memory>
 #include <random>
 #include <stdexcept>
@@ -30,7 +30,7 @@ auto check_agent_type( FuncT func )
 }
 
 template<typename AgentT>
-inline auto create_model_degroot( Network<AgentT> & network, const ModelVariantT & model_settings )
+inline auto create_model_degroot( DirectedNetwork<AgentT> & network, const ModelVariantT & model_settings )
 {
     if constexpr( std::is_same_v<AgentT, DeGrootModel::AgentT> )
     {
@@ -46,8 +46,8 @@ inline auto create_model_degroot( Network<AgentT> & network, const ModelVariantT
 }
 
 template<typename AgentT>
-inline auto
-create_model_activity_driven( Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
+inline auto create_model_activity_driven(
+    DirectedNetwork<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
 {
     if constexpr( std::is_same_v<AgentT, ActivityDrivenModel::AgentT> )
     {
@@ -64,7 +64,7 @@ create_model_activity_driven( Network<AgentT> & network, const ModelVariantT & m
 
 template<typename AgentT>
 inline auto create_model_activity_driven_inertial(
-    Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
+    DirectedNetwork<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
 {
     if constexpr( std::is_same_v<AgentT, InertialModel::AgentT> )
     {
@@ -80,7 +80,8 @@ inline auto create_model_activity_driven_inertial(
 }
 
 template<typename AgentT>
-inline auto create_model_deffuant( Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
+inline auto
+create_model_deffuant( DirectedNetwork<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
 {
     if constexpr( std::is_same_v<AgentT, DeffuantModel::AgentT> )
     {
@@ -97,8 +98,8 @@ inline auto create_model_deffuant( Network<AgentT> & network, const ModelVariant
 }
 
 template<typename AgentT>
-inline auto
-create_model_deffuant_vector( Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
+inline auto create_model_deffuant_vector(
+    DirectedNetwork<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
 {
     if constexpr( std::is_same_v<AgentT, DeffuantModelVector::AgentT> )
     {

@@ -1,4 +1,4 @@
-#include "network.hpp"
+#include "directed_network.hpp"
 #include "network_generation.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
@@ -9,13 +9,13 @@
 TEST_CASE( "Testing the network class" )
 {
     using namespace Seldon;
-    using Network = Network<double>;
+    using DirectedNetwork = DirectedNetwork<double>;
 
     // Generate some network
     const size_t n_agents      = 20;
     const size_t n_connections = 10;
     std::mt19937 gen( 0 );
-    auto network = NetworkGeneration::generate_n_connections<double>( n_agents, n_connections, false, gen );
+    auto network = DirectedNetworkGeneration::generate_n_connections<double>( n_agents, n_connections, false, gen );
 
     // Does n_agents work?
     REQUIRE( network.n_agents() == n_agents );
@@ -24,8 +24,8 @@ TEST_CASE( "Testing the network class" )
 
     // Check that the function for setting neighbours and a single weight work
     // Agent 3
-    std::vector<size_t> neigh{ { 0, 10 } };           // new neighbours
-    std::vector<Network::WeightT> weight{ 0.5, 0.5 }; // new weights (const)
+    std::vector<size_t> neigh{ { 0, 10 } };                   // new neighbours
+    std::vector<DirectedNetwork::WeightT> weight{ 0.5, 0.5 }; // new weights (const)
     network.set_neighbours_and_weights( 3, neigh, 0.5 );
     auto buffer_w_get = network.get_weights( 3 );
 
@@ -44,21 +44,21 @@ TEST_CASE( "Testing the network class" )
         REQUIRE( n == neigh[0] );
         n = 2;
         // Set the neighbour
-        network.set_edge(3, 0, n );
+        network.set_edge( 3, 0, n );
         REQUIRE( network.get_neighbours( 3 )[0] == 2 );
 
-        Network::WeightT w = network.get_weights( 3 )[1];
+        DirectedNetwork::WeightT w = network.get_weights( 3 )[1];
         REQUIRE( w == 0.55 );
         w = 0.9;
-        network.set_edge_weight(3, 1, w);
+        network.set_edge_weight( 3, 1, w );
         REQUIRE( network.get_weights( 3 )[1] == w );
     }
 
     SECTION( "Checking that set_neighbours_and_weights works with a vector of weights, push_back and transpose" )
     {
         // Change the connections for agent 3
-        std::vector<size_t> buffer_n{ { 0, 10, 15 } };           // new neighbours
-        std::vector<Network::WeightT> buffer_w{ 0.1, 0.2, 0.3 }; // new weights
+        std::vector<size_t> buffer_n{ { 0, 10, 15 } };                   // new neighbours
+        std::vector<DirectedNetwork::WeightT> buffer_w{ 0.1, 0.2, 0.3 }; // new weights
         network.set_neighbours_and_weights( 3, buffer_n, buffer_w );
 
         // Make sure the changes worked
@@ -81,7 +81,7 @@ TEST_CASE( "Testing the network class" )
         // Now we test the toggle_incoming_outgoing() function
 
         // First record all the old edges as tuples (i,j,w) where this edge goes from j -> i with weight w
-        std::set<std::tuple<size_t, size_t, Network::WeightT>> old_edges;
+        std::set<std::tuple<size_t, size_t, DirectedNetwork::WeightT>> old_edges;
         for( size_t i_agent = 0; i_agent < network.n_agents(); i_agent++ )
         {
             auto buffer_n = network.get_neighbours( i_agent );
@@ -91,7 +91,7 @@ TEST_CASE( "Testing the network class" )
             {
                 auto neighbour = buffer_n[i_neighbour];
                 auto weight    = buffer_w[i_neighbour];
-                std::tuple<size_t, size_t, Network::WeightT> edge{ i_agent, neighbour, weight };
+                std::tuple<size_t, size_t, DirectedNetwork::WeightT> edge{ i_agent, neighbour, weight };
                 old_edges.insert( edge );
             }
         }
@@ -113,7 +113,7 @@ TEST_CASE( "Testing the network class" )
             {
                 auto neighbour = buffer_n[i_neighbour];
                 auto weight    = buffer_w[i_neighbour];
-                std::tuple<size_t, size_t, Network::WeightT> edge{
+                std::tuple<size_t, size_t, DirectedNetwork::WeightT> edge{
                     neighbour, i_agent, weight
                 }; // Note that i_agent and neighbour are flipped compared to before
                 REQUIRE( old_edges.contains( edge ) ); // can we find the transposed edge?
@@ -160,8 +160,9 @@ TEST_CASE( "Testing the network class" )
         };
         // clang-format on
 
-        auto network = Seldon::Network<double>(
-            std::move( neighbour_list ), std::move( weight_list ), Seldon::Network<double>::EdgeDirection::Incoming );
+        auto network = Seldon::DirectedNetwork<double>(
+            std::move( neighbour_list ), std::move( weight_list ),
+            Seldon::DirectedNetwork<double>::EdgeDirection::Incoming );
 
         network.remove_double_counting();
 
@@ -191,7 +192,7 @@ TEST_CASE( "Testing the network class" )
             };
         // clang-format on
 
-        auto network = Seldon::NetworkGeneration::generate_square_lattice<double>( 3 );
+        auto network = Seldon::DirectedNetworkGeneration::generate_square_lattice<double>( 3 );
 
         for( size_t i_agent = 0; i_agent < network.n_agents(); i_agent++ )
         {

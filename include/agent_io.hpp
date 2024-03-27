@@ -1,6 +1,6 @@
 #pragma once
+#include "directed_network.hpp"
 #include "fstream"
-#include "network.hpp"
 #include "util/misc.hpp"
 #include <fmt/core.h>
 #include <fmt/format.h>
@@ -36,7 +36,7 @@ template<typename AgentT>
 }
 
 template<typename AgentT>
-void agents_to_file( const Network<AgentT> & network, const std::string & file_path )
+void agents_to_file( const DirectedNetwork<AgentT> & network, const std::string & file_path )
 {
     std::fstream fs;
     fs.open( file_path, std::fstream::in | std::fstream::out | std::fstream::trunc );

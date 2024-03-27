@@ -3,8 +3,8 @@
 #include "agents/activity_agent.hpp"
 #include "agents/inertial_agent.hpp"
 #include "config_parser.hpp"
+#include "directed_network.hpp"
 #include "model.hpp"
-#include "network.hpp"
 #include "network_generation.hpp"
 #include <cstddef>
 #include <random>
@@ -20,12 +20,12 @@ template<typename AgentT_>
 class ActivityDrivenModelAbstract : public Model<AgentT_>
 {
 public:
-    using AgentT   = AgentT_;
-    using NetworkT = Network<AgentT>;
-    using WeightT  = typename NetworkT::WeightT;
+    using AgentT           = AgentT_;
+    using DirectedNetworkT = DirectedNetwork<AgentT>;
+    using WeightT          = typename DirectedNetworkT::WeightT;
 
     ActivityDrivenModelAbstract(
-        const Config::ActivityDrivenSettings & settings, NetworkT & network, std::mt19937 & gen )
+        const Config::ActivityDrivenSettings & settings, DirectedNetworkT & network, std::mt19937 & gen )
             : Model<AgentT>( settings.max_iterations ),
               network( network ),
               contact_prob_list( std::vector<std::vector<WeightT>>( network.n_agents() ) ),
@@ -56,7 +56,7 @@ public:
         if( mean_weights )
         {
             auto agents_copy = network.agents;
-            network          = NetworkGeneration::generate_fully_connected<AgentT>( network.n_agents() );
+            network          = DirectedNetworkGeneration::generate_fully_connected<AgentT>( network.n_agents() );
             network.agents   = agents_copy;
         }
     }
@@ -64,7 +64,7 @@ public:
     void iteration() override {};
 
 protected:
-    NetworkT & network;
+    DirectedNetworkT & network;
 
 private:
     std::vector<std::vector<WeightT>> contact_prob_list; // Probability of choosing i in 1 to m rounds
@@ -291,9 +291,9 @@ private:
                 double prob_contact_ji = contact_prob_list[j][idx_agent];
 
                 // Set the incoming agent weight, j-i in weight list
-                double win_ji = network.get_edge_weight( j ,idx_agent);
+                double win_ji = network.get_edge_weight( j, idx_agent );
                 win_ji += prob_contact_ij;
-                network.set_edge_weight(j, idx_agent, win_ji);
+                network.set_edge_weight( j, idx_agent, win_ji );
 
                 // Handle the reciprocity for j->i
                 // Update incoming weight i-j
@@ -301,7 +301,7 @@ private:
 
                 // The probability of reciprocating is
                 win_ij += ( 1.0 - prob_contact_ji ) * reciprocity * prob_contact_ij;
-                network.set_edge_weight(idx_agent, j, win_ij);
+                network.set_edge_weight( idx_agent, j, win_ij );
             }
         }
     }

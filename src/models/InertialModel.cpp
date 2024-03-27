@@ -1,6 +1,6 @@
 #include "models/InertialModel.hpp"
 #include "agents/inertial_agent.hpp"
-#include "network.hpp"
+#include "directed_network.hpp"
 #include "util/math.hpp"
 #include <cstddef>
 #include <random>
@@ -10,7 +10,7 @@ namespace Seldon
 {
 
 InertialModel::InertialModel(
-    const Config::ActivityDrivenInertialSettings & settings, NetworkT & network, std::mt19937 & gen )
+    const Config::ActivityDrivenInertialSettings & settings, DirectedNetworkT & network, std::mt19937 & gen )
         : ActivityDrivenModelAbstract<InertialAgent>( settings, network, gen ),
           friction_coefficient( settings.friction_coefficient )
 {

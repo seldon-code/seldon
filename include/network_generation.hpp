@@ -1,22 +1,22 @@
 #pragma once
-#include "network.hpp"
+#include "directed_network.hpp"
 #include <cstddef>
 #include <random>
 #include <util/math.hpp>
 #include <util/misc.hpp>
 #include <vector>
 
-namespace Seldon::NetworkGeneration
+namespace Seldon::DirectedNetworkGeneration
 {
 /* Constructs a new network with n_connections per agent
    If self_interaction=true, a connection of the agent with itself is included, which is *not* counted in n_connections
 */
 template<typename AgentType>
-Network<AgentType>
+DirectedNetwork<AgentType>
 generate_n_connections( size_t n_agents, size_t n_connections, bool self_interaction, std::mt19937 & gen )
 {
-    using NetworkT = Network<AgentType>;
-    using WeightT  = typename NetworkT::WeightT;
+    using DirectedNetworkT = DirectedNetwork<AgentType>;
+    using WeightT          = typename DirectedNetworkT::WeightT;
 
     std::vector<std::vector<size_t>> neighbour_list;  // Neighbour list for the connections
     std::vector<std::vector<WeightT>> weight_list;    // List for the interaction weights of each connection
@@ -70,15 +70,17 @@ generate_n_connections( size_t n_agents, size_t n_connections, bool self_interac
 
     } // end of loop through n_agents
 
-    return NetworkT( std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
+    return DirectedNetworkT(
+        std::move( neighbour_list ), std::move( weight_list ), DirectedNetworkT::EdgeDirection::Incoming );
 }
 
 // @TODO generate_fully_connected does not need to be overloaded..perhaps a std::optional instead to reduce code duplication?
 template<typename AgentType>
-Network<AgentType> generate_fully_connected( size_t n_agents, typename Network<AgentType>::WeightT weight = 0.0 )
+DirectedNetwork<AgentType>
+generate_fully_connected( size_t n_agents, typename DirectedNetwork<AgentType>::WeightT weight = 0.0 )
 {
-    using NetworkT = Network<AgentType>;
-    using WeightT  = typename NetworkT::WeightT;
+    using DirectedNetworkT = DirectedNetwork<AgentType>;
+    using WeightT          = typename DirectedNetworkT::WeightT;
 
     std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
     std::vector<std::vector<WeightT>> weight_list;   // List for the interaction weights of each connection
@@ -103,14 +105,15 @@ Network<AgentType> generate_fully_connected( size_t n_agents, typename Network<A
 
     } // end of loop through n_agents
 
-    return NetworkT( std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
+    return DirectedNetworkT(
+        std::move( neighbour_list ), std::move( weight_list ), DirectedNetworkT::EdgeDirection::Incoming );
 }
 
 template<typename AgentType>
-Network<AgentType> generate_fully_connected( size_t n_agents, std::mt19937 & gen )
+DirectedNetwork<AgentType> generate_fully_connected( size_t n_agents, std::mt19937 & gen )
 {
-    using NetworkT = Network<AgentType>;
-    using WeightT  = typename NetworkT::WeightT;
+    using DirectedNetworkT = DirectedNetwork<AgentType>;
+    using WeightT          = typename DirectedNetworkT::WeightT;
 
     std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
     std::vector<std::vector<WeightT>> weight_list;   // List for the interaction weights of each connection
@@ -154,14 +157,15 @@ Network<AgentType> generate_fully_connected( size_t n_agents, std::mt19937 & gen
 
     } // end of loop through n_agents
 
-    return NetworkT( std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
+    return DirectedNetworkT(
+        std::move( neighbour_list ), std::move( weight_list ), DirectedNetworkT::EdgeDirection::Incoming );
 }
 
 template<typename AgentType>
-Network<AgentType> generate_from_file( const std::string & file )
+DirectedNetwork<AgentType> generate_from_file( const std::string & file )
 {
-    using NetworkT = Network<AgentType>;
-    using WeightT  = typename NetworkT::WeightT;
+    using DirectedNetworkT = DirectedNetwork<AgentType>;
+    using WeightT          = typename DirectedNetworkT::WeightT;
     std::vector<std::vector<size_t>> neighbour_list; // Neighbour list for the connections
     std::vector<std::vector<WeightT>> weight_list;   // List for the interaction weights of each connection
 
@@ -235,19 +239,21 @@ Network<AgentType> generate_from_file( const std::string & file )
         }
     }
 
-    return NetworkT( std::move( neighbour_list ), std::move( weight_list ), NetworkT::EdgeDirection::Incoming );
+    return DirectedNetworkT(
+        std::move( neighbour_list ), std::move( weight_list ), DirectedNetworkT::EdgeDirection::Incoming );
 }
 
 /* Constructs a new network on a square lattice of edge length n_edge (with PBCs)*/
 template<typename AgentType>
-Network<AgentType> generate_square_lattice( size_t n_edge, typename Network<AgentType>::WeightT weight = 0.0 )
+DirectedNetwork<AgentType>
+generate_square_lattice( size_t n_edge, typename DirectedNetwork<AgentType>::WeightT weight = 0.0 )
 {
-    using NetworkT = Network<AgentType>;
-    using WeightT  = typename NetworkT::WeightT;
-    auto n_agents  = n_edge * n_edge;
+    using DirectedNetworkT = DirectedNetwork<AgentType>;
+    using WeightT          = typename DirectedNetworkT::WeightT;
+    auto n_agents          = n_edge * n_edge;
 
-    // Create an empty Network
-    auto network = NetworkT( n_agents );
+    // Create an empty DirectedNetwork
+    auto network = DirectedNetworkT( n_agents );
 
     auto wrap_edge_index = [&]( int k )
     {
@@ -294,4 +300,4 @@ Network<AgentType> generate_square_lattice( size_t n_edge, typename Network<Agen
 
     return network;
 }
-} // namespace Seldon::NetworkGeneration
+} // namespace Seldon::DirectedNetworkGeneration

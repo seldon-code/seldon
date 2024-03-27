@@ -2,15 +2,15 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "config_parser.hpp"
+#include "directed_network.hpp"
 #include "models/DeGroot.hpp"
-#include "network.hpp"
 #include <random>
 
 TEST_CASE( "Test the DeGroot Model Symmetric", "[DeGroot]" )
 {
     using namespace Seldon;
     using namespace Catch::Matchers;
-    using Network = Network<DeGrootModel::AgentT>;
+    using DirectedNetwork = DirectedNetwork<DeGrootModel::AgentT>;
 
     size_t n_agents     = 2;
     auto neighbour_list = std::vector<std::vector<size_t>>{
@@ -25,7 +25,8 @@ TEST_CASE( "Test the DeGroot Model Symmetric", "[DeGroot]" )
 
     auto settings = Config::DeGrootSettings();
 
-    auto network = Network( std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
+    auto network = DirectedNetwork(
+        std::move( neighbour_list ), std::move( weight_list ), DirectedNetwork::EdgeDirection::Incoming );
 
     settings.convergence_tol = 1e-6;
     settings.max_iterations  = 100;
