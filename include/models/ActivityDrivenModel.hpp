@@ -291,15 +291,17 @@ private:
                 double prob_contact_ji = contact_prob_list[j][idx_agent];
 
                 // Set the incoming agent weight, j-i in weight list
-                double & win_ji = network.get_weights( j )[idx_agent];
+                double win_ji = network.get_edge_weight( j ,idx_agent);
                 win_ji += prob_contact_ij;
+                network.set_edge_weight(j, idx_agent, win_ji);
 
                 // Handle the reciprocity for j->i
                 // Update incoming weight i-j
-                double & win_ij = network.get_weights( idx_agent )[j];
+                double win_ij = network.get_weights( idx_agent )[j];
 
                 // The probability of reciprocating is
                 win_ij += ( 1.0 - prob_contact_ji ) * reciprocity * prob_contact_ij;
+                network.set_edge_weight(idx_agent, j, win_ij);
             }
         }
     }

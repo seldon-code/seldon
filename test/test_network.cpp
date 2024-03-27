@@ -40,14 +40,17 @@ TEST_CASE( "Testing the network class" )
         REQUIRE_THAT( weight, Catch::Matchers::UnorderedRangeEquals( buffer_w_get ) );
         REQUIRE( network.n_edges( 3 ) == 2 );
 
-        size_t & n = network.get_neighbours( 3 )[0];
+        size_t n = network.get_neighbours( 3 )[0];
         REQUIRE( n == neigh[0] );
         n = 2;
+        // Set the neighbour
+        network.set_edge(3, 0, n );
         REQUIRE( network.get_neighbours( 3 )[0] == 2 );
 
-        Network::WeightT & w = network.get_weights( 3 )[1];
+        Network::WeightT w = network.get_weights( 3 )[1];
         REQUIRE( w == 0.55 );
         w = 0.9;
+        network.set_edge_weight(3, 1, w);
         REQUIRE( network.get_weights( 3 )[1] == w );
     }
 

@@ -121,11 +121,6 @@ public:
         return std::span( neighbour_list[agent_idx].data(), neighbour_list[agent_idx].size() );
     }
 
-    [[nodiscard]] std::span<size_t> get_neighbours( std::size_t agent_idx )
-    {
-        return std::span( neighbour_list[agent_idx].data(), neighbour_list[agent_idx].size() );
-    }
-
     /*
     Gives a view into the edge weights going out/coming in at agent_idx
     */
@@ -134,13 +129,8 @@ public:
         return std::span<const WeightT>( weight_list[agent_idx].data(), weight_list[agent_idx].size() );
     }
 
-    [[nodiscard]] std::span<WeightT> get_weights( std::size_t agent_idx )
-    {
-        return std::span<WeightT>( weight_list[agent_idx].data(), weight_list[agent_idx].size() );
-    }
-
     /*
-    Gives a view into the edge weights going out/coming in at agent_idx
+    Set the edge weights going out/coming in at agent_idx
     */
     void set_weights( std::size_t agent_idx, const std::span<const WeightT> weights )
     {
@@ -149,6 +139,15 @@ public:
             throw std::runtime_error( "Network::set_weights: tried to set weights of the wrong size!" );
         }
         weight_list[agent_idx].assign( weights.begin(), weights.end() );
+    }
+
+    /*
+    Sets the neighbour indices
+    */
+    void set_edge(
+        std::size_t agent_idx, std::size_t index_neighbour, std::size_t agent_jdx )
+    {
+        neighbour_list[agent_idx][index_neighbour]=agent_jdx;
     }
 
     /*
@@ -176,6 +175,21 @@ public:
 
         neighbour_list[agent_idx].assign( buffer_neighbours.begin(), buffer_neighbours.end() );
         weight_list[agent_idx].assign( buffer_weights.begin(), buffer_weights.end() );
+    }
+
+    /*
+    Sets the weight for agent_idx, for a neighbour index
+    */
+    void set_edge_weight(std::size_t agent_idx, std::size_t index_neighbour, WeightT weight){
+        weight_list[agent_idx][index_neighbour] = weight;
+    }
+
+    /*
+    Gets the weight for agent_idx, for a neighbour index
+    */
+    const WeightT get_edge_weight(std::size_t agent_idx, std::size_t index_neighbour) const
+    {
+        return weight_list[agent_idx][index_neighbour];
     }
 
     /*
