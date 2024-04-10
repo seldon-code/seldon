@@ -78,8 +78,17 @@ int main( int argc, char * argv[] )
     }
     else if( simulation_options.model == Seldon::Config::Model::DeffuantModel )
     {
-        simulation = std::make_unique<Seldon::Simulation<Seldon::DeffuantModel::AgentT>>(
-            simulation_options, network_file, agent_file );
+        auto model_settings = std::get<Seldon::Config::DeffuantSettings>( simulation_options.model_settings );
+        if( model_settings.use_binary_vector )
+        {
+            simulation = std::make_unique<Seldon::Simulation<Seldon::DeffuantModelVector::AgentT>>(
+                simulation_options, network_file, agent_file );
+        }
+        else
+        {
+            simulation = std::make_unique<Seldon::Simulation<Seldon::DeffuantModel::AgentT>>(
+                simulation_options, network_file, agent_file );
+        }
     }
     else
     {
