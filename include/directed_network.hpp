@@ -1,13 +1,6 @@
 #pragma once
-#include "connectivity.hpp"
-#include <fmt/format.h>
-#include <algorithm>
-#include <cstddef>
-#include <numeric>
-#include <optional>
-#include <span>
-#include <stdexcept>
-#include <vector>
+#include "network_base.hpp"
+#include <utility>
 
 namespace Seldon
 {
@@ -28,7 +21,7 @@ namespace Seldon
     Note: switch is equivalent to toggle + transpose, but much cheaper!
 */
 template<typename AgentType, typename WeightType = double>
-class DirectedNetwork
+class DirectedNetwork : public NetworkBase<AgentType, WeightType>
 {
 public:
     enum class EdgeDirection
@@ -39,57 +32,34 @@ public:
 
     using WeightT = WeightType;
     using AgentT  = AgentType;
-    // @TODO: Make this private later
-    std::vector<AgentT> agents{}; // List of agents of type AgentType
 
     DirectedNetwork() = default;
 
-    DirectedNetwork( size_t n_agents )
-            : agents( std::vector<AgentT>( n_agents ) ),
-              neighbour_list( std::vector<std::vector<size_t>>( n_agents, std::vector<size_t>{} ) ),
-              weight_list( std::vector<std::vector<WeightT>>( n_agents, std::vector<WeightT>{} ) )
-    {
-    }
+    DirectedNetwork( size_t n_agents ) : NetworkBase<AgentT>( n_agents ) {}
 
-    DirectedNetwork( std::vector<AgentT> agents )
-            : agents( agents ),
-              neighbour_list( std::vector<std::vector<size_t>>( agents.size(), std::vector<size_t>{} ) ),
-              weight_list( std::vector<std::vector<WeightT>>( agents.size(), std::vector<WeightT>{} ) )
-    {
-    }
+    DirectedNetwork( std::vector<AgentT> agents ) : NetworkBase<AgentT>( agents ) {}
 
     DirectedNetwork(
         std::vector<std::vector<size_t>> && neighbour_list, std::vector<std::vector<WeightT>> && weight_list,
         EdgeDirection direction )
-            : agents( std::vector<AgentT>( neighbour_list.size() ) ),
-              neighbour_list( neighbour_list ),
-              weight_list( weight_list ),
-              _direction( direction )
+            : NetworkBase<AgentT>( std::move( neighbour_list ), std::move( weight_list ) ), _direction( direction )
     {
-    }
-
-    /*
-    Gives the total number of nodes in the network
-    */
-    [[nodiscard]] std::size_t n_agents() const
-    {
-        return agents.size();
     }
 
     /*
     Gives the number of edges going out/coming in at agent_idx, depending on the value of direction().
     If agent_idx is nullopt, gives the total number of edges
     */
-    [[nodiscard]] std::size_t n_edges( std::optional<std::size_t> agent_idx = std::nullopt ) const
+    [[nodiscard]] std::size_t n_edges( std::optional<std::size_t> agent_idx = std::nullopt ) const override
     {
         if( agent_idx.has_value() )
         {
-            return neighbour_list[agent_idx.value()].size();
+            return this->neighbour_list[agent_idx.value()].size();
         }
         else
         {
             return std::transform_reduce(
-                neighbour_list.cbegin(), neighbour_list.cend(), 0, std::plus{},
+                this->neighbour_list.cbegin(), this->neighbour_list.cend(), 0, std::plus{},
                 []( const auto & neigh_list ) { return neigh_list.size(); } );
         }
     }
@@ -103,42 +73,15 @@ public:
     }
 
     /*
-    Gives the strongly connected components in the graph
-    */
-    [[nodiscard]] std::vector<std::vector<size_t>> strongly_connected_components() const
-    {
-        // Now that we have the neighbour list (or adjacency list)
-        // Run Tarjan's algorithm for strongly connected components
-        auto tarjan_scc = TarjanConnectivityAlgo( neighbour_list );
-        return tarjan_scc.scc_list;
-    }
-
-    /*
-    Gives a view into the neighbour indices going out/coming in at agent_idx
-    */
-    [[nodiscard]] std::span<const size_t> get_neighbours( std::size_t agent_idx ) const
-    {
-        return std::span( neighbour_list[agent_idx].data(), neighbour_list[agent_idx].size() );
-    }
-
-    /*
-    Gives a view into the edge weights going out/coming in at agent_idx
-    */
-    [[nodiscard]] std::span<const WeightT> get_weights( std::size_t agent_idx ) const
-    {
-        return std::span<const WeightT>( weight_list[agent_idx].data(), weight_list[agent_idx].size() );
-    }
-
-    /*
     Set the edge weights going out/coming in at agent_idx
     */
     void set_weights( std::size_t agent_idx, const std::span<const WeightT> weights )
     {
-        if( neighbour_list[agent_idx].size() != weights.size() )
+        if( this->neighbour_list[agent_idx].size() != weights.size() )
         {
             throw std::runtime_error( "DirectedNetwork::set_weights: tried to set weights of the wrong size!" );
         }
-        weight_list[agent_idx].assign( weights.begin(), weights.end() );
+        this->weight_list[agent_idx].assign( weights.begin(), weights.end() );
     }
 
     /*
@@ -146,7 +89,7 @@ public:
     */
     void set_edge( std::size_t agent_idx, std::size_t index_neighbour, std::size_t agent_jdx )
     {
-        neighbour_list[agent_idx][index_neighbour] = agent_jdx;
+        this->neighbour_list[agent_idx][index_neighbour] = agent_jdx;
     }
 
     /*
@@ -155,9 +98,9 @@ public:
     void set_neighbours_and_weights(
         std::size_t agent_idx, std::span<const size_t> buffer_neighbours, const WeightT & weight )
     {
-        neighbour_list[agent_idx].assign( buffer_neighbours.begin(), buffer_neighbours.end() );
-        weight_list[agent_idx].resize( buffer_neighbours.size() );
-        std::fill( weight_list[agent_idx].begin(), weight_list[agent_idx].end(), weight );
+        this->neighbour_list[agent_idx].assign( buffer_neighbours.begin(), buffer_neighbours.end() );
+        this->weight_list[agent_idx].resize( buffer_neighbours.size() );
+        std::fill( this->weight_list[agent_idx].begin(), this->weight_list[agent_idx].end(), weight );
     }
 
     /*
@@ -172,33 +115,25 @@ public:
                 "DirectedNetwork::set_neighbours_and_weights: both buffers need to have the same length!" );
         }
 
-        neighbour_list[agent_idx].assign( buffer_neighbours.begin(), buffer_neighbours.end() );
-        weight_list[agent_idx].assign( buffer_weights.begin(), buffer_weights.end() );
+        this->neighbour_list[agent_idx].assign( buffer_neighbours.begin(), buffer_neighbours.end() );
+        this->weight_list[agent_idx].assign( buffer_weights.begin(), buffer_weights.end() );
     }
 
     /*
     Sets the weight for agent_idx, for a neighbour index
     */
-    void set_edge_weight( std::size_t agent_idx, std::size_t index_neighbour, WeightT weight )
+    void set_edge_weight( std::size_t agent_idx, std::size_t index_neighbour, WeightT weight ) override
     {
-        weight_list[agent_idx][index_neighbour] = weight;
-    }
-
-    /*
-    Gets the weight for agent_idx, for a neighbour index
-    */
-    const WeightT get_edge_weight( std::size_t agent_idx, std::size_t index_neighbour ) const
-    {
-        return weight_list[agent_idx][index_neighbour];
+        this->weight_list[agent_idx][index_neighbour] = weight;
     }
 
     /*
     Adds an edge between agent_idx_i and agent_idx_j with weight w
     */
-    void push_back_neighbour_and_weight( size_t agent_idx_i, size_t agent_idx_j, WeightT w )
+    void push_back_neighbour_and_weight( size_t agent_idx_i, size_t agent_idx_j, WeightT w ) override
     {
-        neighbour_list[agent_idx_i].push_back( agent_idx_j );
-        weight_list[agent_idx_i].push_back( w );
+        this->neighbour_list[agent_idx_i].push_back( agent_idx_j );
+        this->weight_list[agent_idx_i].push_back( w );
     }
 
     /*
@@ -217,22 +152,22 @@ public:
     */
     void toggle_incoming_outgoing()
     {
-        std::vector<std::vector<size_t>> neighbour_list_transpose( n_agents(), std::vector<size_t>( 0 ) );
-        std::vector<std::vector<WeightT>> weight_list_transpose( n_agents(), std::vector<WeightT>( 0 ) );
+        std::vector<std::vector<size_t>> neighbour_list_transpose( this->n_agents(), std::vector<size_t>( 0 ) );
+        std::vector<std::vector<WeightT>> weight_list_transpose( this->n_agents(), std::vector<WeightT>( 0 ) );
 
-        for( size_t i_agent = 0; i_agent < n_agents(); i_agent++ )
+        for( size_t i_agent = 0; i_agent < this->n_agents(); i_agent++ )
         {
-            for( size_t i_neighbour = 0; i_neighbour < neighbour_list[i_agent].size(); i_neighbour++ )
+            for( size_t i_neighbour = 0; i_neighbour < this->neighbour_list[i_agent].size(); i_neighbour++ )
             {
-                const auto neighbour = neighbour_list[i_agent][i_neighbour];
-                const auto weight    = weight_list[i_agent][i_neighbour];
+                const auto neighbour = this->neighbour_list[i_agent][i_neighbour];
+                const auto weight    = this->weight_list[i_agent][i_neighbour];
                 neighbour_list_transpose[neighbour].push_back( i_agent );
                 weight_list_transpose[neighbour].push_back( weight );
             }
         }
 
-        neighbour_list = std::move( neighbour_list_transpose );
-        weight_list    = std::move( weight_list_transpose );
+        this->neighbour_list = std::move( neighbour_list_transpose );
+        this->weight_list    = std::move( weight_list_transpose );
 
         // Swap the edge direction
         switch_direction_flag();
@@ -259,15 +194,15 @@ public:
     /*
     Sorts the neighbours by index and removes doubly counted edges by summing the weights
     */
-    void remove_double_counting()
+    void remove_double_counting() override
     {
         std::vector<size_t> sorting_indices{};
 
-        for( size_t idx_agent = 0; idx_agent < n_agents(); idx_agent++ )
+        for( size_t idx_agent = 0; idx_agent < this->n_agents(); idx_agent++ )
         {
 
-            auto & neighbours = neighbour_list[idx_agent];
-            auto & weights    = weight_list[idx_agent];
+            auto & neighbours = this->neighbour_list[idx_agent];
+            auto & weights    = this->weight_list[idx_agent];
 
             std::vector<WeightT> weights_copy{};
             std::vector<size_t> neighbours_copy{};
@@ -302,26 +237,12 @@ public:
                 }
             }
 
-            weight_list[idx_agent]    = weights_copy;
-            neighbour_list[idx_agent] = neighbours_copy;
+            this->weight_list[idx_agent]    = weights_copy;
+            this->neighbour_list[idx_agent] = neighbours_copy;
         }
     }
 
-    /*
-    Clears the network
-    */
-    void clear()
-    {
-        for( auto & w : weight_list )
-            w.clear();
-
-        for( auto & n : neighbour_list )
-            n.clear();
-    }
-
 private:
-    std::vector<std::vector<size_t>> neighbour_list{}; // Neighbour list for the connections
-    std::vector<std::vector<WeightT>> weight_list{};   // List for the interaction weights of each connection
     EdgeDirection _direction{};
 };
 
