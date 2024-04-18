@@ -1,5 +1,6 @@
 #pragma once
 #include "directed_network.hpp"
+#include "undirected_network.hpp"
 #include <cstddef>
 #include <random>
 #include <util/math.hpp>
@@ -300,4 +301,67 @@ generate_square_lattice( size_t n_edge, typename DirectedNetwork<AgentType>::Wei
 
     return network;
 }
+
 } // namespace Seldon::DirectedNetworkGeneration
+
+namespace Seldon::UndirectedNetworkGeneration
+{
+/* Constructs a new network on a square lattice of edge length n_edge (with PBCs)*/
+template<typename AgentType>
+UndirectedNetwork<AgentType>
+generate_square_lattice( size_t n_edge, typename UndirectedNetwork<AgentType>::WeightT weight = 0.0 )
+{
+    using UndirectedNetworkT = UndirectedNetwork<AgentType>;
+    using WeightT            = typename UndirectedNetworkT::WeightT;
+    auto n_agents            = n_edge * n_edge;
+
+    // Create an empty DirectedNetwork
+    auto network = UndirectedNetworkT( n_agents );
+
+    auto wrap_edge_index = [&]( int k )
+    {
+        if( k >= int( n_edge ) )
+        {
+            return k - int( n_edge );
+        }
+        else if( k < 0 )
+        {
+            return int( n_edge ) + k;
+        }
+        else
+        {
+            return k;
+        }
+    };
+
+    auto linear_index = [&]( int i, int j )
+    {
+        auto idx = wrap_edge_index( i ) + n_edge * wrap_edge_index( j );
+        return idx;
+    };
+
+    for( int i = 0; i < int( n_edge ); i++ )
+    {
+        // other edge
+        for( int j = 0; j < int( n_edge ); j++ )
+        {
+            // Central agent
+            auto central_index = linear_index( i, j );
+
+            // clang-format off
+            std::vector<size_t> neighbours = {
+                linear_index( i - 1, j ), 
+                linear_index( i, j - 1 ),
+            };
+
+            // clang-format on
+            for( size_t j_idx = 0; j_idx < neighbours.size(); j_idx++ )
+            {
+                network.push_back_neighbour_and_weight( central_index, neighbours[j_idx], weight );
+            }
+        }
+    }
+
+    return network;
+}
+} // namespace Seldon::UndirectedNetworkGeneration
