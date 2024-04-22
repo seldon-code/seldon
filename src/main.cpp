@@ -1,6 +1,7 @@
 #include "config_parser.hpp"
 #include "models/DeGroot.hpp"
 #include "models/DeffuantModel.hpp"
+#include "models/InertialModel.hpp"
 #include "simulation.hpp"
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -70,10 +71,24 @@ int main( int argc, char * argv[] )
         simulation = std::make_unique<Seldon::Simulation<Seldon::ActivityDrivenModel::AgentT>>(
             simulation_options, network_file, agent_file );
     }
+    else if( simulation_options.model == Seldon::Config::Model::ActivityDrivenInertial )
+    {
+        simulation = std::make_unique<Seldon::Simulation<Seldon::InertialModel::AgentT>>(
+            simulation_options, network_file, agent_file );
+    }
     else if( simulation_options.model == Seldon::Config::Model::DeffuantModel )
     {
-        simulation = std::make_unique<Seldon::Simulation<Seldon::DeffuantModel::AgentT>>(
-            simulation_options, network_file, agent_file );
+        auto model_settings = std::get<Seldon::Config::DeffuantSettings>( simulation_options.model_settings );
+        if( model_settings.use_binary_vector )
+        {
+            simulation = std::make_unique<Seldon::Simulation<Seldon::DeffuantModelVector::AgentT>>(
+                simulation_options, network_file, agent_file );
+        }
+        else
+        {
+            simulation = std::make_unique<Seldon::Simulation<Seldon::DeffuantModel::AgentT>>(
+                simulation_options, network_file, agent_file );
+        }
     }
     else
     {

@@ -24,7 +24,8 @@ namespace Seldon::Config
 enum class Model
 {
     DeGroot,
-    ActivityDrivenModel,
+    ActivityDrivenModel, // @TODO : no need for model here
+    ActivityDrivenInertial,
     DeffuantModel
 };
 
@@ -81,6 +82,11 @@ struct ActivityDrivenSettings
     double covariance_factor          = 0.0;
 };
 
+struct ActivityDrivenInertialSettings : public ActivityDrivenSettings
+{
+    double friction_coefficient = 1.0;
+};
+
 struct InitialNetworkSettings
 {
     std::optional<std::string> file;
@@ -90,7 +96,8 @@ struct InitialNetworkSettings
 
 struct SimulationOptions
 {
-    using ModelVariantT = std::variant<DeGrootSettings, ActivityDrivenSettings, DeffuantSettings>;
+    using ModelVariantT
+        = std::variant<DeGrootSettings, ActivityDrivenSettings, ActivityDrivenInertialSettings, DeffuantSettings>;
     Model model;
     std::string model_string;
     int rng_seed = std::random_device()();

@@ -1,0 +1,42 @@
+[simulation]
+model = "ActivityDrivenInertial"
+rng_seed = 120           # Leaving this empty will pick a random seed
+
+[io]
+# n_output_network = 1  # Write the network every 20 iterations
+# n_output_agents = 1
+print_progress = false # Print the iteration time ; if not set, then does not print
+
+[model]
+max_iterations = 1000 # If not set, max iterations is infinite
+
+[ActivityDrivenInertial]
+dt = 0.001              # Timestep for the integration of the coupled ODEs
+m = 1                   # Number of agents contacted, when the agent is active
+eps = 1                 # Minimum activity epsilon; a_i belongs to [epsilon,1]
+gamma = 2.1             # Exponent of activity power law distribution of activities
+reciprocity = 1         # probability that when agent i contacts j via weighted reservoir sampling, j also sends feedback to i. So every agent can have more than m incoming connections
+homophily = 0.5         # aka beta. if zero, agents pick their interaction partners at random
+alpha = 1.5             # Controversialness of the issue, must be greater than 0.
+K = 2.0                 # Social interaction strength
+mean_activities = false # Use the mean value of the powerlaw distribution for the activities of all agents
+mean_weights = false    # Use the meanfield approximation of the network edges
+
+reluctances = true     # Assigns a "reluctance" (m_i) to each agent. By default; false and every agent has a reluctance of 1
+reluctance_mean = 1.5  # Mean of distribution before drawing from a truncated normal distribution (default set to 1.0)
+reluctance_sigma = 0.1 # Width of normal distribution (before truncating)
+reluctance_eps = 0.01  # Minimum such that the normal distribution is truncated at this value
+
+n_bots = 1 # The number of bots to be used; if not specified defaults to 0 (which means bots are deactivated)
+# Bots are agents with fixed opinions and different parameters, the parameters are specified in the following lists
+# If n_bots is smaller than the length of any of the lists, the first n_bots entries are used. If n_bots is greater the code will throw an exception.
+bot_m = [1]           # If not specified, defaults to `m`
+bot_homophily = [0.7] # If not specified, defaults to `homophily`
+bot_activity = [1.0]  # If not specified, defaults to 0
+bot_opinion = [2]     # The fixed opinions of the bots
+
+friction_coefficient = 0.5 # Friction coefficient 
+
+[network]
+number_of_agents = 2
+connections_per_agent = 1

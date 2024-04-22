@@ -3,6 +3,7 @@
 #include "models/ActivityDrivenModel.hpp"
 #include "models/DeGroot.hpp"
 #include "models/DeffuantModel.hpp"
+#include "models/InertialModel.hpp"
 #include "network.hpp"
 #include <memory>
 #include <random>
@@ -52,6 +53,23 @@ create_model_activity_driven( Network<AgentT> & network, const ModelVariantT & m
     {
         auto activitydriven_settings = std::get<Config::ActivityDrivenSettings>( model_settings );
         auto model                   = std::make_unique<ActivityDrivenModel>( activitydriven_settings, network, gen );
+        return model;
+    }
+    else
+    {
+        throw std::runtime_error( "Incompatible agent and model type!" );
+        return std::unique_ptr<Model<AgentT>>{};
+    }
+}
+
+template<typename AgentT>
+inline auto create_model_activity_driven_inertial(
+    Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
+{
+    if constexpr( std::is_same_v<AgentT, InertialModel::AgentT> )
+    {
+        auto settings = std::get<Config::ActivityDrivenInertialSettings>( model_settings );
+        auto model    = std::make_unique<InertialModel>( settings, network, gen );
         return model;
     }
     else
