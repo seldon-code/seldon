@@ -36,7 +36,9 @@ struct OutputSettings
     std::optional<size_t> n_output_network = std::nullopt;
     bool print_progress                    = false; // Print the iteration time, by default does not print
     bool output_initial                    = true;  // Output initial opinions and network, by default always outputs.
-    size_t start_output = 1; // Start printing opinion and/or network files from this iteration number
+    size_t start_output         = 1; // Start printing opinion and/or network files from this iteration number
+    size_t start_numbering_from = 0; // The initial step number, before the simulation runs, is this value. The first
+                                     // step would be (1+start_numbering_from). By default, 0
 };
 
 struct DeGrootSettings

@@ -7,7 +7,8 @@ model = "Deffuant"
 n_output_agents = 1 # Write the opinions of agents after every iteration
 print_progress = true # Print the iteration time ; if not set, then does not prints
 output_initial = true # Print the initial opinions and network file from step 0. If not set, this is true by default.
-start_output = 1 # Start writing out opinions and/or network files from this iteration. If not set, this is 1.
+start_output = 1 # Start writing out opinions and/or network files from this iteration. If not set, this is 1 + start_numbering_from.
+start_numbering_from = 0 # The initial step number, before the simulation runs, is this value. The first step would be (1+start_numbering_from). By default, 0
 
 [model]
 max_iterations = 1000 # If not set, max iterations is infinite

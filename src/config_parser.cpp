@@ -121,6 +121,7 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
     set_if_specified( options.output_settings.print_progress, tbl["io"]["print_progress"] );
     set_if_specified( options.output_settings.output_initial, tbl["io"]["output_initial"] );
     set_if_specified( options.output_settings.start_output, tbl["io"]["start_output"] );
+    set_if_specified( options.output_settings.start_numbering_from, tbl["io"]["start_numbering_from"] );
 
     // Check if the 'model' keyword exists
     std::optional<std::string> model_string = tbl["simulation"]["model"].value<std::string>();
@@ -200,6 +201,7 @@ void validate_settings( const SimulationOptions & options )
 
     // @TODO: Check that start_output is less than the max_iterations?
     check( name_and_var( options.output_settings.start_output ), g_zero );
+    check( name_and_var( options.output_settings.start_numbering_from ), g_zero );
 
     auto validate_activity = [&]( const auto & model_settings )
     {
@@ -338,6 +340,7 @@ void print_settings( const SimulationOptions & options )
     fmt::print( "    print_progress {}\n", options.output_settings.print_progress );
     fmt::print( "    output_initial {}\n", options.output_settings.output_initial );
     fmt::print( "    start_output {}\n", options.output_settings.start_output );
+    fmt::print( "    start_numbering_from {}\n", options.output_settings.start_numbering_from );
 }
 
 } // namespace Seldon::Config

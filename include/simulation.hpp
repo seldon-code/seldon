@@ -107,10 +107,11 @@ public:
 
     void run( const fs::path & output_dir_path ) override
     {
-        auto n_output_agents  = this->output_settings.n_output_agents;
-        auto n_output_network = this->output_settings.n_output_network;
-        auto start_output     = this->output_settings.start_output;
-        auto output_initial   = this->output_settings.output_initial;
+        auto n_output_agents     = this->output_settings.n_output_agents;
+        auto n_output_network    = this->output_settings.n_output_network;
+        auto start_output        = this->output_settings.start_output;
+        auto initial_step_number = this->output_settings.start_numbering_from;
+        auto output_initial      = this->output_settings.output_initial;
 
         fmt::print( "-----------------------------------------------------------------\n" );
         fmt::print( "Starting simulation\n" );
@@ -118,8 +119,10 @@ public:
 
         if( output_initial )
         {
-            Seldon::network_to_file( network, ( output_dir_path / fs::path( "network_0.txt" ) ).string() );
-            auto filename = fmt::format( "opinions_{}.txt", 0 );
+            Seldon::network_to_file(
+                network,
+                ( output_dir_path / fs::path( fmt::format( "network_{}.txt", initial_step_number ) ) ).string() );
+            auto filename = fmt::format( "opinions_{}.txt", initial_step_number );
             Seldon::agents_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
         }
         this->model->initialize_iterations();
@@ -147,7 +150,7 @@ public:
             if( n_output_agents.has_value() && ( this->model->n_iterations() >= start_output )
                 && ( this->model->n_iterations() % n_output_agents.value() == 0 ) )
             {
-                auto filename = fmt::format( "opinions_{}.txt", this->model->n_iterations() );
+                auto filename = fmt::format( "opinions_{}.txt", this->model->n_iterations() + initial_step_number );
                 Seldon::agents_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
             }
 
@@ -155,7 +158,7 @@ public:
             if( n_output_network.has_value() && ( this->model->n_iterations() >= start_output )
                 && ( this->model->n_iterations() % n_output_network.value() == 0 ) )
             {
-                auto filename = fmt::format( "network_{}.txt", this->model->n_iterations() );
+                auto filename = fmt::format( "network_{}.txt", this->model->n_iterations() + initial_step_number );
                 Seldon::network_to_file( network, ( output_dir_path / fs::path( filename ) ).string() );
             }
         }
