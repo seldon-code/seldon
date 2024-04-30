@@ -201,7 +201,7 @@ void validate_settings( const SimulationOptions & options )
 
     // @TODO: Check that start_output is less than the max_iterations?
     check( name_and_var( options.output_settings.start_output ), g_zero );
-    check( name_and_var( options.output_settings.start_numbering_from ), g_zero );
+    check( name_and_var( options.output_settings.start_numbering_from ), geq_zero );
 
     auto validate_activity = [&]( const auto & model_settings )
     {
