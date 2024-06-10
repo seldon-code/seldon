@@ -10,6 +10,8 @@
 #include <memory>
 #include <models/ActivityDrivenModel.hpp>
 #include <string>
+#include "main.hpp"
+
 namespace fs = std::filesystem;
 
 int main( int argc, char * argv[] )

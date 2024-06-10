@@ -22,7 +22,6 @@ sources_seldon = [
 # Static library for bindings
 # -----------------------------------
 symbol_visibility = 'default' 
-
 # only generating static library
 seldon_lib = static_library('seldon',
   sources_seldon,
