@@ -17,6 +17,7 @@ sources_seldon = [
   'src/models/DeffuantModelVector.cpp',
   'src/models/InertialModel.cpp',
   'src/util/tomlplusplus.cpp',
+  'src/run_model.cpp'
 ]
 
 # Static library for bindings

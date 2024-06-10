@@ -1,16 +1,11 @@
-#include "config_parser.hpp"
-#include "models/DeGroot.hpp"
-#include "models/DeffuantModel.hpp"
-#include "models/InertialModel.hpp"
-#include "simulation.hpp"
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <argparse/argparse.hpp>
 #include <filesystem>
 #include <memory>
-#include <models/ActivityDrivenModel.hpp>
 #include <string>
 #include "main.hpp"
+#include "run_model.hpp"
 
 namespace fs = std::filesystem;
 
@@ -45,59 +40,9 @@ int main( int argc, char * argv[] )
 
     fmt::print( "Using input file: {}\n", config_file_path.string() );
     fmt::print( "Output directory path set to: {}\n", output_dir_path.string() );
-
     fs::create_directories( output_dir_path ); // Create the output directory
 
-    auto simulation_options = Seldon::Config::parse_config_file( config_file_path.string() );
-    Seldon::Config::validate_settings( simulation_options );
-    Seldon::Config::print_settings( simulation_options );
-
-    if( network_file.has_value() )
-    {
-        fmt::print( "Reading network from file {}\n", network_file.value() );
-    }
-    if( agent_file.has_value() )
-    {
-        fmt::print( "Reading agents from file {}\n", agent_file.value() );
-    }
-
-    std::unique_ptr<Seldon::SimulationInterface> simulation;
-
-    if( simulation_options.model == Seldon::Config::Model::DeGroot )
-    {
-        simulation = std::make_unique<Seldon::Simulation<Seldon::DeGrootModel::AgentT>>(
-            simulation_options, network_file, agent_file );
-    }
-    else if( simulation_options.model == Seldon::Config::Model::ActivityDrivenModel )
-    {
-        simulation = std::make_unique<Seldon::Simulation<Seldon::ActivityDrivenModel::AgentT>>(
-            simulation_options, network_file, agent_file );
-    }
-    else if( simulation_options.model == Seldon::Config::Model::ActivityDrivenInertial )
-    {
-        simulation = std::make_unique<Seldon::Simulation<Seldon::InertialModel::AgentT>>(
-            simulation_options, network_file, agent_file );
-    }
-    else if( simulation_options.model == Seldon::Config::Model::DeffuantModel )
-    {
-        auto model_settings = std::get<Seldon::Config::DeffuantSettings>( simulation_options.model_settings );
-        if( model_settings.use_binary_vector )
-        {
-            simulation = std::make_unique<Seldon::Simulation<Seldon::DeffuantModelVector::AgentT>>(
-                simulation_options, network_file, agent_file );
-        }
-        else
-        {
-            simulation = std::make_unique<Seldon::Simulation<Seldon::DeffuantModel::AgentT>>(
-                simulation_options, network_file, agent_file );
-        }
-    }
-    else
-    {
-        throw std::runtime_error( "Model has not been created" );
-    }
-
-    simulation->run( output_dir_path );
+    run_model(config_file_path, agent_file ,network_file, output_dir_path);
 
     return 0;
 }
