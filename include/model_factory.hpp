@@ -1,3 +1,4 @@
+#pragma once
 #include "config_parser.hpp"
 #include "model.hpp"
 #include "models/ActivityDrivenModel.hpp"
