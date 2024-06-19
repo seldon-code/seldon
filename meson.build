@@ -4,7 +4,6 @@ project('seldon', 'cpp',
 
 deps = []
 cpp_args = ['-Wno-unused-local-typedefs', '-Wno-array-bounds']
-# add_global_arguments(['-Wno-unused-local-typedefs', '-Wno-array-bounds'], language : 'cpp')
 
 incdir = include_directories('include')
 deps += [dependency('fmt'), dependency('tomlplusplus')]
@@ -19,12 +18,16 @@ sources_seldon = [
   'src/util/tomlplusplus.cpp',
 ]
 
-# Static library for bindings
+# both static and shared library for bindings
 # -----------------------------------
-symbol_visibility = 'default' 
+symbol_visibility = 'default'
+if get_option('default_library') == 'static'
+  # from https://github.com/ERGO-Code/HiGHS/pull/1737/files
+  symbol_visibility = 'inlineshidden'
+endif
 
-# only generating static library
-seldon_lib = static_library('seldon',
+# both libraries
+seldon_lib = both_libraries('seldon',
   sources_seldon,
   install:true,
   dependencies: deps,
@@ -35,7 +38,9 @@ seldon_lib = static_library('seldon',
 )
 
 seldon_static_dep = declare_dependency(include_directories:incdir,
-  link_with : seldon_lib, dependencies: deps)
+  link_with : seldon_lib.get_static_lib(), dependencies: deps)
+seldon_shared_dep = declare_dependency(include_directories : incdir,
+  link_with : seldon_lib.get_shared_lib(), dependencies: deps)
 # ------------------------------------
 
 if get_option('build_exe')
