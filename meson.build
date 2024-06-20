@@ -2,11 +2,17 @@ project('seldon', 'cpp',
   version : '0.1',
   default_options : ['warning_level=3', 'cpp_std=c++20', 'optimization=3'])
 
-deps = []
-cpp_args = ['-Wno-unused-local-typedefs', '-Wno-array-bounds']
+cppc = meson.get_compiler('cpp')
 
-incdir = include_directories('include')
-deps += [dependency('fmt'), dependency('tomlplusplus')]
+# Add C++ compiler options
+_incdir = []  # Include directories
+_deps = []  # Dependencies
+_args = []  # Extra arguments
+
+
+_incdir += include_directories('include')
+_deps += [dependency('fmt'), dependency('tomlplusplus')]
+_args +=  cppc.get_supported_arguments(['-Wno-unused-local-typedefs', '-Wno-array-bounds'])
 
 sources_seldon = [
   'src/config_parser.cpp',
@@ -20,35 +26,36 @@ sources_seldon = [
 
 # both static and shared library for bindings
 # -----------------------------------
+
 symbol_visibility = 'default'
 if get_option('default_library') == 'static'
   # from https://github.com/ERGO-Code/HiGHS/pull/1737/files
   symbol_visibility = 'inlineshidden'
 endif
 
-# both libraries
 seldon_lib = both_libraries('seldon',
   sources_seldon,
   install:true,
-  dependencies: deps,
-  include_directories:incdir,
+  dependencies: _deps,
+  include_directories:_incdir,
   gnu_symbol_visibility: symbol_visibility,
   pic: true,
-  cpp_args : cpp_args,
+  cpp_args : _args,
 )
 
-seldon_static_dep = declare_dependency(include_directories:incdir,
-  link_with : seldon_lib.get_static_lib(), dependencies: deps)
-seldon_shared_dep = declare_dependency(include_directories : incdir,
-  link_with : seldon_lib.get_shared_lib(), dependencies: deps)
+seldon_static_dep = declare_dependency(include_directories:_incdir,
+  link_with : seldon_lib.get_static_lib(), dependencies: _deps)
+seldon_shared_dep = declare_dependency(include_directories : _incdir,
+  link_with : seldon_lib.get_shared_lib(), dependencies: _deps)
+
 # ------------------------------------
 
 if get_option('build_exe')
   exe = executable('seldon', sources_seldon + 'src/main.cpp',
     install : true,
-    dependencies : deps,
-    include_directories : incdir,
-    cpp_args : cpp_args
+    dependencies : _deps,
+    include_directories : _incdir,
+    cpp_args : _args
     )
 endif
 
@@ -68,13 +75,13 @@ if get_option('build_tests')
   ]
 
   Catch2 = dependency('Catch2', method : 'cmake', modules : ['Catch2::Catch2WithMain', 'Catch2::Catch2'])
-  deps+= Catch2
+  _deps+= Catch2
 
   foreach t : tests
     exe = executable(t.get(0), sources_seldon + t.get(1),
-      dependencies : deps,
-      include_directories : incdir,
-      cpp_args : cpp_args
+      dependencies : _deps,
+      include_directories : _incdir,
+      cpp_args : _args
     )
     test(t.get(0), exe, workdir : meson.project_source_root())
   endforeach
