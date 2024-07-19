@@ -44,6 +44,7 @@ int main( int argc, char * argv[] )
     fmt::print( "Using input file: {}\n", config_file_path.string() );
     fmt::print( "Output directory path set to: {}\n", output_dir_path.string() );
 
+    fs::remove_all(output_dir_path);// Remove any existing output directory
     fs::create_directories( output_dir_path ); // Create the output directory
 
     auto simulation_options = Seldon::Config::parse_config_file( config_file_path.string() );
