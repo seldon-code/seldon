@@ -113,7 +113,7 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
     toml::table tbl;
     tbl = toml::parse_file( config_file_path );
 
-    options.rng_seed = tbl["simulation"]["rng_seed"].value_or( int( options.rng_seed ) );
+    options.rng_seed = tbl["simulation"]["rng_seed"].value_or( int64_t( options.rng_seed ) );
 
     // Parse output settings
     options.output_settings.n_output_network = tbl["io"]["n_output_network"].value<size_t>();
