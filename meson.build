@@ -11,7 +11,13 @@ _args = []  # Extra arguments
 
 
 _incdir += include_directories('include')
-_deps += [dependency('fmt'), dependency('tomlplusplus')]
+
+fmt_subproj = subproject('fmt', default_options: ['default_library=static'])
+_deps += fmt_subproj.get_variable('fmt_dep')
+
+tomlplusplus_subproj = subproject('tomlplusplus', default_options: ['default_library=static'])
+_deps += tomlplusplus_subproj.get_variable('tomlplusplus_dep')
+
 _args +=  cppc.get_supported_arguments(['-Wno-unused-local-typedefs', '-Wno-array-bounds'])
 
 sources_seldon = [
