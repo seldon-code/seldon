@@ -1,3 +1,8 @@
+# We can store explicitly what we need
+/subprojects/
+!/subprojects/fmt.wrap
+!/subprojects/argparse.wrap
+!/subprojects/tomlplusplus.wrap
 *.txt
 
 .cache/

@@ -57,6 +57,7 @@ seldon_shared_dep = declare_dependency(include_directories : _incdir,
 # ------------------------------------
 
 if get_option('build_exe')
+  _deps += subproject('argparse').get_variable('argparse_dep')
   exe = executable('seldon', sources_seldon + 'src/main.cpp',
     install : true,
     dependencies : _deps,
