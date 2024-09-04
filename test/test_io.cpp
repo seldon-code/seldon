@@ -3,6 +3,7 @@
 #include "models/ActivityDrivenModel.hpp"
 #include "network.hpp"
 #include "network_generation.hpp"
+#include "network_io.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -35,6 +36,38 @@ TEST_CASE( "Test reading in the network from a file", "[io_network]" )
         fmt::print( "{}", i );
         REQUIRE_THAT( neighbours_expected[i], Catch::Matchers::UnorderedRangeEquals( network.get_neighbours( i ) ) );
         REQUIRE_THAT( weights_expected[i], Catch::Matchers::UnorderedRangeEquals( network.get_weights( i ) ) );
+    }
+}
+
+TEST_CASE( "Test writing the network to a file", "[io_network]" )
+{
+    using namespace Seldon;
+    using namespace Catch::Matchers;
+    using AgentT  = ActivityDrivenModel::AgentT;
+    using Network = Network<AgentT>;
+
+    std::vector<std::vector<size_t>> neighbours        = { { 3, 1 }, {}, { 1 } };
+    std::vector<std::vector<Network::WeightT>> weights = { { -0.1, -0.5 }, {}, { -0.2 } };
+
+    // Construct a network
+    auto network = Network( neighbours, weights, Network::EdgeDirection::Incoming );
+
+    // Save the network to a file
+    auto proj_root_path = fs::current_path();
+    auto network_file   = proj_root_path / fs::path( "test/network_out.txt" );
+    network_to_file( network, network_file );
+
+    // Read the network back in
+    auto network_from_file = Seldon::NetworkGeneration::generate_from_file<AgentT>( network_file );
+
+    for( size_t i = 0; i < network.n_agents(); i++ )
+    {
+        fmt::print( "{}", i );
+        REQUIRE_THAT(
+            network.get_neighbours( i ),
+            Catch::Matchers::UnorderedRangeEquals( network_from_file.get_neighbours( i ) ) );
+        REQUIRE_THAT(
+            network.get_weights( i ), Catch::Matchers::UnorderedRangeEquals( network_from_file.get_weights( i ) ) );
     }
 }
 

@@ -3,6 +3,7 @@
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <random>
 #include <string_view>
@@ -102,7 +103,7 @@ struct SimulationOptions
         = std::variant<DeGrootSettings, ActivityDrivenSettings, ActivityDrivenInertialSettings, DeffuantSettings>;
     Model model;
     std::string model_string;
-    int rng_seed = std::random_device()();
+    int64_t rng_seed = std::random_device()();
     OutputSettings output_settings;
     ModelVariantT model_settings;
     InitialNetworkSettings network_settings;
