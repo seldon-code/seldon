@@ -26,6 +26,18 @@ Network two_agents()
     return Network( std::move( neighbour_list ), std::move( weight_list ), Network::EdgeDirection::Incoming );
 }
 
+// Opinions and the anchors that go with them. The anchor is initial-condition
+// state, so whoever sets up a run supplies it: the Simulation does it for a
+// generated network and an agent file does it for a run that was given one.
+// The model must not, which is what the last test here pins.
+void start( Network & network, double first, double second )
+{
+    network.agents[0].data.opinion         = first;
+    network.agents[0].data.initial_opinion = first;
+    network.agents[1].data.opinion         = second;
+    network.agents[1].data.initial_opinion = second;
+}
+
 Seldon::Config::FriedkinJohnsenSettings settings( std::optional<double> susceptibility )
 {
     auto settings            = Seldon::Config::FriedkinJohnsenSettings();
@@ -46,9 +58,8 @@ TEST_CASE( "A fully susceptible group is DeGroot", "[FriedkinJohnsen]" )
     using namespace Seldon;
     using namespace Catch::Matchers;
 
-    auto network                   = two_agents();
-    network.agents[0].data.opinion = 0.0;
-    network.agents[1].data.opinion = 1.0;
+    auto network = two_agents();
+    start( network, 0.0, 1.0 );
 
     auto model = FriedkinJohnsenModel( settings( 1.0 ), network );
     while( !model.finished() )
@@ -73,9 +84,8 @@ TEST_CASE( "A stubborn group settles without agreeing", "[FriedkinJohnsen]" )
     using namespace Seldon;
     using namespace Catch::Matchers;
 
-    auto network                   = two_agents();
-    network.agents[0].data.opinion = 0.0;
-    network.agents[1].data.opinion = 1.0;
+    auto network = two_agents();
+    start( network, 0.0, 1.0 );
 
     auto model = FriedkinJohnsenModel( settings( 0.5 ), network );
     while( !model.finished() )
@@ -102,9 +112,8 @@ TEST_CASE( "A group that listens to nothing does not move", "[FriedkinJohnsen]" 
     using namespace Seldon;
     using namespace Catch::Matchers;
 
-    auto network                   = two_agents();
-    network.agents[0].data.opinion = 0.2;
-    network.agents[1].data.opinion = 0.9;
+    auto network = two_agents();
+    start( network, 0.2, 0.9 );
 
     auto model = FriedkinJohnsenModel( settings( 0.0 ), network );
     for( int step = 0; step < 50; step++ )
@@ -124,10 +133,9 @@ TEST_CASE( "Susceptibility is per agent when the config names none", "[FriedkinJ
     using namespace Seldon;
     using namespace Catch::Matchers;
 
-    auto network                          = two_agents();
-    network.agents[0].data.opinion        = 0.0;
+    auto network = two_agents();
+    start( network, 0.0, 1.0 );
     network.agents[0].data.susceptibility = 0.0; // immovable
-    network.agents[1].data.opinion        = 1.0;
     network.agents[1].data.susceptibility = 1.0; // fully persuadable
 
     auto model = FriedkinJohnsenModel( settings( std::nullopt ), network );
@@ -140,4 +148,36 @@ TEST_CASE( "Susceptibility is per agent when the config names none", "[FriedkinJ
     // weighted average of what it hears, which is now pinned by the other.
     REQUIRE_THAT( network.agents[0].data.opinion, WithinAbs( 0.0, 1e-6 ) );
     REQUIRE_THAT( network.agents[1].data.opinion, WithinAbs( 0.0, 1e-6 ) );
+}
+
+// The anchor is what the run was given, and the model must leave it alone.
+//
+// A constructor that copied the current opinion over it would destroy the
+// anchor of any run resumed from a state where the two had diverged, which is
+// every run of this model past its first step. That is the same mistake
+// DeGroot's constructor was making with the opinions themselves.
+TEST_CASE( "The model does not overwrite the anchor it was given", "[FriedkinJohnsen]" )
+{
+    using namespace Seldon;
+    using namespace Catch::Matchers;
+
+    auto network = two_agents();
+    // A resumed run: the opinions have already moved off where they started.
+    network.agents[0].data.opinion         = 0.4;
+    network.agents[0].data.initial_opinion = 0.0;
+    network.agents[1].data.opinion         = 0.6;
+    network.agents[1].data.initial_opinion = 1.0;
+
+    auto model = FriedkinJohnsenModel( settings( 0.5 ), network );
+
+    REQUIRE_THAT( network.agents[0].data.initial_opinion, WithinAbs( 0.0, 1e-12 ) );
+    REQUIRE_THAT( network.agents[1].data.initial_opinion, WithinAbs( 1.0, 1e-12 ) );
+
+    // And it keeps pulling toward those, not toward where the run resumed.
+    while( !model.finished() )
+    {
+        model.iteration();
+    }
+    REQUIRE( model.opinion_spread() > 0.1 );
+    REQUIRE( network.agents[0].data.opinion < network.agents[1].data.opinion );
 }
