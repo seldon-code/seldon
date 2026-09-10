@@ -95,11 +95,16 @@ First column is the index of the agent, then the next column is the number of in
 
 ### Running Tests
 
-To run the tests, go into the build directory and run the following: 
+Configure with tests on, then run them:
 
 ```bash
-meson test
+meson setup build -Dbuild_tests=true
+meson test -C build
 ```
+
+Catch2 is found through pkg-config, then through its CMake config module, and
+failing both it is fetched as a subproject. A machine does not have to install
+a test framework before it can run one.
 
 ## Contributing
 
