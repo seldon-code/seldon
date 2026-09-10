@@ -21,6 +21,10 @@ Model model_string_to_enum( std::string_view model_string )
     {
         return Model::DeGroot;
     }
+    else if( model_string == "FriedkinJohnsen" )
+    {
+        return Model::FriedkinJohnsen;
+    }
     else if( model_string == "ActivityDriven" )
     {
         return Model::ActivityDrivenModel;
@@ -138,6 +142,14 @@ SimulationOptions parse_config_file( std::string_view config_file_path )
         set_if_specified( model_settings.convergence_tol, tbl[options.model_string]["convergence"] );
         options.model_settings = model_settings;
     }
+    else if( options.model == Model::FriedkinJohnsen )
+    {
+        auto model_settings           = FriedkinJohnsenSettings();
+        model_settings.max_iterations = tbl["model"]["max_iterations"].value<int>();
+        set_if_specified( model_settings.convergence_tol, tbl[options.model_string]["convergence"] );
+        model_settings.susceptibility = tbl[options.model_string]["susceptibility"].value<double>();
+        options.model_settings        = model_settings;
+    }
     else if( options.model == Model::DeffuantModel )
     {
         auto model_settings           = DeffuantSettings();
@@ -244,6 +256,22 @@ void validate_settings( const SimulationOptions & options )
         auto model_settings = std::get<DeGrootSettings>( options.model_settings );
         check( name_and_var( model_settings.convergence_tol ), geq_zero );
     }
+    else if( options.model == Model::FriedkinJohnsen )
+    {
+        auto model_settings = std::get<FriedkinJohnsenSettings>( options.model_settings );
+        check( name_and_var( model_settings.convergence_tol ), geq_zero );
+        // A susceptibility outside [0, 1] is not a stubborn agent, it is an
+        // agent that amplifies what it hears, and the iteration stops being a
+        // contraction. Refusing it here is the difference between a model that
+        // says no and a run that diverges quietly.
+        if( model_settings.susceptibility.has_value() )
+        {
+            const double susceptibility = model_settings.susceptibility.value();
+            check(
+                name_and_var( susceptibility ), []( auto x ) { return x >= 0.0 && x <= 1.0; },
+                "should be between 0 and 1: at 1 an agent is a DeGroot agent, at 0 it never moves" );
+        }
+    }
     else if( options.model == Model::DeffuantModel )
     {
         auto model_settings = std::get<DeffuantSettings>( options.model_settings );
@@ -318,6 +346,13 @@ void print_settings( const SimulationOptions & options )
         auto model_settings = std::get<DeGrootSettings>( options.model_settings );
         fmt::print( "    max_iterations {}\n", model_settings.max_iterations );
         fmt::print( "    convergence_tol {}\n", model_settings.convergence_tol );
+    }
+    else if( options.model == Model::FriedkinJohnsen )
+    {
+        auto model_settings = std::get<FriedkinJohnsenSettings>( options.model_settings );
+        fmt::print( "    max_iterations {}\n", model_settings.max_iterations );
+        fmt::print( "    convergence_tol {}\n", model_settings.convergence_tol );
+        fmt::print( "    susceptibility {}\n", model_settings.susceptibility );
     }
     else if( options.model == Model::DeffuantModel )
     {

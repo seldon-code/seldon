@@ -3,6 +3,7 @@
 !/subprojects/fmt.wrap
 !/subprojects/argparse.wrap
 !/subprojects/tomlplusplus.wrap
+!/subprojects/catch2.wrap
 *.txt
 
 .cache/

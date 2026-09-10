@@ -4,6 +4,7 @@
 #include "models/ActivityDrivenModel.hpp"
 #include "models/DeGroot.hpp"
 #include "models/DeffuantModel.hpp"
+#include "models/FriedkinJohnsen.hpp"
 #include "models/InertialModel.hpp"
 #include "network.hpp"
 #include <memory>
@@ -47,6 +48,22 @@ inline auto create_model_degroot( Network<AgentT> & network, const ModelVariantT
 }
 
 template<typename AgentT>
+inline auto create_model_friedkin_johnsen( Network<AgentT> & network, const ModelVariantT & model_settings )
+{
+    if constexpr( std::is_same_v<AgentT, FriedkinJohnsenModel::AgentT> )
+    {
+        auto settings = std::get<Config::FriedkinJohnsenSettings>( model_settings );
+        auto model    = std::make_unique<FriedkinJohnsenModel>( settings, network );
+        return model;
+    }
+    else
+    {
+        throw std::runtime_error( "Incompatible agent and model type!" );
+        return std::unique_ptr<Model<AgentT>>{};
+    }
+}
+
+template<typename AgentT>
 inline auto
 create_model_activity_driven( Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
 {
@@ -80,14 +97,21 @@ inline auto create_model_activity_driven_inertial(
     }
 }
 
+/// `seed_agents` is false when the run was given its agents, by a network file
+/// or an agent file. Initialising them then would discard what was supplied,
+/// which is well formed, plausible, and not what was asked for.
 template<typename AgentT>
-inline auto create_model_deffuant( Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
+inline auto create_model_deffuant(
+    Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen, bool seed_agents = true )
 {
     if constexpr( std::is_same_v<AgentT, DeffuantModel::AgentT> )
     {
         auto deffuant_settings = std::get<Config::DeffuantSettings>( model_settings );
         auto model             = std::make_unique<DeffuantModel>( deffuant_settings, network, gen );
-        model->initialize_agents( deffuant_settings.dim );
+        if( seed_agents )
+        {
+            model->initialize_agents( deffuant_settings.dim );
+        }
         return model;
     }
     else
@@ -97,15 +121,21 @@ inline auto create_model_deffuant( Network<AgentT> & network, const ModelVariant
     }
 }
 
+/// See [`create_model_deffuant`] for what `seed_agents` is for. The vector
+/// variant sizes each agent's opinion vector as part of initialising it, so a
+/// run that supplies agents has to supply vectors of the right length.
 template<typename AgentT>
-inline auto
-create_model_deffuant_vector( Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen )
+inline auto create_model_deffuant_vector(
+    Network<AgentT> & network, const ModelVariantT & model_settings, std::mt19937 & gen, bool seed_agents = true )
 {
     if constexpr( std::is_same_v<AgentT, DeffuantModelVector::AgentT> )
     {
         auto deffuant_settings = std::get<Config::DeffuantSettings>( model_settings );
         auto model             = std::make_unique<DeffuantModelVector>( deffuant_settings, network, gen );
-        model->initialize_agents( deffuant_settings.dim );
+        if( seed_agents )
+        {
+            model->initialize_agents( deffuant_settings.dim );
+        }
         return model;
     }
     else

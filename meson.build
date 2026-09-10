@@ -23,6 +23,7 @@ _args +=  cppc.get_supported_arguments(['-Wno-unused-local-typedefs', '-Wno-arra
 sources_seldon = [
   'src/config_parser.cpp',
   'src/models/DeGroot.cpp',
+  'src/models/FriedkinJohnsen.cpp',
   'src/models/ActivityDrivenModel.cpp',
   'src/models/DeffuantModel.cpp',
   'src/models/DeffuantModelVector.cpp',
@@ -70,6 +71,7 @@ if get_option('build_tests')
   tests = [
     ['Test_Tarjan', 'test/test_tarjan.cpp'],
     ['Test_DeGroot', 'test/test_deGroot.cpp'],
+    ['Test_Friedkin_Johnsen', 'test/test_friedkin_johnsen.cpp'],
     ['Test_Activity_Driven', 'test/test_activity.cpp'],
     ['Test_Activity_Driven_Inertial', 'test/test_activity_inertial.cpp'],
     ['Test_Deffuant', 'test/test_deffuant.cpp'],
@@ -81,7 +83,17 @@ if get_option('build_tests')
     ['Test_Prob', 'test/test_probability_distributions.cpp'],
   ]
 
-  Catch2 = dependency('Catch2', method : 'cmake', modules : ['Catch2::Catch2WithMain', 'Catch2::Catch2'])
+  # Catch2 v3 installs a pkg-config file, and a conda environment also ships
+  # the CMake config module the older lookup here used. The wrap is the last
+  # resort, so a machine with neither can still build the tests rather than
+  # having to install a test framework before it can run one.
+  Catch2 = dependency('catch2-with-main', method : 'pkg-config', required : false)
+  if not Catch2.found()
+    Catch2 = dependency('Catch2', method : 'cmake', modules : ['Catch2::Catch2WithMain', 'Catch2::Catch2'], required : false)
+  endif
+  if not Catch2.found()
+    Catch2 = dependency('catch2-with-main', fallback : ['catch2', 'catch2_with_main_dep'])
+  endif
   _deps+= Catch2
 
   foreach t : tests

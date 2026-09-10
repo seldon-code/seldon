@@ -46,6 +46,49 @@ If you've installed it, you can simply run `seldon` anywhere.
 seldon /path/to/config -o /path/to/output/dir
 ```
 
+#### Models
+
+| Model | What it is | Reference |
+|---|---|---|
+| `DeGroot` | Repeated weighted averaging over the network | doi:10.1080/01621459.1974.10480137 |
+| `FriedkinJohnsen` | DeGroot averaging against each agent's initial opinion | doi:10.1080/0022250X.1990.9990069 |
+| `Deffuant` | Pairwise interaction within a confidence bound | |
+| `ActivityDriven` | Time-varying network from agent activity | |
+| `ActivityDrivenInertial` | The same, with inertia | |
+
+On a strongly connected, aperiodic network DeGroot always converges to one
+number. That is a property of the update rule, not a finding about the group,
+so a run of it cannot answer whether a group stays split.
+
+`FriedkinJohnsen` adds one parameter per agent. Each agent keeps weight
+`1 - susceptibility` on the opinion it started with:
+
+```
+x_i(t+1) = lambda_i * sum_j w_ij x_j(t) + (1 - lambda_i) * x_i(0)
+```
+
+It still converges when any agent is stubborn, but to a fixed point that
+generally is not consensus. Setting every `susceptibility` to 1 reproduces
+DeGroot exactly, and a test pins that.
+
+Set it for the whole run in the config:
+
+```toml
+[FriedkinJohnsen]
+convergence = 1e-6
+susceptibility = 0.5
+```
+
+or leave `susceptibility` out and give each agent its own in an agent file,
+whose columns are `opinion, initial_opinion, susceptibility`. An agent file
+that gives only an opinion anchors the agent to it.
+
+#### Initial opinions
+
+Opinions come from the run, not from the model. A network read with `-n`, or
+an agent file passed with `-a`, is used as given. Only a generated network is
+seeded, with opinions spread evenly over `[0, 1)` in agent order.
+
 #### Output files
 The file `network.txt` contains information about the network. 
 First column is the index of the agent, then the next column is the number of incoming agent connections *including* the agent itself. Subsequent columns are the neighbouring incoming agent indices and weights. In addition, every iteration produces a *double* opinion value for each agent. These are outputted to files named opinions_i.txt.

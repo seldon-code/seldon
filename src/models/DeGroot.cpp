@@ -20,11 +20,6 @@ DeGrootModel::DeGrootModel( Config::DeGrootSettings settings, NetworkT & network
     {
         fmt::print( "WARNING: You have {} strongly connected components in your network!\n", n_components );
     }
-
-    for( size_t i = 0; i < network.agents.size(); i++ )
-    {
-        network.agents[i].data.opinion = double( i ) / double( network.agents.size() );
-    }
 }
 
 void DeGrootModel::iteration()

@@ -6,11 +6,13 @@
 #include "network.hpp"
 #include <fmt/chrono.h>
 #include <fmt/format.h>
+#include <agent_generation.hpp>
 #include <filesystem>
 #include <memory>
 #include <models/ActivityDrivenModel.hpp>
 #include <models/DeGroot.hpp>
 #include <models/DeffuantModel.hpp>
+#include <models/FriedkinJohnsen.hpp>
 #include <network_generation.hpp>
 #include <network_io.hpp>
 #include <optional>
@@ -33,6 +35,13 @@ class Simulation : public SimulationInterface
 
 private:
     std::mt19937 gen;
+    /// Whether the network was read rather than generated.
+    ///
+    /// A network that was read carries opinions somebody chose. A network that
+    /// was generated carries none, and something has to supply an initial
+    /// condition. Telling the two apart is what stops the second case from
+    /// quietly overwriting the first.
+    bool network_from_file = false;
 
 public:
     std::unique_ptr<Model<AgentType>> model;
@@ -48,6 +57,8 @@ public:
         if( !file.has_value() ) // Check if toml file should be superceded by cli_network_file
             file = options.network_settings.file;
 
+        network_from_file = file.has_value();
+
         if( file.has_value() )
         {
             network = NetworkGeneration::generate_from_file<AgentType>( file.value() );
@@ -62,9 +73,38 @@ public:
 
     void create_model( const Config::SimulationOptions & options, const std::optional<std::string> & cli_agent_file )
     {
+        // Before the model, not after. A model reads the agents it is handed:
+        // it may copy them, take a reference to them, or derive state from
+        // them, and one built over agents that are about to be replaced is a
+        // model built over the wrong ones.
+        if( cli_agent_file.has_value() )
+        {
+            network.agents = agents_from_file<AgentType>( cli_agent_file.value() );
+        }
+
+        // Whether this run brought its own agents. A generated network carries
+        // no opinions and something has to supply an initial condition; a run
+        // that was given one must keep it. Friedkin-Johnsen makes the stakes
+        // plain, since it anchors every agent to the opinion it starts with,
+        // but the rule is the same for all of them: initial conditions belong
+        // to the run, not to a model's constructor.
+        const bool seed_agents = !network_from_file && !cli_agent_file.has_value();
+
+        if( options.model == Config::Model::DeGroot || options.model == Config::Model::FriedkinJohnsen )
+        {
+            if( seed_agents )
+            {
+                AgentGeneration::ramp( network.agents );
+            }
+        }
+
         if( options.model == Config::Model::DeGroot )
         {
             model = ModelFactory::create_model_degroot( network, options.model_settings );
+        }
+        else if( options.model == Config::Model::FriedkinJohnsen )
+        {
+            model = ModelFactory::create_model_friedkin_johnsen( network, options.model_settings );
         }
         else if( options.model == Config::Model::ActivityDrivenModel )
         {
@@ -79,17 +119,12 @@ public:
             auto deffuant_settings = std::get<Config::DeffuantSettings>( options.model_settings );
             if( deffuant_settings.use_binary_vector )
             {
-                model = ModelFactory::create_model_deffuant_vector( network, options.model_settings, gen );
+                model = ModelFactory::create_model_deffuant_vector( network, options.model_settings, gen, seed_agents );
             }
             else
             {
-                model = ModelFactory::create_model_deffuant( network, options.model_settings, gen );
+                model = ModelFactory::create_model_deffuant( network, options.model_settings, gen, seed_agents );
             }
-        }
-
-        if( cli_agent_file.has_value() )
-        {
-            network.agents = agents_from_file<AgentType>( cli_agent_file.value() );
         }
     }
 

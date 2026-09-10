@@ -24,6 +24,7 @@ namespace Seldon::Config
 enum class Model
 {
     DeGroot,
+    FriedkinJohnsen,
     ActivityDrivenModel, // @TODO : no need for model here
     ActivityDrivenInertial,
     DeffuantModel
@@ -45,6 +46,19 @@ struct DeGrootSettings
 {
     std::optional<int> max_iterations = std::nullopt;
     double convergence_tol;
+};
+
+struct FriedkinJohnsenSettings
+{
+    std::optional<int> max_iterations = std::nullopt;
+    double convergence_tol            = 1e-6;
+    /// lambda, applied to every agent when set. Left unset, each agent keeps
+    /// whatever susceptibility it came in with, which is how a run gives
+    /// different agents different stubbornness.
+    ///
+    /// At 1 this reproduces DeGroot exactly, which is worth being able to say
+    /// in a config rather than only in a comment.
+    std::optional<double> susceptibility = std::nullopt;
 };
 
 struct DeffuantSettings
@@ -98,8 +112,9 @@ struct InitialNetworkSettings
 
 struct SimulationOptions
 {
-    using ModelVariantT
-        = std::variant<DeGrootSettings, ActivityDrivenSettings, ActivityDrivenInertialSettings, DeffuantSettings>;
+    using ModelVariantT = std::variant<
+        DeGrootSettings, FriedkinJohnsenSettings, ActivityDrivenSettings, ActivityDrivenInertialSettings,
+        DeffuantSettings>;
     Model model;
     std::string model_string;
     int rng_seed = std::random_device()();

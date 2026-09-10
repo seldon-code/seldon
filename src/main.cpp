@@ -66,6 +66,11 @@ int main( int argc, char * argv[] )
         simulation = std::make_unique<Seldon::Simulation<Seldon::DeGrootModel::AgentT>>(
             simulation_options, network_file, agent_file );
     }
+    else if( simulation_options.model == Seldon::Config::Model::FriedkinJohnsen )
+    {
+        simulation = std::make_unique<Seldon::Simulation<Seldon::FriedkinJohnsenModel::AgentT>>(
+            simulation_options, network_file, agent_file );
+    }
     else if( simulation_options.model == Seldon::Config::Model::ActivityDrivenModel )
     {
         simulation = std::make_unique<Seldon::Simulation<Seldon::ActivityDrivenModel::AgentT>>(

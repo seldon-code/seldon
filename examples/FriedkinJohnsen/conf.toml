@@ -1,0 +1,26 @@
+[simulation]
+model = "FriedkinJohnsen"
+# rng_seed = 120 # Leaving this empty will pick a random seed
+
+[io]
+n_output_network = 20 # Write the network every 20 iterations
+n_output_agents = 1 # Write the opinions of agents after every iteration
+print_progress = false
+output_initial = true
+start_output = 1
+start_numbering_from = 0
+
+[model]
+max_iterations = 200 # If not set, max iterations is infinite
+
+[FriedkinJohnsen]
+convergence = 1e-6 # If not set, the default 1e-6 is used
+# How much of the next opinion comes from listening. The rest is stubbornness:
+# weight each agent keeps on the opinion it started with. At 1 this is DeGroot
+# and the group converges to one number; below 1 it settles without agreeing.
+# Leave this out to let each agent keep its own, read from an agent file.
+susceptibility = 0.5
+
+[network]
+number_of_agents = 300
+connections_per_agent = 10
