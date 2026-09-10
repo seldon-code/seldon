@@ -29,4 +29,14 @@ void ramp( std::vector<AgentT> & agents ) requires requires( AgentT agent )
     }
 }
 
+/// Agents whose opinion is not one number have nothing to spread over an
+/// interval, and the models that use them carry their own initial condition.
+///
+/// The overload exists because the caller decides per model rather than per
+/// agent type, so a call that is never taken still has to compile.
+template<typename AgentT>
+void ramp( std::vector<AgentT> & )
+{
+}
+
 } // namespace Seldon::AgentGeneration

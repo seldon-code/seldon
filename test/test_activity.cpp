@@ -141,6 +141,47 @@ TEST_CASE(
     REQUIRE_THAT( x_t, WithinAbs( x_t_analytical, 1e-5 ) );
 }
 
+// The iteration has to actually run. It is a virtual on a class template with
+// an empty body for the general case and a specialisation for this agent type,
+// which is a shape where the wrong one gets called silently: the model
+// integrates nothing, the base class never counts an iteration, finished()
+// never becomes true, and Simulation::run spins. Every other test here asserts
+// on opinions after a run, so a run that does nothing and never returns shows
+// up as a timeout rather than as a wrong number.
+TEST_CASE( "The activity driven iteration runs and is counted", "[activityIterationRuns]" )
+{
+    using namespace Seldon;
+    using namespace Catch::Matchers;
+    using AgentT = ActivityDrivenModel::AgentT;
+
+    auto proj_root_path = fs::current_path();
+    auto input_file     = proj_root_path / fs::path( "test/res/1bot_1agent_activity_prob.toml" );
+    auto options        = Config::parse_config_file( input_file.string() );
+
+    auto simulation = Simulation<AgentT>( options, std::nullopt, std::nullopt );
+    simulation.model->initialize_iterations();
+    REQUIRE( simulation.model->n_iterations() == 0 );
+
+    // The agent, not the bot: a bot's opinion is fixed by construction, so it
+    // would sit still whether the iteration ran or not.
+    auto & agent  = simulation.network.agents[1];
+    auto starting = agent.data.opinion;
+
+    for( int step = 0; step < 5; step++ )
+    {
+        simulation.model->iteration();
+    }
+
+    REQUIRE( simulation.model->n_iterations() == 5 );
+    REQUIRE( std::abs( agent.data.opinion - starting ) > 0.0 );
+
+    // And the run terminates, which is the same fact read the other way: a
+    // model whose iterations are never counted never reaches max_iterations.
+    REQUIRE_FALSE( simulation.model->finished() );
+    auto settings = std::get<Config::ActivityDrivenSettings>( options.model_settings );
+    REQUIRE( settings.max_iterations.has_value() );
+}
+
 TEST_CASE( "Test the meanfield activity driven model with 10 agents", "[activityMeanfield10Agents]" )
 {
     using namespace Seldon;

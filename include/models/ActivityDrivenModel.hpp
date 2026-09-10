@@ -61,6 +61,13 @@ public:
         }
     }
 
+    /// Empty for the general case, and specialised for `ActivityAgent` below.
+    ///
+    /// The definition has to exist here because a virtual function is odr-used
+    /// by the vtable of every instantiation, and `InertialModel` derives from
+    /// `ActivityDrivenModelAbstract<InertialAgent>` while overriding this. The
+    /// declaration after the class is what stops that emptiness reaching the
+    /// agent type the real implementation is written for.
     void iteration() override {};
 
 protected:
@@ -348,6 +355,18 @@ protected:
         }
     }
 };
+
+/// The real iteration for the activity driven model, defined in the source.
+///
+/// Without this declaration every translation unit that includes the header
+/// instantiates the empty body above, and the explicit specialisation in the
+/// source is only visible to the source. What that produced was a model whose
+/// iteration did nothing at all: the base class counts iterations inside the
+/// body that was not being called, so `n_iterations()` stayed at zero,
+/// `finished()` never became true, and `Simulation::run` spun forever over a
+/// model that never integrated anything.
+template<>
+void ActivityDrivenModelAbstract<ActivityAgent>::iteration();
 
 using ActivityDrivenModel = ActivityDrivenModelAbstract<ActivityAgent>;
 
