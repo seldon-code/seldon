@@ -95,6 +95,10 @@ public:
             if( seed_agents )
             {
                 AgentGeneration::ramp( network.agents );
+                // The anchor is part of the same initial condition, and it is
+                // only set where the opinions were. An agent file that
+                // supplied an anchor keeps it.
+                AgentGeneration::anchor( network.agents );
             }
         }
 

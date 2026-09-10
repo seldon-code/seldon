@@ -15,14 +15,15 @@ FriedkinJohnsenModel::FriedkinJohnsenModel( Config::FriedkinJohnsenSettings sett
     // Unlike DeGroot, a disconnected network is not a warning here. Components
     // that never hear each other settling on different opinions is a thing
     // this model is for, not a configuration mistake.
-    for( auto & agent : network.agents )
+    // The anchor is not set here. It is part of the initial condition, so it
+    // comes from the agent file that supplied it or from the seeding the
+    // Simulation does for a generated network. A constructor that copied the
+    // current opinion over it would destroy the anchor of any run resumed from
+    // a state where the two had already diverged, which is every run of this
+    // model past its first step.
+    if( settings.susceptibility.has_value() )
     {
-        // The anchor is whatever the agent came in holding, so a network or an
-        // agent file sets it and nothing here invents one. A model that
-        // overwrote the initial opinions would be overwriting the only state
-        // that makes it different from DeGroot.
-        agent.data.initial_opinion = agent.data.opinion;
-        if( settings.susceptibility.has_value() )
+        for( auto & agent : network.agents )
         {
             agent.data.susceptibility = settings.susceptibility.value();
         }

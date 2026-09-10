@@ -29,6 +29,30 @@ void ramp( std::vector<AgentT> & agents ) requires requires( AgentT agent )
     }
 }
 
+/// Anchor each agent to the opinion it now holds.
+///
+/// Friedkin-Johnsen agents are pulled toward where they started for the whole
+/// run, so the anchor is initial-condition state and belongs beside the
+/// opinions rather than inside a model. An agent file that supplied both is
+/// left alone: this runs only where the opinions were seeded here.
+template<typename AgentT>
+void anchor( std::vector<AgentT> & agents ) requires requires( AgentT agent )
+{
+    agent.data.initial_opinion = agent.data.opinion;
+}
+{
+    for( auto & agent : agents )
+    {
+        agent.data.initial_opinion = agent.data.opinion;
+    }
+}
+
+/// Agents with nothing to anchor, which is every model but one.
+template<typename AgentT>
+void anchor( std::vector<AgentT> & )
+{
+}
+
 /// Agents whose opinion is not one number have nothing to spread over an
 /// interval, and the models that use them carry their own initial condition.
 ///
