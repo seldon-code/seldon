@@ -28,6 +28,7 @@ sources_seldon = [
   'src/models/DeffuantModelVector.cpp',
   'src/models/InertialModel.cpp',
   'src/util/tomlplusplus.cpp',
+  'src/capi.cpp',
 ]
 
 # both static and shared library for bindings
@@ -38,6 +39,8 @@ if get_option('default_library') == 'static'
   # from https://github.com/ERGO-Code/HiGHS/pull/1737/files
   symbol_visibility = 'inlineshidden'
 endif
+
+install_headers('include/seldon_capi.h')
 
 seldon_lib = both_libraries('seldon',
   sources_seldon,
@@ -79,6 +82,7 @@ if get_option('build_tests')
     ['Test_IO', 'test/test_io.cpp'],
     ['Test_Util', 'test/test_util.cpp'],
     ['Test_Prob', 'test/test_probability_distributions.cpp'],
+    ['Test_CAPI', 'test/test_capi.cpp'],
   ]
 
   Catch2 = dependency('Catch2', method : 'cmake', modules : ['Catch2::Catch2WithMain', 'Catch2::Catch2'])
